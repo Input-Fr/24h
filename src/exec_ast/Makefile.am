@@ -2,11 +2,11 @@
 lib_LIBRARIES = libexec.a
 
 # source files for liblexer
-liblexer_a_SOURCES = 
+libexec_a_SOURCES = exec.c
 
 # flags needed for the liblexer
-liblexer_a_CPPFLAGS = -I$(top_srcdir)/src
+libexec_a_CPPFLAGS = -I$(top_srcdir)/src
 
-liblexer_a_CFLAGS = -std=c99 -Werror -Wall -Wextra -Wvla -pedantic
+libexec_a_CFLAGS = -std=c99 -Werror -Wall -Wextra -Wvla -pedantic
 
 noinst_LIBRARIES = libexec.a

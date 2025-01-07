@@ -1,1 +1,4 @@
-SUBDIRS = src tests
+SUBDIRS = src
+
+check-local:
+	./tests/tests.sh
