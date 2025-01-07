@@ -73,6 +73,7 @@ int test_fi(struct lexer *lexer);
 int test_then(struct lexer *lexer);
 int test_elif(struct lexer *lexer);
 int test_else(struct lexer *lexer);
+int test_EOF(struct lexer *lexer);
 
 //token.c :
 
@@ -83,6 +84,7 @@ struct token token_then(void);
 struct token token_elif(void);
 struct token token_else(void);
 struct token token_error(void);
+struct token token_EOF(void);
 
 
 #endif /* !LEXER_H */

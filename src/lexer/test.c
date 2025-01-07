@@ -65,3 +65,12 @@ int test_else(struct lexer *lexer)
     }
     return 0;
 }
+
+int test_EOF(struct lexer *lexer)
+{
+    if (lexer->input[lexer->pos] == '\0')
+    {
+        return 1;
+    }
+    return 0;
+}

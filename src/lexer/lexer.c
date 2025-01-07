@@ -18,67 +18,6 @@ void lexer_free(struct lexer *lexer)
     free(lexer);
 }
 
-
-struct token word(struct lexer *lexer)
-{
-    struct token tok;
-    size_t index = lexer->pos;
-    if (index + 2 < strlen(lexer->input) && test_if(lexer))
-    {
-        return token_if();
-    }
-
-    if (index + 2 < strlen(lexer->input) && test_fi(lexer))
-    {
-        return token_fi();
-    }
-
-    if (index + 4 < strlen(lexer->input) && test_then(lexer))
-    {
-        return token_then();
-    }
-
-    if (index + 4 < strlen(lexer->input) && test_elif(lexer))
-    {
-        return token_elif();
-    }
-
-    if (index + 4 < strlen(lexer->input) && test_else(lexer))
-    {
-        return token_else();
-    }
-
-    else if (lexer->input[index] == '\0')
-    {
-        tok.type = TOKEN_EOF;
-        tok.str = "EOF";
-        return tok;
-    }
-    tok.type = TOKEN_ERROR;
-    tok.str = "ERROR";
-    lexer->pos += 1;
-    return tok;
-}
-
-
-
-struct token toke(struct lexer *lexer)
-{
-    struct token tok;
-    size_t index = lexer->pos;
-
-    if (lexer->input[index] == ';')
-    {
-        return sem();
-    }
-    else
-    {
-        return word(lexer);
-    }
-
-    return tok;
-}
-
 size_t token_reco(struct lexer *lexer)
 {
     while (lexer->input[lexer->pos] == ' ')
@@ -122,7 +61,7 @@ size_t token_reco(struct lexer *lexer)
     }
 }
 
-struct token test_toke(struct lexer *lexer)
+struct token token(struct lexer *lexer)
 {
     if (test_if(lexer))
     {
@@ -144,6 +83,10 @@ struct token test_toke(struct lexer *lexer)
     {
         return token_then();
     }
+    else if (test_EOF(lexer))
+    {
+        return token_EOF();
+    }
     else
     {
         errx(1, "Syntax error");
@@ -155,18 +98,8 @@ struct token lexer_next_token(struct lexer *lexer)
 {
     struct token tok;
     size_t end_of_token = token_reco(lexer);
-    tok = test_toke(lexer);
-    lexer->pos = end_of_token;
-
-    return tok;
-}
-
-struct token test_lexer_next_token(struct lexer *lexer)
-{
-    struct token tok;
-
-    tok = toke(lexer);
-
+    tok = token(lexer);
+    lexer->pos = end_of_token + 1;
     return tok;
 }
 
@@ -181,6 +114,5 @@ struct token lexer_peek(struct lexer *lexer)
 struct token lexer_pop(struct lexer *lexer)
 {
     struct token tok = lexer_next_token(lexer);
-    //lexer->pos += 1;
     return tok;
 }

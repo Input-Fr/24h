@@ -54,6 +54,14 @@ struct token token_else(void)
     return tok;
 }
 
+struct token token_EOF(void)
+{
+    struct token tok;
+    tok.type = TOKEN_EOF;
+    tok.str = "EOF";
+    return tok;
+}
+
 struct token token_error(void)
 {
     struct token tok;
@@ -61,6 +69,3 @@ struct token token_error(void)
     tok.str = "ERROR";
     return tok;
 }
-
-
-

@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    const char* string = " if then fi ";
+    const char* string = "if then ; fi ";
     struct lexer *lex = lexer_new(string);
     if (argc > 1)
     {
