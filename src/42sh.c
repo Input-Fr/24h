@@ -1,12 +1,25 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "lexer/lexer.h"
 #include "parser/parser.h"
 #include "exec_ast/exec.h"
 
-int main()//int argc, char *argv[])
+void given_string(char *input)
 {
-    affiche("echo from lexer");
+    if (input)
+    {
+        return;
+    }
+}   
+
+int main(int argc, char *argv[])
+{
+    if (argc == 3 && !strcmp("-c", argv[1]))
+    {
+        given_string(argv[2]);
+    }
+    affiche("echo from lexer\n");
     print_parser();
     exec_ast();
     return 0;
