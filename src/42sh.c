@@ -11,7 +11,7 @@ void given_string(char *input)
     {
         return;
     }
-}   
+}
 
 int main(int argc, char *argv[])
 {
@@ -19,8 +19,5 @@ int main(int argc, char *argv[])
     {
         given_string(argv[2]);
     }
-    affiche("echo from lexer\n");
-    print_parser();
-    exec_ast();
     return 0;
 }
