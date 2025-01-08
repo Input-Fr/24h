@@ -5,7 +5,7 @@
 
 enum token_type
 {
-    TOKEN_COMMAND, // command
+    TOKEN_WORD, // command
     TOKEN_BOOL, // bool
     TOKEN_IF, // if
     TOKEN_THEN, // then
@@ -14,6 +14,7 @@ enum token_type
     TOKEN_FI, // fi
     TOKEN_SEMI, // ;
     TOKEN_COM, // #
+    TOKEN_QUO, // 'wd'
     TOKEN_EOF,
     TOKEN_ERROR
 };

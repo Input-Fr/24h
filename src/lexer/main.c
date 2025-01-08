@@ -13,7 +13,22 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    const char* string = "if then ; fi ";
+    //const char* string = "if world then hello";
+    //const char* string = "#if world \n then hello";
+    //const char* string = "if 'world then hello'";
+    //const char* string = "if world ; then hello";
+
+    //const char* string = "if 'world' then hello";
+    //const char* string = "'if' world 'then hello'";
+    //const char* string = "if world 'then' hello";
+    //const char* string = "if world then 'hello'";
+
+    //const char* string = "if world;\nthen hello";
+    //const char* string = "if world then hello";
+    //const char* string = "if #world then\nhello";
+    //const char* string = "if #world then hello";
+    //const char* string = "if world then hello";
+
     struct lexer *lex = lexer_new(string);
     if (argc > 1)
     {
@@ -27,7 +42,6 @@ int main(int argc, char *argv[])
             pretty_print(lex);
         }
     }
-
     free(lex);
     return 0;
 }

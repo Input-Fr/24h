@@ -22,7 +22,10 @@ struct lexer
 {
     const char *input; // The input data
     size_t pos; // The current offset inside the input data
+    size_t end_of_token; // The current offset inside the input data
+    size_t length; // The length of the input data
     struct token current_tok; // The next token, if processed
+    
 };
 
 /**
@@ -74,6 +77,9 @@ int test_then(struct lexer *lexer);
 int test_elif(struct lexer *lexer);
 int test_else(struct lexer *lexer);
 int test_EOF(struct lexer *lexer);
+int test_semi(struct lexer *lexer);
+int test_com(struct lexer *lexer);
+int test_quo(struct lexer *lexer);
 
 //token.c :
 
@@ -85,6 +91,11 @@ struct token token_elif(void);
 struct token token_else(void);
 struct token token_error(void);
 struct token token_EOF(void);
+struct token token_word(struct lexer *lexer);
+struct token token_quo(struct lexer *lexer);
+struct token token_com(struct lexer *lexer);
+struct token token_semi(void);
+char *str_word(struct lexer *lexer);
 
 
 #endif /* !LEXER_H */
