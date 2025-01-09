@@ -1,58 +1,10 @@
-#include "lexer.h"
+#include "token.h"
 
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "token.h"
 #include <string.h>
 
-struct token sem(void)
-{
-    struct token tok;
-    tok.type = TOKEN_SEMI;
-    tok.str = ";";
-    return tok;
-}
-
-struct token token_if(void)
-{
-    struct token tok;
-    tok.type = TOKEN_IF;
-    tok.str = "if";
-    return tok;
-}
-
-struct token token_fi(void)
-{
-    struct token tok;
-    tok.type = TOKEN_FI;
-    tok.str = "fi";
-    return tok;
-}
-
-struct token token_then(void)
-{
-    struct token tok;
-    tok.type = TOKEN_THEN;
-    tok.str = "then";
-    return tok;
-}
-
-struct token token_elif(void)
-{
-    struct token tok;
-    tok.type = TOKEN_ELIF;
-    tok.str = "elif";
-    return tok;
-}
-
-struct token token_else(void)
-{
-    struct token tok;
-    tok.type = TOKEN_ELSE;
-    tok.str = "else";
-    return tok;
-}
+#include "lexer.h"
 
 char *str_word(struct lexer *lexer)
 {
@@ -61,7 +13,7 @@ char *str_word(struct lexer *lexer)
     while (index < lexer->end_of_token + 1)
     {
         len += 1;
-        index+=1;
+        index += 1;
     }
 
     size_t i = 0;
@@ -74,7 +26,7 @@ char *str_word(struct lexer *lexer)
         index += 1;
     }
     string[i] = '\0';
-    //printf("str : %s \n",string);
+    // printf("str : %s \n",string);
     return string;
 }
 
@@ -106,6 +58,14 @@ struct token token_word(struct lexer *lexer)
 
     tok.str = str_word(lexer);
 
+    return tok;
+}
+
+struct token token_newline(void)
+{
+    struct token tok;
+    tok.type = TOKEN_NEWLINE;
+    tok.str = "newline";
     return tok;
 }
 

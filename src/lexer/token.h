@@ -13,6 +13,7 @@ enum token_type
     TOKEN_ELSE, // else
     TOKEN_FI, // fi
     TOKEN_SEMI, // ;
+    TOKEN_NEWLINE, // \n
     TOKEN_COM, // #
     TOKEN_QUO, // 'wd'
     TOKEN_EOF,
@@ -22,7 +23,7 @@ enum token_type
 struct token
 {
     enum token_type type;
-    char* str;
+    char *str;
 };
 
 #endif /* !TOKEN_H */

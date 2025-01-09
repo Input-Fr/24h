@@ -25,7 +25,6 @@ struct lexer
     size_t end_of_token; // The current offset inside the input data
     size_t length; // The length of the input data
     struct token current_tok; // The next token, if processed
-    
 };
 
 /**
@@ -61,27 +60,25 @@ struct token lexer_peek(struct lexer *lexer);
  */
 struct token lexer_pop(struct lexer *lexer);
 
-
-
-
-
 void print(struct lexer *lex);
 
 void pretty_print(struct lexer *lex);
 
-//test.c :
+// lexer.c :
+
+struct token word(struct lexer *lexer);
+
+// test.c :
 
 int test_if(struct lexer *lexer);
 int test_fi(struct lexer *lexer);
 int test_then(struct lexer *lexer);
 int test_elif(struct lexer *lexer);
 int test_else(struct lexer *lexer);
-int test_EOF(struct lexer *lexer);
-int test_semi(struct lexer *lexer);
 int test_com(struct lexer *lexer);
 int test_quo(struct lexer *lexer);
 
-//token.c :
+// token.c :
 
 struct token sem(void);
 struct token token_if(void);
@@ -95,7 +92,15 @@ struct token token_word(struct lexer *lexer);
 struct token token_quo(struct lexer *lexer);
 struct token token_com(struct lexer *lexer);
 struct token token_semi(void);
+struct token token_newline(void);
 char *str_word(struct lexer *lexer);
 
+// token_reco.c
+
+struct token uno(struct lexer *lexer, int *token, size_t *index);
+struct token tres(struct lexer *lexer, int *token, size_t *index);
+struct token siete(struct lexer *lexer, int *token, size_t *index);
+struct token ocho(struct lexer *lexer, size_t *index);
+struct token nueve(struct lexer *lexer, size_t *index);
 
 #endif /* !LEXER_H */

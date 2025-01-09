@@ -1,10 +1,9 @@
-#include "lexer.h"
-
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "token.h"
 #include <string.h>
+
+#include "lexer.h"
+#include "token.h"
 
 void print(struct lexer *lex)
 {
@@ -34,7 +33,7 @@ void print(struct lexer *lex)
             free(tok.str);
         }
         else if (type == TOKEN_IF || type == TOKEN_THEN || type == TOKEN_ELIF
-                || type == TOKEN_ELSE || type == TOKEN_FI)
+                 || type == TOKEN_ELSE || type == TOKEN_FI)
         {
             printf("rw : %s\n", string);
         }
@@ -42,13 +41,15 @@ void print(struct lexer *lex)
         {
             printf("se: %s\n", string);
         }
+        else if (type == TOKEN_NEWLINE)
+        {
+            printf("nl: %s\n", string);
+        }
         else
         {
             printf("? : %s\n", string);
         }
-
     }
-
 }
 
 void pretty_print(struct lexer *lex)
@@ -59,12 +60,13 @@ void pretty_print(struct lexer *lex)
         if (tokpeek.type == TOKEN_IF)
         {
             printf("%s {", tokpeek.str);
-            //lexer_pop(lex);
-            while (lexer_pop(lex).type != TOKEN_SEMI && lexer_peek(lex).type != TOKEN_EOF)
+            // lexer_pop(lex);
+            while (lexer_pop(lex).type != TOKEN_SEMI
+                   && lexer_peek(lex).type != TOKEN_EOF)
             {
                 if (tokpeek.type == TOKEN_SEMI)
                 {
-               //     printf(" %s ", lexer_peek(lex).str);
+                    //     printf(" %s ", lexer_peek(lex).str);
                 }
             }
             printf(" }; ");
@@ -74,11 +76,12 @@ void pretty_print(struct lexer *lex)
         {
             printf("%s {", tokpeek.str);
             lexer_pop(lex);
-            while (lexer_pop(lex).type != TOKEN_FI && lexer_peek(lex).type != TOKEN_EOF)
+            while (lexer_pop(lex).type != TOKEN_FI
+                   && lexer_peek(lex).type != TOKEN_EOF)
             {
                 if (tokpeek.type == TOKEN_SEMI)
                 {
-                //    printf(" %s ", lexer_peek(lex).str);
+                    //    printf(" %s ", lexer_peek(lex).str);
                 }
             }
             printf(" }; %s ", lexer_peek(lex).str);
