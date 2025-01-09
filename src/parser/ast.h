@@ -3,6 +3,7 @@
 
 enum AST_TYPE
 {
+    AST_LIST,
     AST_WORD,
     AST_ECHO,
     AST_COMMAND,
@@ -18,6 +19,7 @@ struct ast
 {
     enum AST_TYPE ast_type;
     char *value;
+    struct ast *cList;
     struct ast *left;
     struct ast *right;
 };

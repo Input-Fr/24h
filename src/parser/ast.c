@@ -22,6 +22,11 @@ void ast_free(struct ast *ast)
 
     ast_free(ast->right);
     ast->right = NULL;
-
+    while (ast->cList)
+    {
+        struct ast *save = ast->cList->cList;
+        free(ast->cList);
+        ast->cList = save;
+    }
     free(ast);
 }

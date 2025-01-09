@@ -2,7 +2,7 @@
 lib_LIBRARIES = libparser.a
 
 # source files for libparser
-libparser_a_SOURCES = parser.c parser.h
+libparser_a_SOURCES = parser.c parser.h ast.c ast.h
 
 # flags needed for the libparser
 libparser_a_CPPFLAGS = -I$(top_srcdir)/src
