@@ -27,7 +27,7 @@ struct ast
 /**
  ** \brief Allocates a new ast with the given type.
  */
-struct ast *ast_new(enum ast_type type);
+struct ast *ast_new(enum AST_TYPE type);
 
 /**
  ** \brief Recursively frees the given ast.

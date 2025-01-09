@@ -3,7 +3,9 @@
 #include <err.h>
 #include <stdlib.h>
 
-struct ast *ast_new(enum ast_type type)
+#include "parser/parser.h"
+
+struct ast *ast_new(enum AST_TYPE type)
 {
     struct ast *new = calloc(1, sizeof(struct ast));
     if (!new)
