@@ -5,6 +5,30 @@
 #include "ast.h"
 #include "lexer/lexer.h"
 
+static struct ast *parse_list(enum parser_status *status, struct lexer *lexer);
+
+static struct ast *parse_and_or(enum parser_status *status, struct lexer *lexer);
+
+static struct ast *parse_pipeline(enum parser_status *status, struct lexer *lexer);
+
+static struct ast *parse_command(enum parser_status *status, struct lexer *lexer);
+
+static struct ast *parse_shell_command(enum parser_status *status, struct lexer *lexer);
+
+static struct ast *handle_then(enum parser_status *status, struct lexer *lexer);
+
+static struct ast *parse_rule_if(enum parser_status *status, struct lexer *lexer);
+
+static struct ast *handle_elif(enum parser_status *status, struct lexer *lexer);
+
+static struct ast *parse_else_clause(enum parser_status *status, struct lexer *lexer);
+
+static struct ast *parse_compound_list(enum parser_status *status, struct lexer *lexer);
+
+static struct ast *parse_simple_command(enum parser_status *status, struct lexer *lexer);
+
+static struct ast *parse_element(enum parser_status *status, struct lexer *lexer);
+
 
 static void add_elt_to_list(struct ast *base_node, struct ast *elt)
 {
@@ -25,7 +49,7 @@ input = list '\n'
     ;
 */
 
-static struct ast *parse(enum parser_status *status, struct lexer *lexer)
+struct ast *parse(enum parser_status *status, struct lexer *lexer)
 {
     if (lexer_peek(lexer).type == TOKEN_ERROR)
     {
@@ -42,11 +66,11 @@ static struct ast *parse(enum parser_status *status, struct lexer *lexer)
         lexer_pop(lexer);
         return NULL;
     }
-    struct ast *lst = parse_list(lexer);
+    struct ast *lst = parse_list(status, lexer);
     if (*status != PARSER_OK)
     {
         fprintf(stderr, "Do not respect the grammar\n");
-        ast_free(res);
+        ast_free(lst);
     }
     else // it can respect the grammar
     {
@@ -88,6 +112,7 @@ static struct ast *parse_list(enum parser_status *status, struct lexer *lexer)
         add_elt_to_list(ast_list, snd_and_or);
         tok = lexer_peek(lexer);
     }
+    return ast_list;
 }
 
 /*
@@ -230,7 +255,7 @@ static struct ast *handle_elif(enum parser_status *status, struct lexer *lexer)
     }
     struct ast *ast_elif = ast_new(AST_ELIF);
     add_elt_to_list(ast_elif, compound_list);
-    struct asr *ast_then = ast_new(AST_THEN);
+    struct ast *ast_then = ast_new(AST_THEN);
     add_elt_to_list(ast_then, compound_list2);
     ast_elif->left = ast_then;
     struct ast *ast_else = parse_else_clause(status, lexer);
@@ -300,7 +325,7 @@ static struct ast *parse_compound_list(enum parser_status *status, struct lexer 
 simple_command = WORD { element } ;
 element = WORD;
 */
-static struct ast *parse_simple(enum parser_status *status, struct lexer *lexer)
+static struct ast *parse_simple_command(enum parser_status *status, struct lexer *lexer)
 {
     struct token tok = lexer_peek(lexer);
     if (tok.type == TOKEN_WORD)

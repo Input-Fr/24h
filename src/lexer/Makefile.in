@@ -86,7 +86,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-subdir = src/parser
+subdir = src/lexer
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -129,11 +129,13 @@ AM_V_AR = $(am__v_AR_@AM_V@)
 am__v_AR_ = $(am__v_AR_@AM_DEFAULT_V@)
 am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
-libparser_a_AR = $(AR) $(ARFLAGS)
-libparser_a_LIBADD =
-am_libparser_a_OBJECTS = libparser_a-parser.$(OBJEXT) \
-	libparser_a-ast.$(OBJEXT)
-libparser_a_OBJECTS = $(am_libparser_a_OBJECTS)
+liblexer_a_AR = $(AR) $(ARFLAGS)
+liblexer_a_LIBADD =
+am_liblexer_a_OBJECTS = liblexer_a-lexer.$(OBJEXT) \
+	liblexer_a-token.$(OBJEXT) liblexer_a-print.$(OBJEXT) \
+	liblexer_a-test.$(OBJEXT) liblexer_a-rw_token.$(OBJEXT) \
+	liblexer_a-token_reco.$(OBJEXT)
+liblexer_a_OBJECTS = $(am_liblexer_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -149,8 +151,11 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/libparser_a-ast.Po \
-	./$(DEPDIR)/libparser_a-parser.Po
+am__depfiles_remade = ./$(DEPDIR)/liblexer_a-lexer.Po \
+	./$(DEPDIR)/liblexer_a-print.Po \
+	./$(DEPDIR)/liblexer_a-rw_token.Po \
+	./$(DEPDIR)/liblexer_a-test.Po ./$(DEPDIR)/liblexer_a-token.Po \
+	./$(DEPDIR)/liblexer_a-token_reco.Po
 am__mv = mv -f
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -168,8 +173,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(libparser_a_SOURCES)
-DIST_SOURCES = $(libparser_a_SOURCES)
+SOURCES = $(liblexer_a_SOURCES)
+DIST_SOURCES = $(liblexer_a_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -291,15 +296,15 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 # lib name
-lib_LIBRARIES = libparser.a
+lib_LIBRARIES = liblexer.a
 
-# source files for libparser
-libparser_a_SOURCES = parser.c parser.h ast.c ast.h
+# source files for liblexer
+liblexer_a_SOURCES = lexer.c lexer.h token.c print.c token.h lexer.h test.c rw_token.c token_reco.c
 
-# flags needed for the libparser
-libparser_a_CPPFLAGS = -I$(top_srcdir)/src
-libparser_a_CFLAGS = -std=c99 -Werror -Wall -Wextra -Wvla -pedantic
-noinst_LIBRARIES = libparser.a
+# flags needed for the liblexer
+liblexer_a_CPPFLAGS = -I$(top_srcdir)/src
+liblexer_a_CFLAGS = -std=c99 -Werror -Wall -Wextra -Wvla -pedantic
+noinst_LIBRARIES = liblexer.a
 all: all-am
 
 .SUFFIXES:
@@ -313,9 +318,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign src/parser/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign src/lexer/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign src/parser/Makefile
+	  $(AUTOMAKE) --foreign src/lexer/Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
@@ -368,10 +373,10 @@ clean-libLIBRARIES:
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
 
-libparser.a: $(libparser_a_OBJECTS) $(libparser_a_DEPENDENCIES) $(EXTRA_libparser_a_DEPENDENCIES) 
-	$(AM_V_at)-rm -f libparser.a
-	$(AM_V_AR)$(libparser_a_AR) libparser.a $(libparser_a_OBJECTS) $(libparser_a_LIBADD)
-	$(AM_V_at)$(RANLIB) libparser.a
+liblexer.a: $(liblexer_a_OBJECTS) $(liblexer_a_DEPENDENCIES) $(EXTRA_liblexer_a_DEPENDENCIES) 
+	$(AM_V_at)-rm -f liblexer.a
+	$(AM_V_AR)$(liblexer_a_AR) liblexer.a $(liblexer_a_OBJECTS) $(liblexer_a_LIBADD)
+	$(AM_V_at)$(RANLIB) liblexer.a
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -379,8 +384,12 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libparser_a-ast.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libparser_a-parser.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblexer_a-lexer.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblexer_a-print.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblexer_a-rw_token.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblexer_a-test.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblexer_a-token.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liblexer_a-token_reco.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -404,33 +413,89 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
-libparser_a-parser.o: parser.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libparser_a_CPPFLAGS) $(CPPFLAGS) $(libparser_a_CFLAGS) $(CFLAGS) -MT libparser_a-parser.o -MD -MP -MF $(DEPDIR)/libparser_a-parser.Tpo -c -o libparser_a-parser.o `test -f 'parser.c' || echo '$(srcdir)/'`parser.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libparser_a-parser.Tpo $(DEPDIR)/libparser_a-parser.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='parser.c' object='libparser_a-parser.o' libtool=no @AMDEPBACKSLASH@
+liblexer_a-lexer.o: lexer.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -MT liblexer_a-lexer.o -MD -MP -MF $(DEPDIR)/liblexer_a-lexer.Tpo -c -o liblexer_a-lexer.o `test -f 'lexer.c' || echo '$(srcdir)/'`lexer.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblexer_a-lexer.Tpo $(DEPDIR)/liblexer_a-lexer.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='lexer.c' object='liblexer_a-lexer.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libparser_a_CPPFLAGS) $(CPPFLAGS) $(libparser_a_CFLAGS) $(CFLAGS) -c -o libparser_a-parser.o `test -f 'parser.c' || echo '$(srcdir)/'`parser.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -c -o liblexer_a-lexer.o `test -f 'lexer.c' || echo '$(srcdir)/'`lexer.c
 
-libparser_a-parser.obj: parser.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libparser_a_CPPFLAGS) $(CPPFLAGS) $(libparser_a_CFLAGS) $(CFLAGS) -MT libparser_a-parser.obj -MD -MP -MF $(DEPDIR)/libparser_a-parser.Tpo -c -o libparser_a-parser.obj `if test -f 'parser.c'; then $(CYGPATH_W) 'parser.c'; else $(CYGPATH_W) '$(srcdir)/parser.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libparser_a-parser.Tpo $(DEPDIR)/libparser_a-parser.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='parser.c' object='libparser_a-parser.obj' libtool=no @AMDEPBACKSLASH@
+liblexer_a-lexer.obj: lexer.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -MT liblexer_a-lexer.obj -MD -MP -MF $(DEPDIR)/liblexer_a-lexer.Tpo -c -o liblexer_a-lexer.obj `if test -f 'lexer.c'; then $(CYGPATH_W) 'lexer.c'; else $(CYGPATH_W) '$(srcdir)/lexer.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblexer_a-lexer.Tpo $(DEPDIR)/liblexer_a-lexer.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='lexer.c' object='liblexer_a-lexer.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libparser_a_CPPFLAGS) $(CPPFLAGS) $(libparser_a_CFLAGS) $(CFLAGS) -c -o libparser_a-parser.obj `if test -f 'parser.c'; then $(CYGPATH_W) 'parser.c'; else $(CYGPATH_W) '$(srcdir)/parser.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -c -o liblexer_a-lexer.obj `if test -f 'lexer.c'; then $(CYGPATH_W) 'lexer.c'; else $(CYGPATH_W) '$(srcdir)/lexer.c'; fi`
 
-libparser_a-ast.o: ast.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libparser_a_CPPFLAGS) $(CPPFLAGS) $(libparser_a_CFLAGS) $(CFLAGS) -MT libparser_a-ast.o -MD -MP -MF $(DEPDIR)/libparser_a-ast.Tpo -c -o libparser_a-ast.o `test -f 'ast.c' || echo '$(srcdir)/'`ast.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libparser_a-ast.Tpo $(DEPDIR)/libparser_a-ast.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='ast.c' object='libparser_a-ast.o' libtool=no @AMDEPBACKSLASH@
+liblexer_a-token.o: token.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -MT liblexer_a-token.o -MD -MP -MF $(DEPDIR)/liblexer_a-token.Tpo -c -o liblexer_a-token.o `test -f 'token.c' || echo '$(srcdir)/'`token.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblexer_a-token.Tpo $(DEPDIR)/liblexer_a-token.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='token.c' object='liblexer_a-token.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libparser_a_CPPFLAGS) $(CPPFLAGS) $(libparser_a_CFLAGS) $(CFLAGS) -c -o libparser_a-ast.o `test -f 'ast.c' || echo '$(srcdir)/'`ast.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -c -o liblexer_a-token.o `test -f 'token.c' || echo '$(srcdir)/'`token.c
 
-libparser_a-ast.obj: ast.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libparser_a_CPPFLAGS) $(CPPFLAGS) $(libparser_a_CFLAGS) $(CFLAGS) -MT libparser_a-ast.obj -MD -MP -MF $(DEPDIR)/libparser_a-ast.Tpo -c -o libparser_a-ast.obj `if test -f 'ast.c'; then $(CYGPATH_W) 'ast.c'; else $(CYGPATH_W) '$(srcdir)/ast.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libparser_a-ast.Tpo $(DEPDIR)/libparser_a-ast.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='ast.c' object='libparser_a-ast.obj' libtool=no @AMDEPBACKSLASH@
+liblexer_a-token.obj: token.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -MT liblexer_a-token.obj -MD -MP -MF $(DEPDIR)/liblexer_a-token.Tpo -c -o liblexer_a-token.obj `if test -f 'token.c'; then $(CYGPATH_W) 'token.c'; else $(CYGPATH_W) '$(srcdir)/token.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblexer_a-token.Tpo $(DEPDIR)/liblexer_a-token.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='token.c' object='liblexer_a-token.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libparser_a_CPPFLAGS) $(CPPFLAGS) $(libparser_a_CFLAGS) $(CFLAGS) -c -o libparser_a-ast.obj `if test -f 'ast.c'; then $(CYGPATH_W) 'ast.c'; else $(CYGPATH_W) '$(srcdir)/ast.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -c -o liblexer_a-token.obj `if test -f 'token.c'; then $(CYGPATH_W) 'token.c'; else $(CYGPATH_W) '$(srcdir)/token.c'; fi`
+
+liblexer_a-print.o: print.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -MT liblexer_a-print.o -MD -MP -MF $(DEPDIR)/liblexer_a-print.Tpo -c -o liblexer_a-print.o `test -f 'print.c' || echo '$(srcdir)/'`print.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblexer_a-print.Tpo $(DEPDIR)/liblexer_a-print.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='print.c' object='liblexer_a-print.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -c -o liblexer_a-print.o `test -f 'print.c' || echo '$(srcdir)/'`print.c
+
+liblexer_a-print.obj: print.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -MT liblexer_a-print.obj -MD -MP -MF $(DEPDIR)/liblexer_a-print.Tpo -c -o liblexer_a-print.obj `if test -f 'print.c'; then $(CYGPATH_W) 'print.c'; else $(CYGPATH_W) '$(srcdir)/print.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblexer_a-print.Tpo $(DEPDIR)/liblexer_a-print.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='print.c' object='liblexer_a-print.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -c -o liblexer_a-print.obj `if test -f 'print.c'; then $(CYGPATH_W) 'print.c'; else $(CYGPATH_W) '$(srcdir)/print.c'; fi`
+
+liblexer_a-test.o: test.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -MT liblexer_a-test.o -MD -MP -MF $(DEPDIR)/liblexer_a-test.Tpo -c -o liblexer_a-test.o `test -f 'test.c' || echo '$(srcdir)/'`test.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblexer_a-test.Tpo $(DEPDIR)/liblexer_a-test.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test.c' object='liblexer_a-test.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -c -o liblexer_a-test.o `test -f 'test.c' || echo '$(srcdir)/'`test.c
+
+liblexer_a-test.obj: test.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -MT liblexer_a-test.obj -MD -MP -MF $(DEPDIR)/liblexer_a-test.Tpo -c -o liblexer_a-test.obj `if test -f 'test.c'; then $(CYGPATH_W) 'test.c'; else $(CYGPATH_W) '$(srcdir)/test.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblexer_a-test.Tpo $(DEPDIR)/liblexer_a-test.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test.c' object='liblexer_a-test.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -c -o liblexer_a-test.obj `if test -f 'test.c'; then $(CYGPATH_W) 'test.c'; else $(CYGPATH_W) '$(srcdir)/test.c'; fi`
+
+liblexer_a-rw_token.o: rw_token.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -MT liblexer_a-rw_token.o -MD -MP -MF $(DEPDIR)/liblexer_a-rw_token.Tpo -c -o liblexer_a-rw_token.o `test -f 'rw_token.c' || echo '$(srcdir)/'`rw_token.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblexer_a-rw_token.Tpo $(DEPDIR)/liblexer_a-rw_token.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='rw_token.c' object='liblexer_a-rw_token.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -c -o liblexer_a-rw_token.o `test -f 'rw_token.c' || echo '$(srcdir)/'`rw_token.c
+
+liblexer_a-rw_token.obj: rw_token.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -MT liblexer_a-rw_token.obj -MD -MP -MF $(DEPDIR)/liblexer_a-rw_token.Tpo -c -o liblexer_a-rw_token.obj `if test -f 'rw_token.c'; then $(CYGPATH_W) 'rw_token.c'; else $(CYGPATH_W) '$(srcdir)/rw_token.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblexer_a-rw_token.Tpo $(DEPDIR)/liblexer_a-rw_token.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='rw_token.c' object='liblexer_a-rw_token.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -c -o liblexer_a-rw_token.obj `if test -f 'rw_token.c'; then $(CYGPATH_W) 'rw_token.c'; else $(CYGPATH_W) '$(srcdir)/rw_token.c'; fi`
+
+liblexer_a-token_reco.o: token_reco.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -MT liblexer_a-token_reco.o -MD -MP -MF $(DEPDIR)/liblexer_a-token_reco.Tpo -c -o liblexer_a-token_reco.o `test -f 'token_reco.c' || echo '$(srcdir)/'`token_reco.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblexer_a-token_reco.Tpo $(DEPDIR)/liblexer_a-token_reco.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='token_reco.c' object='liblexer_a-token_reco.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -c -o liblexer_a-token_reco.o `test -f 'token_reco.c' || echo '$(srcdir)/'`token_reco.c
+
+liblexer_a-token_reco.obj: token_reco.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -MT liblexer_a-token_reco.obj -MD -MP -MF $(DEPDIR)/liblexer_a-token_reco.Tpo -c -o liblexer_a-token_reco.obj `if test -f 'token_reco.c'; then $(CYGPATH_W) 'token_reco.c'; else $(CYGPATH_W) '$(srcdir)/token_reco.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/liblexer_a-token_reco.Tpo $(DEPDIR)/liblexer_a-token_reco.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='token_reco.c' object='liblexer_a-token_reco.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(liblexer_a_CPPFLAGS) $(CPPFLAGS) $(liblexer_a_CFLAGS) $(CFLAGS) -c -o liblexer_a-token_reco.obj `if test -f 'token_reco.c'; then $(CYGPATH_W) 'token_reco.c'; else $(CYGPATH_W) '$(srcdir)/token_reco.c'; fi`
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -559,8 +624,12 @@ clean-am: clean-generic clean-libLIBRARIES clean-noinstLIBRARIES \
 	mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/libparser_a-ast.Po
-	-rm -f ./$(DEPDIR)/libparser_a-parser.Po
+		-rm -f ./$(DEPDIR)/liblexer_a-lexer.Po
+	-rm -f ./$(DEPDIR)/liblexer_a-print.Po
+	-rm -f ./$(DEPDIR)/liblexer_a-rw_token.Po
+	-rm -f ./$(DEPDIR)/liblexer_a-test.Po
+	-rm -f ./$(DEPDIR)/liblexer_a-token.Po
+	-rm -f ./$(DEPDIR)/liblexer_a-token_reco.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -606,8 +675,12 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/libparser_a-ast.Po
-	-rm -f ./$(DEPDIR)/libparser_a-parser.Po
+		-rm -f ./$(DEPDIR)/liblexer_a-lexer.Po
+	-rm -f ./$(DEPDIR)/liblexer_a-print.Po
+	-rm -f ./$(DEPDIR)/liblexer_a-rw_token.Po
+	-rm -f ./$(DEPDIR)/liblexer_a-test.Po
+	-rm -f ./$(DEPDIR)/liblexer_a-token.Po
+	-rm -f ./$(DEPDIR)/liblexer_a-token_reco.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

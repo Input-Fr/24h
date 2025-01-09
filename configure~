@@ -5784,7 +5784,7 @@ fi
 
 
 
-for flag in          -fno-strict-aliasing         -Wall -Wextra -Werror -Wvla -pedantic -std=c99     ; do
+for flag in          -fno-strict-aliasing         -Wall -Wextra -Werror -Wvla -pedantic -std=c99 -fsanitize=address     ; do
   as_CACHEVAR=`printf "%s\n" "ax_cv_check_cflags_$ax_compiler_flags_test_$flag" | sed "$as_sed_sh"`
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts $flag" >&5
 printf %s "checking whether C compiler accepts $flag... " >&6; }

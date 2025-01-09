@@ -17,7 +17,7 @@ enum AST_TYPE
 
 struct ast
 {
-    enum AST_TYPE ast_type;
+    enum AST_TYPE type;
     char *value;
     struct ast *cList;
     struct ast *left;
