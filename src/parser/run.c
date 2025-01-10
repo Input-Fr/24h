@@ -118,7 +118,7 @@ int list_run(struct ast *ast)
 // cmd ast eval
 int cmd_run(struct ast * ast)
 {
-    assert(ast && ast->type == AST_COMMANDE);
+    assert(ast && ast->type == AST_COMMAND);
     struct ast_cmd * cmd = (struct ast_cmd *)ast;
     if (!cmd->words)
     {

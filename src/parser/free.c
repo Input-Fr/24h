@@ -8,7 +8,7 @@
 // commande free
 void cmd_free(struct ast *ast)
 {
-    assert(ast && ast->type == AST_COMMANDE);
+    assert(ast && ast->type == AST_COMMAND);
     struct ast_cmd *cmd = (struct ast_cmd *)ast;
     if (cmd->words)
     {

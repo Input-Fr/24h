@@ -6,7 +6,7 @@
 enum AST_TYPE
 {
     AST_LIST,
-    AST_COMMANDE,
+    AST_COMMAND,
     AST_IF,
 };
 
@@ -45,8 +45,8 @@ struct ast_list
 {
 
     struct ast base;
-    size_t nbr_cmd ;// number of commande
-    struct ast ** cmd; // the list of commande
+    size_t nbr_cmd ;// number of command
+    struct ast ** cmd; // the list of command
 };
 
 struct ast * ast_cmd_init(char **word);

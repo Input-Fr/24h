@@ -16,7 +16,7 @@ struct ast *ast_cmd_init(char **word)
     {
         return NULL;
     }
-    cmd->base.type = AST_COMMANDE;
+    cmd->base.type = AST_COMMAND;
     cmd->base.ftable = &ftable;
     cmd->words = word;
     return &cmd->base;
