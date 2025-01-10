@@ -10,15 +10,20 @@ enum AST_TYPE
     AST_ELIF,
 };
 
+struct ast_ftable
+{
+    void (*run)(struct ast *ast);
+    void (*free)(struct ast *ast);
+    void (*pretty_print)(struct ast *ast);
+}
+
+
+
+
 struct ast
 {
     enum AST_TYPE ast_type;
-    (void *)(run)(void *)
-    (void *)(free)(void *)
-    /*char *value;
-    struct ast *cList;
-    struct ast *left;
-    struct ast *right;*/
+
 };
 
 struct ast_list

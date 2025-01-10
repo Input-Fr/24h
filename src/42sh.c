@@ -27,7 +27,8 @@ int main(int argc, char *argv[])
     //
     //const char* string = "if t; then t fi";
     //const char* string = "if true; then t else echo caca fi";
-    const char* string = "ls";
+    //const char* string = "ls";
+    const char* string = "if echo toto then if echo tata then echo toto fi fi";
     //
     struct lexer *lex = lexer_new(string);
     struct ast *ast;
