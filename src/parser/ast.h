@@ -5,25 +5,45 @@ enum AST_TYPE
 {
     AST_LIST,
     AST_WORD,
-    AST_ECHO,
     AST_COMMAND,
     AST_IF,
-    AST_FI,
-    AST_THEN,
     AST_ELIF,
-    AST_ELSE,
-    AST_BOOL
 };
 
 struct ast
 {
-    enum AST_TYPE type;
-    char *value;
+    enum AST_TYPE ast_type;
+    (void *)(run)(void *)
+    (void *)(free)(void *)
+    /*char *value;
     struct ast *cList;
     struct ast *left;
-    struct ast *right;
+    struct ast *right;*/
 };
 
+struct ast_list
+{
+
+}
+
+
+struct ast_word
+{
+}
+
+struct ast_command
+{
+}
+
+struct ast_if
+{
+
+}
+
+
+struct ast_elif
+{
+}
 /**
  ** \brief Allocates a new ast with the given type.
  */
