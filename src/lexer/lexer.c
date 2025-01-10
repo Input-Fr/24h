@@ -5,15 +5,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "token.h"
 
-struct lexer *lexer_new(const char *input)
+struct lexer *lexer_new(void)
 {
     struct lexer *lex = malloc(sizeof(struct lexer));
-    lex->input = input;
-    lex->pos = 0;
-    lex->end_of_token = 0;
-    lex->length = strlen(input);
+    lex->input = '\0';
+    struct token tok;
+    tok.type = NO_TOKEN;
+    tok.data = mbt_str_init();
+    lex->current_tok = tok;
+    lex->Quoting = NO_QUOTE;
+    lex->peek = 0;
     return lex;
 }
 
@@ -22,88 +24,198 @@ void lexer_free(struct lexer *lexer)
     free(lexer);
 }
 
-struct token token_reco(struct lexer *lexer)
+struct token lexer_next_token(struct lexer *lexer)
 {
-    size_t index = lexer->pos;
-    short isQuoting = 0;
+    clear_current_tok(lexer);
     int token = 0;
     while (1)
     {
-        if (lexer->input[index] == '\0')
+        char c = lexer_file(lexer->file);
+        if (c == '\0')
         {
             // 1
-            return uno(lexer, &token, &index);
+            if (token)
+            {
+                lexer->current_tok.type = TOKEN_WORD;
+                ungetc('\0', lexer->file);
+                return lexer->current_tok;
+            }
+            else
+            {
+                lexer->current_tok.type = TOKEN_EOF;
+                return lexer->current_tok;
+            }
+
         }
-        else if (!isQuoting && lexer->input[index] == ';')
+        else if (lexer->Quoting == NO_QUOTE && c == ';') //changer
         {
             // 3
-            return tres(lexer, &token, &index);
+            if (token)
+            {
+                lexer->current_tok.type = TOKEN_WORD;
+                ungetc(';', lexer->file);
+                return lexer->current_tok;
+            }
+            else
+            {
+                lexer->current_tok.type = TOKEN_SEMI;
+                return lexer->current_tok;
+            }
         }
-        else if ((lexer->input[index] == '\\' || lexer->input[index] == '\''))
+        else if ((c == '\\') || c == '\'' || c == '"') //cas \n
         {
             // 4
-            isQuoting = isQuoting != 0 ? 0 : 1;
-            lexer->end_of_token += 1;
-            index++;
+            if (c == '\'')  //(&& lexer->input[index] == ' ' || lexer->input[index] == ';')
+            {
+                if (lexer->Quoting == NO_QUOTE && c == '\'')
+                {
+                    lexer->Quoting = SINGLE_QUOTE;
+                }
+                else if (lexer->Quoting == SINGLE_QUOTE && c == '\'')
+                {
+                    lexer->Quoting = NO_QUOTE;
+                }
+            }
+
+            if (c == '"')  //(&& lexer->input[index] == ' ' || lexer->input[index] == ';')
+            {
+                if (lexer->Quoting == NO_QUOTE && c == '"')
+                {
+                    lexer->Quoting = DOUBLE_QUOTE;
+                }
+                else if (lexer->Quoting == DOUBLE_QUOTE && c == '"')
+                {
+                    lexer->Quoting = NO_QUOTE;
+                }
+            }
+
+            if (c == '\\')
+            {
+                if (lexer->Quoting == NO_QUOTE && c == '\\')
+                {
+                    lexer->Quoting = BACKSLASH_QUOTE;
+                }
+            }
+
+            //lexer->current_tok->str = lexer->input;
         }
-        else if (!isQuoting && lexer->input[index] == '\n')
+        else if (lexer->Quoting == NO_QUOTE && c == '\n')
         {
             // 7
-            return siete(lexer, &token, &index);
+            if (token)
+            {
+                lexer->current_tok.type = TOKEN_WORD;
+                ungetc('\n', lexer->file);
+                return lexer->current_tok;
+            }
+            else
+            {
+                lexer->current_tok.type = TOKEN_NEWLINE;
+                return lexer->current_tok;
+            }
         }
-        else if (!isQuoting && lexer->input[index] == ' ')
+        else if ((lexer->Quoting == NO_QUOTE && c == ' '))
         {
             // 8
             if (token)
             {
-                return ocho(lexer, &index);
-            }
-            else
-            {
-                lexer->pos += 1;
-                lexer->end_of_token += 1;
-                index += 1;
+                lexer->current_tok.type = TOKEN_WORD;
+                return lexer->current_tok;
             }
         }
         else if (token)
         {
-            index += 1;
+            mbt_str_pushc(lexer->current_tok.data,c);
         }
-        else if (!isQuoting && lexer->input[index] == '#')
+        else if (lexer->Quoting == NO_QUOTE && c == '#')
         {
             // 9
-            return nueve(lexer, &index);
+            mbt_str_pushc(lexer->current_tok.data, c);
+            lexer->current_tok.type = TOKEN_COM;
+            while (1)
+            {
+                char co = fgetc(lexer->file);
+                if (co == '\0')
+                {
+                    ungetc('\0', lexer->file);
+                    return lexer->current_tok;
+                }
+                else if (co == '\n')
+                {
+                    ungetc('\n', lexer->file);
+                    return lexer->current_tok;
+                }
+                mbt_str_pushc(lexer->current_tok.data, co);
+            }
+
         }
         else
         {
-            lexer->end_of_token += 1;
-            index += 1;
+            mbt_str_pushc(lexer->current_tok.data, c);
             token = 1;
+            if (lexer->Quoting == BACKSLASH_QUOTE)
+            {
+                lexer->Quoting = NO_QUOTE;
+            }
         }
     }
 }
 
-struct token lexer_next_token(struct lexer *lexer)
+void reserved_word(struct lexer *lexer)
 {
-    struct token tok;
-    tok = token_reco(lexer);
-    lexer->pos = lexer->end_of_token + 1;
-    lexer->end_of_token = lexer->pos;
-    return tok;
+    if (lexer->current_tok.type == TOKEN_WORD)
+    {
+        if (test_if(lexer))
+        {
+            lexer->current_tok.type = TOKEN_IF;
+        }
+        else if (test_fi(lexer))
+        {
+            lexer->current_tok.type = TOKEN_FI;
+        }
+        else if (test_elif(lexer))
+        {
+            lexer->current_tok.type = TOKEN_ELIF;
+        }
+        else if (test_else(lexer))
+        {
+            lexer->current_tok.type = TOKEN_ELSE;
+        }
+        else if (test_then(lexer))
+        {
+            lexer->current_tok.type = TOKEN_THEN;
+        }
+    }
 }
+
+
 
 struct token lexer_peek(struct lexer *lexer)
 {
-    size_t tmp = lexer->pos;
-    size_t tmp2 = lexer->end_of_token;
-    struct token tok = lexer_next_token(lexer);
-    lexer->pos = tmp;
-    lexer->end_of_token = tmp2;
-    return tok;
+    reserved_word(lexer);
+    if (!lexer->peek)
+    {
+        lexer->peek = 1;
+        lexer_next_token(lexer);
+        return lexer->current_tok;
+    }
+    else
+    {
+        return lexer->current_tok;
+    }
 }
 
 struct token lexer_pop(struct lexer *lexer)
 {
-    struct token tok = lexer_next_token(lexer);
-    return tok;
+    if (!lexer->peek)
+    {
+        lexer_next_token(lexer);
+        reserved_word(lexer);
+        return lexer->current_tok;
+    }
+    else
+    {
+        lexer->peek = 0;
+        return lexer->current_tok;
+    }
 }

@@ -3,10 +3,11 @@
 #include <string.h>
 
 #include "lexer.h"
-#include "token.h"
 
-void print(struct lexer *lex)
+
+void print_lex(struct lexer *lex)
 {
+    int i = 0;
     while (1)
     {
         struct token tok = lexer_pop(lex);
@@ -16,21 +17,14 @@ void print(struct lexer *lex)
             printf("EOF\n");
             break;
         }
-        char *string = tok.str;
+        char *string = tok.data->str;
         if (type == TOKEN_WORD)
         {
             printf("wd : %s\n", string);
-            free(tok.str);
         }
         else if (type == TOKEN_COM)
         {
             printf("co : %s\n", string);
-            free(tok.str);
-        }
-        else if (type == TOKEN_QUO)
-        {
-            printf("qo : %s\n", string);
-            free(tok.str);
         }
         else if (type == TOKEN_IF || type == TOKEN_THEN || type == TOKEN_ELIF
                  || type == TOKEN_ELSE || type == TOKEN_FI)
@@ -39,54 +33,114 @@ void print(struct lexer *lex)
         }
         else if (type == TOKEN_SEMI)
         {
-            printf("se: %s\n", string);
+            printf("se : ;\n");
         }
         else if (type == TOKEN_NEWLINE)
         {
-            printf("nl: %s\n", string);
+            printf("nl : newline\n");
         }
         else
         {
             printf("? : %s\n", string);
         }
+        mbt_str_free(lex->current_tok.data);
+        lex->current_tok.data = mbt_str_init();
+        i += 1;
     }
+    mbt_str_free(lex->current_tok.data);
+    free(lex);
 }
 
-void pretty_print(struct lexer *lex)
+void print_lex_peek3(struct lexer *lex)
 {
-    while ((lexer_peek(lex)).type != TOKEN_EOF)
+    int i = 0;
+    while (i < 4)
     {
-        struct token tokpeek = lexer_pop(lex);
-        if (tokpeek.type == TOKEN_IF)
-        {
-            printf("%s {", tokpeek.str);
-            // lexer_pop(lex);
-            while (lexer_pop(lex).type != TOKEN_SEMI
-                   && lexer_peek(lex).type != TOKEN_EOF)
-            {
-                if (tokpeek.type == TOKEN_SEMI)
-                {
-                    //     printf(" %s ", lexer_peek(lex).str);
-                }
-            }
-            printf(" }; ");
-        }
 
-        if (tokpeek.type == TOKEN_THEN)
+        struct token tok = lexer_peek(lex);
+        enum token_type type = tok.type;
+        if (type == TOKEN_EOF)
         {
-            printf("%s {", tokpeek.str);
-            lexer_pop(lex);
-            while (lexer_pop(lex).type != TOKEN_FI
-                   && lexer_peek(lex).type != TOKEN_EOF)
-            {
-                if (tokpeek.type == TOKEN_SEMI)
-                {
-                    //    printf(" %s ", lexer_peek(lex).str);
-                }
-            }
-            printf(" }; %s ", lexer_peek(lex).str);
+            printf("EOF\n");
+            break;
         }
+        char *string = tok.data->str;
+        if (type == TOKEN_WORD)
+        {
+            printf("wd : %s\n", string);
+        }
+        else if (type == TOKEN_COM)
+        {
+            printf("co : %s\n", string);
+        }
+        else if (type == TOKEN_IF || type == TOKEN_THEN || type == TOKEN_ELIF
+                 || type == TOKEN_ELSE || type == TOKEN_FI)
+        {
+            printf("rw : %s\n", string);
+        }
+        else if (type == TOKEN_SEMI)
+        {
+            printf("se : ;\n");
+        }
+        else if (type == TOKEN_NEWLINE)
+        {
+            printf("nl : newline\n");
+        }
+        else
+        {
+            printf("? : %s\n", string);
+        }
+        //mbt_str_free(lex->current_tok.data);
+        //lex->current_tok.data = mbt_str_init();
+        i += 1;
     }
+    mbt_str_free(lex->current_tok.data);
+    free(lex);
+}
 
-    printf(" }; %s \n", lexer_peek(lex).str);
+void print_lex_pop3(struct lexer *lex)
+{
+    int i = 0;
+    while (i < 4)
+    {
+
+        struct token tok = lexer_pop(lex);
+        enum token_type type = tok.type;
+        if (type == TOKEN_EOF)
+        {
+            printf("EOF\n");
+            break;
+        }
+        char *string = tok.data->str;
+        if (type == TOKEN_WORD)
+        {
+            printf("wd : %s\n", string);
+        }
+        else if (type == TOKEN_COM)
+        {
+            printf("co : %s\n", string);
+        }
+        else if (type == TOKEN_IF || type == TOKEN_THEN || type == TOKEN_ELIF
+                 || type == TOKEN_ELSE || type == TOKEN_FI)
+        {
+            printf("rw : %s\n", string);
+        }
+        else if (type == TOKEN_SEMI)
+        {
+            printf("se : ;\n");
+        }
+        else if (type == TOKEN_NEWLINE)
+        {
+            printf("nl : newline\n");
+        }
+        else
+        {
+            printf("? : %s\n", string);
+        }
+        //mbt_str_free(lex->current_tok.data);
+        //lex->current_tok.data = mbt_str_init();
+        i += 1;
+    }
+    mbt_str_free(lex->current_tok.data);
+    free(lex);
 }

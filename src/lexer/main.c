@@ -1,10 +1,9 @@
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "lexer.h"
-#include "token.h"
-
 
 
 
@@ -23,44 +22,39 @@ static FILE * gere_usage(int argc, char *argv[])
             {
                 return NULL;
             }
-
             return fmemopen(argv[2], (strlen(argv[2]) + 1),"r");
         }
-        else { return fopen(argv[1],"r");
+        else
+        {
+            return fopen(argv[1],"r");
         }
     }
 
 }
 
-static void lexer_file (FILE * hd)
+char lexer_file (FILE * hd)
 {
-    char  chars = 0; 
-    while((chars = fgetc(hd)))
-    {
-
-        if ( chars != EOF)
-        {
-            printf("%c",chars);
-        }
-        else
-        {
-            break;
-        }
-    }
+    return fgetc(hd);
 }
 
 int main(int argc, char *argv[])
 {
-
-
-    // get the sh code
     FILE * value = gere_usage(argc,argv);
-    
+    if (!value)
+    {
+        return -1;
+    }
+
+    struct lexer *lexer = lexer_new();
+    lexer->file = value;
+    print_lex(lexer);
+    // get the sh code
+
     if (value == NULL)
     {
         return -1;
     }
     // start of the process of lexing
-    lexer_file(value);
+    //lexer_file(value);
     return 0;
 }

@@ -1,8 +1,8 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#include "token.h"
-
+#include <stdlib.h>
+#include <stdio.h>
 /**
  * \page Lexer
  *
@@ -18,19 +18,60 @@
  *   - TOKEN_NUMBER { .value = 3 }
  */
 
+enum token_type
+{
+    TOKEN_WORD, // command
+    TOKEN_BOOL, // bool
+    TOKEN_IF, // if
+    TOKEN_THEN, // then
+    TOKEN_ELIF, // elif
+    TOKEN_ELSE, // else
+    TOKEN_FI, // fi
+    TOKEN_SEMI, // ;
+    TOKEN_NEWLINE, // \n
+    TOKEN_COM, // #
+    TOKEN_EOF,
+    TOKEN_ERROR,
+    NO_TOKEN,
+};
+
+
+struct mbt_str
+{
+    char *str;
+    size_t size;
+    size_t capacity;
+};
+
+struct token
+{
+    enum token_type type;
+    struct mbt_str *data;
+};
+
+
+enum quote
+{
+    NO_QUOTE,
+    BACKSLASH_QUOTE,
+    SINGLE_QUOTE,
+    DOUBLE_QUOTE
+};
+
 struct lexer
 {
-    const char *input; // The input data
-    size_t pos; // The current offset inside the input data
-    size_t end_of_token; // The current offset inside the input data
-    size_t length; // The length of the input data
+    char input;
     struct token current_tok; // The next token, if processed
+    int peek;
+    enum quote Quoting;
+    FILE *file;
 };
+
 
 /**
  * \brief Creates a new lexer given an input string.
  */
-struct lexer *lexer_new(const char *input);
+struct lexer *lexer_new(void);
 
 /**
  ** \brief Frees the given lexer, but not its input.
@@ -60,47 +101,43 @@ struct token lexer_peek(struct lexer *lexer);
  */
 struct token lexer_pop(struct lexer *lexer);
 
-void print(struct lexer *lex);
+// print.c :
 
-void pretty_print(struct lexer *lex);
+void print_lex(struct lexer *lex);
+void print_lex_peek3(struct lexer *lex);
+void print_lex_pop3(struct lexer *lex);
+
+
 
 // lexer.c :
 
-struct token word(struct lexer *lexer);
 
-// test.c :
+// test_reserved_words.c :
+
 
 int test_if(struct lexer *lexer);
+int test_else(struct lexer *lexer);
 int test_fi(struct lexer *lexer);
 int test_then(struct lexer *lexer);
 int test_elif(struct lexer *lexer);
 int test_else(struct lexer *lexer);
-int test_com(struct lexer *lexer);
-int test_quo(struct lexer *lexer);
+
 
 // token.c :
 
-struct token sem(void);
-struct token token_if(void);
-struct token token_fi(void);
-struct token token_then(void);
-struct token token_elif(void);
-struct token token_else(void);
-struct token token_error(void);
-struct token token_EOF(void);
-struct token token_word(struct lexer *lexer);
-struct token token_quo(struct lexer *lexer);
-struct token token_com(struct lexer *lexer);
-struct token token_semi(void);
-struct token token_newline(void);
-char *str_word(struct lexer *lexer);
 
 // token_reco.c
 
-struct token uno(struct lexer *lexer, int *token, size_t *index);
-struct token tres(struct lexer *lexer, int *token, size_t *index);
-struct token siete(struct lexer *lexer, int *token, size_t *index);
-struct token ocho(struct lexer *lexer, size_t *index);
-struct token nueve(struct lexer *lexer, size_t *index);
+
+//mbt_str.c
+
+void mbt_str_free(struct mbt_str *str);
+struct mbt_str *mbt_str_init(void);
+void mbt_str_pushc(struct mbt_str *str, char c);
+void clear_current_tok(struct lexer *lex);
+
+char lexer_file(FILE * hd);
+void lexer_file_back(FILE * hd);
+
 
 #endif /* !LEXER_H */
