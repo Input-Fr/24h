@@ -1,4 +1,11 @@
-#include <ast.h>
+#include "ast.h"
+#include <string.h>
+
+#define RUN(AST) (*(AST)->ftable->run)((AST))
+
+
+
+
 // for three evaluation
 
 
@@ -8,7 +15,7 @@ int list_run(struct ast *ast)
     assert(ast && ast->type == AST_LIST);
     struct ast_list * list = (struct ast_list *) ast;
     size_t i = 0;
-    while ( i < list->nbr_cmd && (*list->cmd[i]->ftable->run)(list->cmd[i]))
+    while ( i < list->nbr_cmd && RUN(list->cmd[i]))
     {
         i += 1;
     }
@@ -18,7 +25,26 @@ int list_run(struct ast *ast)
 // cmd ast eval
 int cmd_run(struct ast * ast)
 {
+    assert(ast && ast->type == AST_COMMANDE);
+    struct ast_cmd * cmd = (struct cmd *)ast;
+    if (!cmd->word)
+    {
+        return 0;
+    }
+    else
+    {
+        if (!strcmp(cmd->words[0],"echo"))
+        {
 
+        }
+        else
+        {
+            execvp(cmd->words[0],cmd->words);
+        }
+        return 1;
+    }
+
+}
 
 
 // if ast eval
@@ -26,9 +52,9 @@ int if_run(struct ast * ast)
 {
     assert(ast && ast->type == AST_IF);
     struct ast_if * if_ast = (struct ast_if *)ast;
-    if ((*if_ast->condition->ftable->run)(if_ast->condition))
+    if (RUN(if_ast->condition))
     {
-        return (*if_ast->then_body->ftable->run)(if_ast->then_body);
+        return RUN(if_ast->then_body);
     }
     else if (!if_ast->else_body)
     {
@@ -36,6 +62,6 @@ int if_run(struct ast * ast)
     }
     else
     {
-        return (*if_ast->else_body->ftable->run)(if_ast->else_body);
+        return RUN(if_ast->else_body);
     }
 }

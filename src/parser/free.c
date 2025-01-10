@@ -2,6 +2,9 @@
 #include <err.h>
 #include <stdli.h>
 
+
+#define FREE(AST) (*(AST)->ftable->free)((AST))
+
 // commande free
 void cmd_free(struct ast *ast)
 {
@@ -26,7 +29,7 @@ void list_free(struct ast *ast)
     struct ast_list * list = (struct ast_list *)ast;
     for (size_t i = 0; i < list->nbr_cmd; i++)
     {
-        (*list->cmd[i]->ftable->free)(list->cmd[i]);
+        FREE(list->cmd[i]);
     }
     free(list->cmd);
     free(ast);
@@ -37,11 +40,11 @@ void if_free(struct ast * ast)
 {
     assert(ast && ast->typ == AST_IF);
     struct ast_if * if_ast = (struct ast_if *) ast;
-    (*if_ast->condition->ftable->free)(if_ast->condition);
-    (*if_ast->then_body->ftable->free)(if_ast->then_body);
+    FREE(if_ast->condition);
+    FREE(if_ast->then_body);
     if (if_ast->else_body)
     {
-        (*if_ast->else_body->ftable->free)(if_ast->else_body);
+        FREE(if_ast->else_body);
     }
     free(ast);
 }
