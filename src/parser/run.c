@@ -1,10 +1,99 @@
 #include "ast.h"
 #include <string.h>
+#include <unistd.h>
 
 #define RUN(AST) (*(AST)->ftable->run)((AST))
 
 
 
+static void printWbackslash(char *carg)
+{
+    size_t idx = 0;
+    while (carg[idx])
+    {
+        if (carg[idx] == '\\')
+        {
+            idx++;
+            if (carg[idx] == 'n')
+            {
+                printf("\n");
+            }
+            else if (carg[idx] == 't')
+            {
+                printf("\t");
+            }
+            else if (carg[idx] == '\\')
+            {
+                printf("\\");
+            }
+            else // connais pas
+            {
+                printf("\\");
+                printf("%c", carg[idx]);
+            }
+        }
+        else
+        {
+            printf("%c", carg[idx]);
+        }
+        idx++;
+    }
+}
+
+// args est de la forme ["arg1", "arg2", "arg3"]
+void echo_builtin(char *args[], size_t nb_args)
+{
+    bool newline = true;
+    bool backslash = false;
+    size_t i = 0;
+    while (i < nb_args && args[i][0] == '-')
+    {
+        if (!strcmp(args[i], "-n"))
+        {
+            newline = false;
+        }
+        else if (!strcmp(args[i], "-e"))
+        {
+            backslash = true;
+        }
+        else if (!strcmp(args[i], "-E"))
+        {
+            backslash = false;
+        }
+        else
+        {
+            // pas une option juste afficher
+            break;
+        }
+        i++;
+    }
+
+    // echo les arguments
+    while (i < nb_args)
+    {
+        if (backslash)
+        {
+            char *cur_arg = args[i];
+            printWbackslash(cur_arg);
+        }
+        else
+        {
+            printf("%s", args[i]);
+        }
+        if (i < nb_args - 1) // on sépare tout les argument d'un espace
+        {
+            printf(" ");
+        }
+        i++;
+    }
+
+    if (newline)
+    {
+        printf("\n");
+    }
+
+    fflush(stdout);
+}
 
 // for three evaluation
 
@@ -35,11 +124,24 @@ int cmd_run(struct ast * ast)
     {
         if (!strcmp(cmd->words[0],"echo"))
         {
-
+            int idx = 1;
+            while (cmd->words[idx])
+            {
+                idx++;
+            }
+            echo_builtin(cmd->words + 1, idx - 1)
         }
         else
         {
-            execvp(cmd->words[0],cmd->words);
+            if (fork() == 0)
+            {
+                int status_code = execvp(cmd->words[0], cmd->words);
+                if (status_code == -1)
+                {
+                    printf("Terminated Incorrectly\n");
+                    return 2;
+                }
+            }
         }
         return 1;
     }
