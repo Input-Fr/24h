@@ -1,6 +1,10 @@
 #include "ast.h"
 #include <string.h>
 #include <unistd.h>
+#include <stdio.h>
+
+#include <assert.h>
+#include <stdbool.h>
 
 #define RUN(AST) (*(AST)->ftable->run)((AST))
 
@@ -115,8 +119,8 @@ int list_run(struct ast *ast)
 int cmd_run(struct ast * ast)
 {
     assert(ast && ast->type == AST_COMMANDE);
-    struct ast_cmd * cmd = (struct cmd *)ast;
-    if (!cmd->word)
+    struct ast_cmd * cmd = (struct ast_cmd *)ast;
+    if (!cmd->words)
     {
         return 0;
     }
@@ -129,7 +133,7 @@ int cmd_run(struct ast * ast)
             {
                 idx++;
             }
-            echo_builtin(cmd->words + 1, idx - 1)
+            echo_builtin(cmd->words + 1, idx - 1);
         }
         else
         {

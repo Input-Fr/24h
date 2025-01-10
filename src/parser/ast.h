@@ -1,11 +1,21 @@
 #ifndef AST_H
 #define AST_H
 
+#include <stddef.h>
+
 enum AST_TYPE
 {
     AST_LIST,
-    AST_COMMAND,
+    AST_COMMANDE,
     AST_IF,
+};
+
+struct ast_ftable;
+
+struct ast
+{
+    enum AST_TYPE type;
+    struct ast_ftable *ftable;
 };
 
 struct ast_ftable
@@ -13,13 +23,6 @@ struct ast_ftable
     int (*run)(struct ast *ast);
     void (*free)(struct ast *ast);
     void (*pretty_print)(struct ast *ast);
-};
-
-
-struct ast
-{
-    enum AST_TYPE ast_type;
-    struct ast_ftable *ftable;
 };
 
 
@@ -44,7 +47,7 @@ struct ast_list
     struct ast base;
     size_t nbr_cmd ;// number of commande
     struct ast ** cmd; // the list of commande
-}
+};
 
 struct ast * ast_cmd_init(char **word);
 struct ast * ast_if_init(struct ast *condition, struct ast * then_body,

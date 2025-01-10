@@ -2,6 +2,8 @@
 
 #include <err.h>
 #include <stdlib.h>
+#include <assert.h>
+#include <stdbool.h>
 
 struct ast *ast_cmd_init(char **word)
 {
@@ -16,7 +18,7 @@ struct ast *ast_cmd_init(char **word)
     }
     cmd->base.type = AST_COMMANDE;
     cmd->base.ftable = &ftable;
-    cmd->word = word;
+    cmd->words = word;
     return &cmd->base;
 }
 
@@ -25,7 +27,7 @@ struct ast * ast_if_init(struct ast *condition, struct ast * then_body,
 {
     static struct ast_ftable ftable = 
     {
-        .run = &if_run, .free = &if_run,
+        .run = &if_run, .free = &if_free,
         .pretty_print = &if_pretty_print,
     };
     struct ast_if *if_ast = malloc(sizeof(struct ast_if));
@@ -34,7 +36,7 @@ struct ast * ast_if_init(struct ast *condition, struct ast * then_body,
         return NULL;
     }
     if_ast->base.type = AST_IF;
-    if_ast->base.ftable = ftable;
+    if_ast->base.ftable = &ftable;
     if_ast->condition = condition;
     if_ast->then_body = then_body;
     if_ast->else_body = else_body;
@@ -54,7 +56,7 @@ struct ast * ast_list_init(void)
         return NULL;
     }
     list->base.type = AST_LIST;
-    list->base>ftable = ftable;
+    list->base.ftable = &ftable;
     return &list->base;
 }
 
