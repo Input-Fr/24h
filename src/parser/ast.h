@@ -22,7 +22,7 @@ struct ast_ftable
 {
     int (*run)(struct ast *ast);
     void (*free)(struct ast *ast);
-    void (*pretty_print)(struct ast *ast);
+    void (*pretty_print)(struct ast *ast,int actual);
 };
 
 
@@ -58,7 +58,7 @@ struct ast * ast_list_init(void);
 // list ast function
 int list_run(struct ast *ast);
 void list_free(struct ast *ast);
-void list_pretty_print(struct ast *ast);
+void list_pretty_print(struct ast *ast,int actual);
 void list_push(struct ast * list_ast,struct ast * new_children);
 
 
@@ -66,12 +66,12 @@ void list_push(struct ast * list_ast,struct ast * new_children);
 //cmd ast function
 int cmd_run(struct ast * ast);
  void cmd_free(struct ast *ast);
- void cmd_pretty_print(struct ast *ast);
+ void cmd_pretty_print(struct ast *ast,int actual);
 
 
 // if ast function
 int if_run(struct ast * ast);
 void if_free(struct ast * ast);
-void if_pretty_print(struct ast * ast);
+void if_pretty_print(struct ast * ast,int actual);
 
 #endif /* !AST_H */
