@@ -28,6 +28,10 @@ struct token lexer_peek(struct lexer *lexer)
     if (!lexer->peek)
     {
         lexer->peek = 1;
+        if (lexer->current_tok.type != TOKEN_WORD)
+        {
+            free(lexer->current_tok.data->str);
+        }
         return lexer_next_token(lexer);
     }
     else
@@ -40,6 +44,10 @@ struct token lexer_pop(struct lexer *lexer)
 {
     if (!lexer->peek)
     {
+        if (lexer->current_tok.type != TOKEN_WORD)
+        {
+            free(lexer->current_tok.data->str);
+        }
         return lexer_next_token(lexer);
     }
     else
