@@ -1,15 +1,14 @@
 #!/bin/sh
 #!/bin/bash
 
-
 a=0
 b=0
 
 run_test()
 {
-    if [ "$COVERAGE" == "yes" ]; then
-        echo yes
-    fi
+    #if [ "$COVERAGE" == "yes" ]; then
+    #    echo yes
+    #fi
 
     local args=$1
 
@@ -32,13 +31,25 @@ run_test()
     b=$((b+1))
 }
 
-run_test "echo test"
+run_test "echo hello"
+run_test "echo hello;"
+run_test "echo hello : "
+run_test "echo #hello"
 run_test "echo if true; then echo world"
-run_test "echo if true; then echo test"
-run_test 'if true; then echo pipi; fi'
+run_test "if true; then echo 'if'; fi"
+run_test "if true; then echo oui; else echo oui; fi"
+run_test "if false; then echo oui; else echo oui; fi"
+run_test "if false; then echo 'if'; fi"
+run_test "if true; then echo a///ad/fag/a//fd/a oui else echo oui; fi"
+run_test "if false
+true
+then
+echo a
+echo b; echo c
+fi"
 
-echo "$a"
-echo "$b"
-echo $((a / b))
-#c=$((a/b))
-#echo "$c"
+
+b=$((b*10))
+a=$((a*1000))
+
+echo "$a / $b" | bc > "$OUTPUT_FILE"
