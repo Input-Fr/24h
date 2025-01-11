@@ -52,4 +52,7 @@ fi"
 b=$((b*10))
 a=$((a*1000))
 
-echo "$a / $b" | bc > "$OUTPUT_FILE"
+if [ "$COVERAGE" != "yes" ]; then
+    echo "$a / $b" | bc > "$OUTPUT_FILE"
+fi
+
