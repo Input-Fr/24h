@@ -79,7 +79,7 @@ void rule_four(struct lexer *lexer)
 
 struct token rule_seven(struct lexer *lexer, int *token)
 {
-    if (token)
+    if (*token)
     {
         ungetc('\n', lexer->file);
         lexer->current_tok.type = reserved_word(lexer);
