@@ -1,8 +1,8 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 /**
  * \page Lexer
  *
@@ -30,11 +30,11 @@ enum token_type
     TOKEN_SEMI, // ;
     TOKEN_NEWLINE, // \n
     TOKEN_COM, // #
+    TOKEN_QUOTE, // '
     TOKEN_EOF,
     TOKEN_ERROR,
     NO_TOKEN,
 };
-
 
 struct mbt_str
 {
@@ -48,7 +48,6 @@ struct token
     enum token_type type;
     struct mbt_str *data;
 };
-
 
 enum quote
 {
@@ -66,7 +65,6 @@ struct lexer
     enum quote Quoting;
     FILE *file;
 };
-
 
 /**
  * \brief Creates a new lexer given an input string.
@@ -107,13 +105,9 @@ void print_lex(struct lexer *lex);
 void print_lex_peek3(struct lexer *lex);
 void print_lex_pop3(struct lexer *lex);
 
-
-
 // lexer.c :
 
-
 // test_reserved_words.c :
-
 
 int test_if(struct lexer *lexer);
 int test_else(struct lexer *lexer);
@@ -121,23 +115,18 @@ int test_fi(struct lexer *lexer);
 int test_then(struct lexer *lexer);
 int test_elif(struct lexer *lexer);
 int test_else(struct lexer *lexer);
-
+enum token_type reserved_word(struct lexer *lexer);
 
 // token.c :
 
-
-// token_reco.c
-
-
-//mbt_str.c
+// mbt_str.c
 
 void mbt_str_free(struct mbt_str *str);
 struct mbt_str *mbt_str_init(void);
 void mbt_str_pushc(struct mbt_str *str, char c);
 void clear_current_tok(struct lexer *lex);
 
-char lexer_file(FILE * hd);
-void lexer_file_back(FILE * hd);
-
+char lexer_file(FILE *hd);
+void lexer_file_back(FILE *hd);
 
 #endif /* !LEXER_H */

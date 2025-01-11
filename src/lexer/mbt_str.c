@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "lexer.h"
@@ -12,7 +12,7 @@ void clear_current_tok(struct lexer *lex)
 
 void mbt_str_free(struct mbt_str *str)
 {
-    free(str->str);
+    //free(str->str);
     free(str);
 }
 
@@ -24,7 +24,6 @@ struct mbt_str *mbt_str_init(void)
     str->size = 0;
     return str;
 }
-
 
 void mbt_str_pushc(struct mbt_str *str, char c)
 {
