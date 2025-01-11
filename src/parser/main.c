@@ -1,11 +1,12 @@
 #define _POSIX_C_SOURCE 200809L
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "../lexer/lexer.h"
 #include "parser.h"
 #include "ast.h"
-#include "../lexer/lexer.h"
 
 
 static FILE * gere_usage(int argc, char *argv[])

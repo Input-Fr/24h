@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
     enum parser_status status;
     struct ast *ast = parse(&status, lexer);
     (*ast->ftable->free)(ast);
+    free(lexer);
 
     return 0;
 }

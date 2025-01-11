@@ -2,11 +2,11 @@
 lib_LIBRARIES = liblexer.a
 
 # source files for liblexer
-liblexer_a_SOURCES = lexer.c lexer.h print.c lexer.h test_reserved_words.c mbt_str.c
+liblexer_a_SOURCES = lexer.c lexer.h next_token.c test_reserved_words.c mbt_str.c
 
 # flags needed for the liblexer
 liblexer_a_CPPFLAGS = -I$(top_srcdir)/src
 
-liblexer_a_CFLAGS = -std=c99 -Werror -Wall -Wextra -Wvla -pedantic -fsanitize=address
+liblexer_a_CFLAGS = -O0 -std=c99 -Werror -Wall -Wextra -Wvla -pedantic -fsanitize=address
 
 noinst_LIBRARIES = liblexer.a

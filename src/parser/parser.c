@@ -351,7 +351,6 @@ static struct ast *parse_simple_command(enum parser_status *status, struct lexer
        }
        *status = PARSER_OK;
        return ast_cmd_init(words);
-
     }
     else
     {

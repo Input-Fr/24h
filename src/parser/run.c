@@ -108,7 +108,7 @@ int list_run(struct ast *ast)
     assert(ast && ast->type == AST_LIST);
     struct ast_list * list = (struct ast_list *) ast;
     size_t i = 0;
-    while ( i < list->nbr_cmd && RUN(list->cmd[i]))
+    while ( i < list->nbr_cmd && !RUN(list->cmd[i]))
     {
         i += 1;
     }
@@ -122,7 +122,7 @@ int cmd_run(struct ast * ast)
     struct ast_cmd * cmd = (struct ast_cmd *)ast;
     if (!cmd->words)
     {
-        return 0;
+        return 2;
     }
     else
     {
@@ -134,6 +134,14 @@ int cmd_run(struct ast * ast)
                 idx++;
             }
             echo_builtin(cmd->words + 1, idx - 1);
+        }
+        else if (!strcmp(cmd->words[0],"true"))
+        {
+            return 0;
+        }
+        else if (!strcmp(cmd->words[0],"false"))
+        {
+            return 1;
         }
         else
         {
@@ -147,7 +155,7 @@ int cmd_run(struct ast * ast)
                 }
             }
         }
-        return 1;
+        return 0;
     }
 
 }
@@ -164,7 +172,7 @@ int if_run(struct ast * ast)
     }
     else if (!if_ast->else_body)
     {
-        return 0;
+        return 1;
     }
     else
     {
