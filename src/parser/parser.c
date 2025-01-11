@@ -366,7 +366,7 @@ static struct ast *parse_simple_command(enum parser_status *status,
         while (*status == PARSER_OK)
         {
             nb_words++;
-            words = realloc(words, nb_words*sizeof(char *));
+            words = realloc(words, nb_words * sizeof(char *));
             words[nb_words - 1] = 0;
             words[nb_words - 2] = word;
             word = parse_element(status, lexer);

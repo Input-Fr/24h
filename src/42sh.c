@@ -20,7 +20,7 @@ static FILE * gere_usage(int argc, char *argv[])
         int begin = 1;
         if (!strcmp(argv[1],"-p"))
         {
-            if (argc <= 3)
+            if (argc < 3)
             {
                 return NULL;
             }
