@@ -148,10 +148,14 @@ struct token lexer_next_token(struct lexer *lexer)
             // 7
             return rule_seven(lexer, &token);
         }
-        else if ((lexer->Quoting == NO_QUOTE && c == ' ') && token)
+        else if ((lexer->Quoting == NO_QUOTE && c == ' '))
         {
             // 8
-            return rule_eight(lexer);
+            if (token)
+            {
+                lexer->current_tok.type = reserved_word(lexer);
+                return lexer->current_tok;
+            }
         }
         else if (token)
         {

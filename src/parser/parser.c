@@ -3,30 +3,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "ast.h"
 #include "../lexer/lexer.h"
+#include "ast.h"
 
 static struct ast *parse_list(enum parser_status *status, struct lexer *lexer);
 
-static struct ast *parse_and_or(enum parser_status *status, struct lexer *lexer);
+static struct ast *parse_and_or(enum parser_status *status,
+                                struct lexer *lexer);
 
-static struct ast *parse_pipeline(enum parser_status *status, struct lexer *lexer);
+static struct ast *parse_pipeline(enum parser_status *status,
+                                  struct lexer *lexer);
 
-static struct ast *parse_command(enum parser_status *status, struct lexer *lexer);
+static struct ast *parse_command(enum parser_status *status,
+                                 struct lexer *lexer);
 
-static struct ast *parse_shell_command(enum parser_status *status, struct lexer *lexer);
+static struct ast *parse_shell_command(enum parser_status *status,
+                                       struct lexer *lexer);
 
 static struct ast *handle_then(enum parser_status *status, struct lexer *lexer);
 
-static struct ast *parse_rule_if(enum parser_status *status, struct lexer *lexer);
+static struct ast *parse_rule_if(enum parser_status *status,
+                                 struct lexer *lexer);
 
 static struct ast *handle_elif(enum parser_status *status, struct lexer *lexer);
 
-static struct ast *parse_else_clause(enum parser_status *status, struct lexer *lexer);
+static struct ast *parse_else_clause(enum parser_status *status,
+                                     struct lexer *lexer);
 
-static struct ast *parse_compound_list(enum parser_status *status, struct lexer *lexer);
+static struct ast *parse_compound_list(enum parser_status *status,
+                                       struct lexer *lexer);
 
-static struct ast *parse_simple_command(enum parser_status *status, struct lexer *lexer);
+static struct ast *parse_simple_command(enum parser_status *status,
+                                        struct lexer *lexer);
 
 static char *parse_element(enum parser_status *status, struct lexer *lexer);
 
@@ -113,7 +121,8 @@ static struct ast *parse_and_or(enum parser_status *status, struct lexer *lexer)
 /*
 pipeline = command ;
 */
-static struct ast *parse_pipeline(enum parser_status *status, struct lexer *lexer)
+static struct ast *parse_pipeline(enum parser_status *status,
+                                  struct lexer *lexer)
 {
     return parse_command(status, lexer);
 }
@@ -122,7 +131,8 @@ static struct ast *parse_pipeline(enum parser_status *status, struct lexer *lexe
 command = simple_command
           | shell_command ;
 */
-static struct ast *parse_command(enum parser_status *status, struct lexer *lexer)
+static struct ast *parse_command(enum parser_status *status,
+                                 struct lexer *lexer)
 {
     struct ast *ast_simplec = parse_simple_command(status, lexer);
     if (*status == PARSER_OK)
@@ -141,7 +151,8 @@ static struct ast *parse_command(enum parser_status *status, struct lexer *lexer
 /*
 shell_command = rule_if ;
 */
-static struct ast *parse_shell_command(enum parser_status *status, struct lexer *lexer)
+static struct ast *parse_shell_command(enum parser_status *status,
+                                       struct lexer *lexer)
 {
     return parse_rule_if(status, lexer);
 }
@@ -168,7 +179,8 @@ static struct ast *handle_then(enum parser_status *status, struct lexer *lexer)
     }
 }
 
-static struct ast *parse_rule_if(enum parser_status *status, struct lexer *lexer)
+static struct ast *parse_rule_if(enum parser_status *status,
+                                 struct lexer *lexer)
 {
     struct token tok = lexer_pop(lexer);
     if (tok.type == TOKEN_IF)
@@ -246,7 +258,8 @@ static struct ast *handle_elif(enum parser_status *status, struct lexer *lexer)
     return ast_elif;
 }
 
-static struct ast *parse_else_clause(enum parser_status *status, struct lexer *lexer)
+static struct ast *parse_else_clause(enum parser_status *status,
+                                     struct lexer *lexer)
 {
     struct token tok = lexer_peek(lexer);
     if (tok.type == TOKEN_ELSE)
@@ -280,7 +293,8 @@ static struct ast *parse_else_clause(enum parser_status *status, struct lexer *l
 compound_list = {'\n'} and_or { ( ';' | '\n' ) {'\n'} and_or } [';'] {'\n'} ;
 */
 
-static struct ast *parse_compound_list(enum parser_status *status, struct lexer *lexer)
+static struct ast *parse_compound_list(enum parser_status *status,
+                                       struct lexer *lexer)
 {
     struct token tok = lexer_peek(lexer);
     while (tok.type == TOKEN_NEWLINE)
@@ -297,7 +311,7 @@ static struct ast *parse_compound_list(enum parser_status *status, struct lexer 
     struct ast *compound_list = ast_list_init();
     list_push(compound_list, ast_and_or);
     tok = lexer_peek(lexer);
-    while(tok.type == TOKEN_SEMI || tok.type == TOKEN_NEWLINE)
+    while (tok.type == TOKEN_SEMI || tok.type == TOKEN_NEWLINE)
     {
         lexer_pop(lexer);
         tok = lexer_peek(lexer);
@@ -331,26 +345,27 @@ static struct ast *parse_compound_list(enum parser_status *status, struct lexer 
 simple_command = WORD { element } ;
 element = WORD;
 */
-static struct ast *parse_simple_command(enum parser_status *status, struct lexer *lexer)
+static struct ast *parse_simple_command(enum parser_status *status,
+                                        struct lexer *lexer)
 {
     struct token tok = lexer_peek(lexer);
     if (tok.type == TOKEN_WORD)
     {
-       lexer_pop(lexer);
-       int nb_words = 2; // une liste de mot de taille 2
-       char **words = calloc(nb_words, sizeof(char*));
-       words[nb_words - 2] = tok.data->str;
-       char *word = parse_element(status, lexer);
-       while (*status == PARSER_OK)
-       {
+        lexer_pop(lexer);
+        int nb_words = 2; // une liste de mot de taille 2
+        char **words = calloc(nb_words, sizeof(char *));
+        words[nb_words - 2] = tok.data->str;
+        char *word = parse_element(status, lexer);
+        while (*status == PARSER_OK)
+        {
             nb_words++;
             words = realloc(words, nb_words*sizeof(char *));
             words[nb_words - 1] = 0;
             words[nb_words - 2] = word;
             word = parse_element(status, lexer);
-       }
-       *status = PARSER_OK;
-       return ast_cmd_init(words);
+        }
+        *status = PARSER_OK;
+        return ast_cmd_init(words);
     }
     else
     {

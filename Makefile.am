@@ -1,4 +1,4 @@
 SUBDIRS = src
 
-check-local:
+check:
 	./tests/tests.sh

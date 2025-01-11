@@ -5,11 +5,10 @@
 #include <string.h>
 
 #include "lexer/lexer.h"
-#include "parser/parser.h"
 #include "parser/ast.h"
+#include "parser/parser.h"
 
-
-static FILE * gere_usage(int argc, char *argv[])
+static FILE *gere_usage(int argc, char *argv[])
 {
     if (argc == 1)
     {
@@ -17,40 +16,29 @@ static FILE * gere_usage(int argc, char *argv[])
     }
     else
     {
-        int begin = 1;
-        if (!strcmp(argv[1],"-p"))
+        if (!strcmp(argv[1], "-c"))
         {
-            if (argc <= 3)
+            if (argc <= 2)
             {
                 return NULL;
             }
-            begin += 1;
-        }
-        int second = begin + 1;
-        if (!strcmp(argv[begin],"-c"))
-        {
-            if (argc <= second)
-            {
-                return NULL;
-            }
-            return fmemopen(argv[second], (strlen(argv[second]) + 1),"r");
+            return fmemopen(argv[2], (strlen(argv[2]) + 1), "r");
         }
         else
         {
-            return fopen(argv[begin],"r");
+            return fopen(argv[1], "r");
         }
     }
-
 }
 
-char lexer_file (FILE * hd)
+char lexer_file(FILE *hd)
 {
     return fgetc(hd);
 }
 
 int main(int argc, char *argv[])
 {
-    FILE * value = gere_usage(argc,argv);
+    FILE *value = gere_usage(argc, argv);
     if (!value)
     {
         return -1;
@@ -63,14 +51,7 @@ int main(int argc, char *argv[])
     // launch parser
     enum parser_status status;
     struct ast *ast = parse(&status, lexer);
-    if (argc > 1 &&  !strcmp(argv[1], "-p"))
-    {
-        pretty_print_ast(ast);
-    }
-    else
-    {
-        (*ast->ftable->run)(ast);
-    }
+    (*ast->ftable->run)(ast);
     (*ast->ftable->free)(ast);
     free(lexer);
 
@@ -82,11 +63,10 @@ int main(int argc, char *argv[])
 #include <stdlib.h>
 #include <string.h>
 
-
-#include "lexer/lexer.h"
-#include "parser/parser.h"
-#include "parser/ast.h"
 #include "exec_ast/exec.h"
+#include "lexer/lexer.h"
+#include "parser/ast.h"
+#include "parser/parser.h"
 
 void given_string(char *input)
 {
@@ -116,7 +96,7 @@ int main(int argc, char *argv[])
     ast = parse(&status, lex);
     ast_free(ast);
 
-    // TEST DE LEXER 
+    // TEST DE LEXER
     //
     //const char* string = "#if world \n then hello";
     //const char* string = "if 'world then hello'";

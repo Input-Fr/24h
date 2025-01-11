@@ -1,14 +1,12 @@
-#include "ast.h"
-#include <string.h>
-#include <unistd.h>
-#include <stdio.h>
-
 #include <assert.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+
+#include "ast.h"
 
 #define RUN(AST) (*(AST)->ftable->run)((AST))
-
-
 
 static void printWbackslash(char *carg)
 {
@@ -101,14 +99,13 @@ void echo_builtin(char *args[], size_t nb_args)
 
 // for three evaluation
 
-
 // list ast eval
 int list_run(struct ast *ast)
 {
     assert(ast && ast->type == AST_LIST);
-    struct ast_list * list = (struct ast_list *) ast;
+    struct ast_list *list = (struct ast_list *)ast;
     size_t i = 0;
-    while ( i < list->nbr_cmd && !RUN(list->cmd[i]))
+    while (i < list->nbr_cmd && RUN(list->cmd[i]))
     {
         i += 1;
     }
@@ -116,17 +113,17 @@ int list_run(struct ast *ast)
 }
 
 // cmd ast eval
-int cmd_run(struct ast * ast)
+int cmd_run(struct ast *ast)
 {
     assert(ast && ast->type == AST_COMMAND);
-    struct ast_cmd * cmd = (struct ast_cmd *)ast;
+    struct ast_cmd *cmd = (struct ast_cmd *)ast;
     if (!cmd->words)
     {
-        return 2;
+        return 0;
     }
     else
     {
-        if (!strcmp(cmd->words[0],"echo"))
+        if (!strcmp(cmd->words[0], "echo"))
         {
             int idx = 1;
             while (cmd->words[idx])
@@ -134,14 +131,6 @@ int cmd_run(struct ast * ast)
                 idx++;
             }
             echo_builtin(cmd->words + 1, idx - 1);
-        }
-        else if (!strcmp(cmd->words[0],"true"))
-        {
-            return 0;
-        }
-        else if (!strcmp(cmd->words[0],"false"))
-        {
-            return 1;
         }
         else
         {
@@ -155,24 +144,22 @@ int cmd_run(struct ast * ast)
                 }
             }
         }
-        return 0;
+        return 1;
     }
-
 }
 
-
 // if ast eval
-int if_run(struct ast * ast)
+int if_run(struct ast *ast)
 {
     assert(ast && ast->type == AST_IF);
-    struct ast_if * if_ast = (struct ast_if *)ast;
+    struct ast_if *if_ast = (struct ast_if *)ast;
     if (RUN(if_ast->condition))
     {
         return RUN(if_ast->then_body);
     }
     else if (!if_ast->else_body)
     {
-        return 1;
+        return 0;
     }
     else
     {

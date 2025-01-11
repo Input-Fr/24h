@@ -1,7 +1,8 @@
-#include "ast.h"
+#include <assert.h>
 #include <err.h>
 #include <stdlib.h>
-#include <assert.h>
+
+#include "ast.h"
 
 #define FREE(AST) (*(AST)->ftable->free)((AST))
 
@@ -21,12 +22,11 @@ void cmd_free(struct ast *ast)
     free(ast);
 }
 
-
 // list free
 void list_free(struct ast *ast)
 {
     assert(ast && ast->type == AST_LIST);
-    struct ast_list * list = (struct ast_list *)ast;
+    struct ast_list *list = (struct ast_list *)ast;
     for (size_t i = 0; i < list->nbr_cmd; i++)
     {
         FREE(((list->cmd)[i]));
@@ -36,10 +36,10 @@ void list_free(struct ast *ast)
 }
 
 // if free
-void if_free(struct ast * ast)
+void if_free(struct ast *ast)
 {
     assert(ast && ast->type == AST_IF);
-    struct ast_if * if_ast = (struct ast_if *) ast;
+    struct ast_if *if_ast = (struct ast_if *)ast;
     FREE(if_ast->condition);
     FREE(if_ast->then_body);
     if (if_ast->else_body)
@@ -48,4 +48,3 @@ void if_free(struct ast * ast)
     }
     free(ast);
 }
-

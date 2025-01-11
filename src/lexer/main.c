@@ -5,10 +5,7 @@
 
 #include "lexer.h"
 
-
-
-
-static FILE * gere_usage(int argc, char *argv[])
+static FILE *gere_usage(int argc, char *argv[])
 {
     if (argc == 1)
     {
@@ -16,30 +13,29 @@ static FILE * gere_usage(int argc, char *argv[])
     }
     else
     {
-        if (!strcmp(argv[1],"-c"))
+        if (!strcmp(argv[1], "-c"))
         {
             if (argc <= 2)
             {
                 return NULL;
             }
-            return fmemopen(argv[2], (strlen(argv[2]) + 1),"r");
+            return fmemopen(argv[2], (strlen(argv[2])), "r");
         }
         else
         {
-            return fopen(argv[1],"r");
+            return fopen(argv[1], "r");
         }
     }
-
 }
 
-char lexer_file (FILE * hd)
+char lexer_file(FILE *hd)
 {
     return fgetc(hd);
 }
 
 int main(int argc, char *argv[])
 {
-    FILE * value = gere_usage(argc,argv);
+    FILE *value = gere_usage(argc, argv);
     if (!value)
     {
         return -1;
@@ -55,6 +51,6 @@ int main(int argc, char *argv[])
         return -1;
     }
     // start of the process of lexing
-    //lexer_file(value);
+    // lexer_file(value);
     return 0;
 }

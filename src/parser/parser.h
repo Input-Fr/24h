@@ -15,7 +15,7 @@ list = and_or { ';' and_or } [ ';' ] ;
 and_or = pipeline ;
 pipeline = command ;
 
-command = simple_command 
+command = simple_command
         | shell_command ;
 
 shell_command = rule_if ;
@@ -33,7 +33,6 @@ element = WORD ;
 
   THIS GRAMMAR WILL EVOLVE OVER TIME
 */
-
 
 enum parser_status
 {
