@@ -69,7 +69,7 @@ void list_push(struct ast * list_ast,struct ast * new_children)
     size_t index = list->nbr_cmd;
     list->nbr_cmd += 1;
     struct ast ** ast = NULL;
-    ast = realloc(list->cmd, sizeof(struct ast *) + list->nbr_cmd);
+    ast = realloc(list->cmd, sizeof(struct ast *) * list->nbr_cmd);
     if (ast == NULL)
     {
         return;

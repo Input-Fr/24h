@@ -53,6 +53,7 @@ int main(int argc, char *argv[])
     // launch parser
     enum parser_status status;
     struct ast *ast = parse(&status, lexer);
+    (*ast->ftable->run)(ast);
     (*ast->ftable->free)(ast);
     free(lexer);
 
