@@ -33,7 +33,7 @@ struct ast_cmd
 };
 
 
-struct ast_if 
+struct ast_if
 {
     struct ast base;
     struct ast *condition; // the condition
@@ -43,7 +43,6 @@ struct ast_if
 
 struct ast_list
 {
-
     struct ast base;
     size_t nbr_cmd ;// number of command
     struct ast ** cmd; // the list of command
