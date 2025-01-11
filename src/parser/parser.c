@@ -75,8 +75,8 @@ struct ast *parse(enum parser_status *status, struct lexer *lexer)
         {
             if (lexer_peek(lexer).type == TOKEN_EOF)
             {
-                //A
-                //mbt_str_free(lexer_peek(lexer).data);
+                // A
+                // mbt_str_free(lexer_peek(lexer).data);
                 free(tok.data->str);
                 free(tok.data);
             }
