@@ -9,6 +9,7 @@ int test_if(struct lexer *lexer)
     char *str = lexer->current_tok.data->str;
     if (lexer->current_tok.data->size == 2 && str[0] == 'i' && str[1] == 'f')
     {
+        free(str);
         return 1;
     }
     return 0;
@@ -19,6 +20,7 @@ int test_fi(struct lexer *lexer)
     char *str = lexer->current_tok.data->str;
     if (lexer->current_tok.data->size == 2 && str[0] == 'f' && str[1] == 'i')
     {
+        free(str);
         return 1;
     }
     return 0;
@@ -30,6 +32,7 @@ int test_then(struct lexer *lexer)
     if (lexer->current_tok.data->size == 4 && str[0] == 't' && str[1] == 'h'
         && str[2] == 'e' && str[3] == 'n')
     {
+        free(str);
         return 1;
     }
     return 0;
@@ -41,6 +44,7 @@ int test_elif(struct lexer *lexer)
     if (lexer->current_tok.data->size == 4 && str[0] == 'e' && str[1] == 'l'
         && str[2] == 'i' && str[3] == 'f')
     {
+        free(str);
         return 1;
     }
     return 0;
@@ -52,6 +56,7 @@ int test_else(struct lexer *lexer)
     if (lexer->current_tok.data->size == 4 && str[0] == 'e' && str[1] == 'l'
         && str[2] == 's' && str[3] == 'e')
     {
+        free(str);
         return 1;
     }
     return 0;

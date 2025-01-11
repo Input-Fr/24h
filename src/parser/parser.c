@@ -72,6 +72,10 @@ struct ast *parse(enum parser_status *status, struct lexer *lexer)
         if (lexer_peek(lexer).type == TOKEN_EOF
             || lexer_peek(lexer).type == TOKEN_NEWLINE) // end of file
         {
+            if (lexer_peek(lexer).type == TOKEN_EOF)
+            {
+                mbt_str_free(lexer_peek(lexer).data);
+            }
             return lst;
         }
         else
@@ -162,7 +166,7 @@ rule_if = 'if' compound_list 'then' compound_list [else_clause] 'fi' ;
 */
 static struct ast *handle_then(enum parser_status *status, struct lexer *lexer)
 {
-    struct token tok = lexer_pop(lexer);
+    struct token tok = lexer_peek(lexer);
     if (tok.type != TOKEN_THEN)
     {
         *status = PARSER_UNEXPECTED_TOKEN;
@@ -170,6 +174,7 @@ static struct ast *handle_then(enum parser_status *status, struct lexer *lexer)
     }
     else
     {
+        lexer_pop(lexer);
         struct ast *compound = parse_compound_list(status, lexer);
         if (*status != PARSER_OK)
         {
@@ -182,9 +187,10 @@ static struct ast *handle_then(enum parser_status *status, struct lexer *lexer)
 static struct ast *parse_rule_if(enum parser_status *status,
                                  struct lexer *lexer)
 {
-    struct token tok = lexer_pop(lexer);
+    struct token tok = lexer_peek(lexer);
     if (tok.type == TOKEN_IF)
     {
+        lexer_pop(lexer);
         struct ast *compound = parse_compound_list(status, lexer);
         if (*status != PARSER_OK)
         {
@@ -323,7 +329,8 @@ static struct ast *parse_compound_list(enum parser_status *status,
         struct ast *snd_ast_and_or = parse_and_or(status, lexer);
         if (*status != PARSER_OK)
         {
-            return NULL;
+            *status = PARSER_OK;
+            break;
         }
         list_push(compound_list, snd_ast_and_or);
     }

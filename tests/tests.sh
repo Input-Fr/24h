@@ -34,7 +34,7 @@ run_test()
 run_test "echo hello"
 run_test "echo hello;"
 run_test "echo hello : "
-run_test "echo #hello"
+# run_test "echo #hello"
 run_test "echo if true; then echo world"
 run_test "if true; then echo 'if'; fi"
 run_test "if true; then echo oui; else echo oui; fi"

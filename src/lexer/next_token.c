@@ -108,11 +108,13 @@ struct token rule_nine(struct lexer *lexer)
         if (co == '\0')
         {
             ungetc('\0', lexer->file);
+            free(lexer->current_tok.data->str);
             return lexer->current_tok;
         }
         else if (co == '\n')
         {
             ungetc('\n', lexer->file);
+            free(lexer->current_tok.data->str);
             return lexer->current_tok;
         }
         mbt_str_pushc(lexer->current_tok.data, co);
@@ -128,7 +130,7 @@ struct token lexer_next_token(struct lexer *lexer)
         lexer->input = lexer_file(lexer->file);
         char c = lexer->input;
 
-        if (c == EOF)
+        if (c == EOF || c == '\0')
         {
             // 1
             return rule_one(lexer, &token);
