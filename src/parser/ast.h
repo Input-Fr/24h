@@ -74,4 +74,7 @@ int if_run(struct ast * ast);
 void if_free(struct ast * ast);
 void if_pretty_print(struct ast * ast,int actual);
 
+
+// pretty_print the entire_ast
+void pretty_print_ast(struct ast * ast);
 #endif /* !AST_H */

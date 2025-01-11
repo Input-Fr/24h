@@ -17,17 +17,27 @@ static FILE * gere_usage(int argc, char *argv[])
     }
     else
     {
-        if (!strcmp(argv[1],"-c"))
+        int begin = 1;
+        if (!strcmp(argv[1],"-p"))
         {
-            if (argc <= 2)
+            if (argc <= 3)
             {
                 return NULL;
             }
-            return fmemopen(argv[2], (strlen(argv[2]) + 1),"r");
+            begin += 1;
+        }
+        int second = begin + 1;
+        if (!strcmp(argv[begin],"-c"))
+        {
+            if (argc <= second)
+            {
+                return NULL;
+            }
+            return fmemopen(argv[second], (strlen(argv[second]) + 1),"r");
         }
         else
         {
-            return fopen(argv[1],"r");
+            return fopen(argv[begin],"r");
         }
     }
 
@@ -53,7 +63,14 @@ int main(int argc, char *argv[])
     // launch parser
     enum parser_status status;
     struct ast *ast = parse(&status, lexer);
-    (*ast->ftable->run)(ast);
+    if (argc > 1 &&  !strcmp(argv[1], "-p"))
+    {
+        pretty_print_ast(ast);
+    }
+    else
+    {
+        (*ast->ftable->run)(ast);
+    }
     (*ast->ftable->free)(ast);
     free(lexer);
 
