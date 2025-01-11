@@ -126,7 +126,7 @@ struct token lexer_next_token(struct lexer *lexer)
     while (1)
     {
         lexer->input = lexer_file(lexer->file);
-        char c  = lexer->input;
+        char c = lexer->input;
 
         if (c == EOF)
         {

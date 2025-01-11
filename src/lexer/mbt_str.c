@@ -12,7 +12,7 @@ void clear_current_tok(struct lexer *lex)
 
 void mbt_str_free(struct mbt_str *str)
 {
-    //free(str->str);
+    // free(str->str);
     free(str);
 }
 
