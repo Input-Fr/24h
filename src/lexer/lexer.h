@@ -45,6 +45,7 @@ enum token_type
 // operators
     TOKEN_SEMI, // ;
     TOKEN_PIPE, // |
+    TOKEN_AND, // &
     TOKEN_AND_IF, // &&
     TOKEN_OR_IF, // ||
     TOKEN_DSEMI, // ;;

@@ -146,6 +146,10 @@ static void operator_1(struct lexer *lexer)
     {
         lexer->current_tok.type = TOKEN_PIPE;
     }
+    else if (c == '&')
+    {
+        lexer->current_tok.type = TOKEN_AND;
+    }
 }
 
 static int test_operator_1(struct lexer *lexer)
@@ -261,18 +265,18 @@ struct token lexer_next_token(struct lexer *lexer)
                 mbt_str_pushc(lexer->current_tok.data, c);
             }
         }
-        else if (lexer->Quoting == NO_QUOTE && c == '\n') //7
+        else if (lexer->Quoting == NO_QUOTE && c == '\n')
         {
             return rule_seven(lexer, &word);
         }
-        else if ((lexer->Quoting == NO_QUOTE && c == ' ')) //8
+        else if ((lexer->Quoting == NO_QUOTE && c == ' '))
         {
             if (word)
             {
                 return rule_eight(lexer);
             }
         }
-        else if (word) //9
+        else if (word)
         {
             mbt_str_pushc(lexer->current_tok.data, c);
         }

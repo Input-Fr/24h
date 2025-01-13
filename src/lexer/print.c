@@ -40,6 +40,8 @@ static void print(char *string, enum token_type type)
         printf("rw: |\n");
     else if (type == TOKEN_NEWLINE)
         printf("nl: newline\n");
+    else if (type == TOKEN_AND)
+        printf("op: &\n");
     else if (type == TOKEN_AND_IF)
         printf("op: &&\n");
     else if (type == TOKEN_OR_IF)
