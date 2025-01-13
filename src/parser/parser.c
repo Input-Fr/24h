@@ -69,17 +69,9 @@ struct ast *parse(enum parser_status *status, struct lexer *lexer)
     }
     else // it can respect the grammar
     {
-        struct token tok = lexer_peek(lexer);
         if (lexer_peek(lexer).type == TOKEN_EOF
             || lexer_peek(lexer).type == TOKEN_NEWLINE) // end of file
         {
-            if (lexer_peek(lexer).type == TOKEN_EOF)
-            {
-                // A
-                // mbt_str_free(lexer_peek(lexer).data);
-                free(tok.data->str);
-                free(tok.data);
-            }
             return lst;
         }
         else

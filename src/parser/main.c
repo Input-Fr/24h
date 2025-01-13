@@ -21,7 +21,7 @@ static FILE *gere_usage(int argc, char *argv[])
             {
                 return NULL;
             }
-            return fmemopen(argv[2], (strlen(argv[2]) + 1), "r");
+            return fmemopen(argv[2], (strlen(argv[2])), "r");
         }
         else
         {

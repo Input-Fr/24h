@@ -6,13 +6,15 @@
 
 void clear_current_tok(struct lexer *lex)
 {
-    mbt_str_free(lex->current_tok.data);
-    lex->current_tok.data = mbt_str_init();
+    if (lex->current_tok.data != NULL)
+    {
+        mbt_str_free(lex->current_tok.data);
+        lex->current_tok.data = NULL;
+    }
 }
 
 void mbt_str_free(struct mbt_str *str)
 {
-    // free(str->str);
     free(str);
 }
 

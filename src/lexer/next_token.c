@@ -5,10 +5,10 @@
 
 #include "lexer.h"
 
-struct token rule_one(struct lexer *lexer, int *token)
+static struct token rule_one(struct lexer *lexer, int *word)
 {
     // 1
-    if (*token)
+    if (*word)
     {
         ungetc(EOF, lexer->file);
         lexer->current_tok.type = reserved_word(lexer);
@@ -21,23 +21,8 @@ struct token rule_one(struct lexer *lexer, int *token)
     }
 }
 
-struct token rule_three(struct lexer *lexer, int *token)
-{
-    // 3
-    if (*token)
-    {
-        ungetc(';', lexer->file);
-        lexer->current_tok.type = reserved_word(lexer);
-        return lexer->current_tok;
-    }
-    else
-    {
-        lexer->current_tok.type = TOKEN_SEMI;
-        return lexer->current_tok;
-    }
-}
 
-void rule_four(struct lexer *lexer)
+static void rule_four(struct lexer *lexer)
 {
     char c = lexer->input;
     if (c == '\'') //(&& lexer->input[index] == ' ' ||
@@ -77,9 +62,16 @@ void rule_four(struct lexer *lexer)
     }
 }
 
-struct token rule_seven(struct lexer *lexer, int *token)
+static struct token rule_six(struct lexer *lexer)
 {
-    if (*token)
+    ungetc(lexer->input, lexer->file);
+    lexer->current_tok.type = reserved_word(lexer);
+    return lexer->current_tok;
+}
+
+static struct token rule_seven(struct lexer *lexer, int *word)
+{
+    if (*word)
     {
         ungetc('\n', lexer->file);
         lexer->current_tok.type = reserved_word(lexer);
@@ -92,15 +84,14 @@ struct token rule_seven(struct lexer *lexer, int *token)
     }
 }
 
-struct token rule_eight(struct lexer *lexer)
+static struct token rule_eight(struct lexer *lexer)
 {
     lexer->current_tok.type = reserved_word(lexer);
     return lexer->current_tok;
 }
 
-struct token rule_nine(struct lexer *lexer)
+static struct token rule_nine(struct lexer *lexer)
 {
-    mbt_str_pushc(lexer->current_tok.data, lexer->input);
     lexer->current_tok.type = TOKEN_COM;
     while (1)
     {
@@ -108,74 +99,95 @@ struct token rule_nine(struct lexer *lexer)
         if (co == '\0')
         {
             ungetc('\0', lexer->file);
-            // free(lexer->current_tok.data->str);
             return lexer->current_tok;
         }
         else if (co == '\n')
         {
             ungetc('\n', lexer->file);
-            // free(lexer->current_tok.data->str);
             return lexer->current_tok;
         }
-        mbt_str_pushc(lexer->current_tok.data, co);
     }
+}
+
+static void begin_word(struct lexer *lexer)
+{
+    lexer->current_tok.data = mbt_str_init();
+    mbt_str_pushc(lexer->current_tok.data, lexer->input);
+    if (lexer->Quoting == BACKSLASH_QUOTE)
+    {
+        lexer->Quoting = NO_QUOTE;
+    }
+
 }
 
 struct token lexer_next_token(struct lexer *lexer)
 {
     clear_current_tok(lexer);
-    int token = 0;
+    int word = 0;
     while (1)
     {
         lexer->input = lexer_file(lexer->file);
         char c = lexer->input;
 
-        if (c == EOF || c == '\0')
+        if (c == EOF || c == '\0') //1
         {
-            // 1
-            return rule_one(lexer, &token);
+            return rule_one(lexer, &word);
         }
-        else if (lexer->Quoting == NO_QUOTE && c == ';') // changer
+        //else if (lexer->Quoting == NO_QUOTE && //tout les autres operands
+        //        lexer->current_tok.type == TOKEN_SEMI)  //test_operand
+        //{
+        //    if (test_operand(c)) //2
+        //    {
+        //        //mbt_str_pushc(lexer->current_tok.data, c);
+        //    }
+        //    else //3
+        //    {
+        //        //unget(c)
+        //        //return lexer->current_tok;
+        //    }
+        //}
+        else if ((c == '\\') || c == '\'' || c == '"') //4    cas \n
         {
-            // 3
-            return rule_three(lexer, &token);
-        }
-        else if ((c == '\\') || c == '\'' || c == '"') // cas \n
-        {
-            // 4
             rule_four(lexer);
         }
-        else if (lexer->Quoting == NO_QUOTE && c == '\n')
+        else if (lexer->Quoting == NO_QUOTE && c == ';') //6
         {
-            // 7
-            return rule_seven(lexer, &token);
-        }
-        else if ((lexer->Quoting == NO_QUOTE && c == ' '))
-        {
-            // 8
-            if (token)
+            if (word)
             {
-                lexer->current_tok.type = reserved_word(lexer);
+                return rule_six(lexer);
+            }
+            else
+            {
+                //mbt_str_pushc(lexer->current_tok.data, c);
+                //lexer->current_tok.type == TOKEN_OPE;
+                //test_operand(lexer);
+                lexer->current_tok.type = TOKEN_SEMI;
                 return lexer->current_tok;
             }
         }
-        else if (token)
+        else if (lexer->Quoting == NO_QUOTE && c == '\n') //7
+        {
+            return rule_seven(lexer, &word);
+        }
+        else if ((lexer->Quoting == NO_QUOTE && c == ' ')) //8
+        {
+            if (word)
+            {
+                return rule_eight(lexer);
+            }
+        }
+        else if (word) //9
         {
             mbt_str_pushc(lexer->current_tok.data, c);
         }
-        else if (lexer->Quoting == NO_QUOTE && c == '#')
+        else if (lexer->Quoting == NO_QUOTE && c == '#') 
         {
-            // 9
             return rule_nine(lexer);
         }
         else
         {
-            mbt_str_pushc(lexer->current_tok.data, c);
-            token = 1;
-            if (lexer->Quoting == BACKSLASH_QUOTE)
-            {
-                lexer->Quoting = NO_QUOTE;
-            }
+            word = 1;
+            begin_word(lexer);
         }
     }
 }

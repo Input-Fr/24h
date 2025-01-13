@@ -25,6 +25,14 @@ static FILE *gere_usage(int argc, char *argv[])
             }
             begin += 1;
         }
+        else if (!strcmp(argv[1], "-l"))
+        {
+            if (argc < 3)
+            {
+                return NULL;
+            }
+            begin += 1;
+        }
         int second = begin + 1;
         if (!strcmp(argv[begin], "-c"))
         {
@@ -60,6 +68,11 @@ int main(int argc, char *argv[])
 
     // launch parser
     enum parser_status status;
+    if (argc > 1 && !strcmp(argv[1], "-l"))
+    {
+        print_lex(lexer);
+        return 0;
+    }
     struct ast *ast = parse(&status, lexer);
     if (argc > 1 && !strcmp(argv[1], "-p"))
     {
@@ -70,7 +83,8 @@ int main(int argc, char *argv[])
         (*ast->ftable->run)(ast);
     }
     (*ast->ftable->free)(ast);
-    free(lexer);
+
+    lexer_free(lexer);
 
     return 0;
 }

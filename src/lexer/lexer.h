@@ -102,8 +102,6 @@ struct token lexer_pop(struct lexer *lexer);
 // print.c :
 
 void print_lex(struct lexer *lex);
-void print_lex_peek3(struct lexer *lex);
-void print_lex_pop3(struct lexer *lex);
 
 // lexer.c :
 
