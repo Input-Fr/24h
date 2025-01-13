@@ -113,7 +113,7 @@ int list_run(struct ast *ast)
     {
         i += 1;
     }
-    return i >= list->nbr_cmd;
+    return !(i >= list->nbr_cmd);
 }
 
 // cmd ast eval
@@ -172,13 +172,13 @@ int if_run(struct ast *ast)
 {
     assert(ast && ast->type == AST_IF);
     struct ast_if *if_ast = (struct ast_if *)ast;
-    if (RUN(if_ast->condition))
+    if (!RUN(if_ast->condition))
     {
         return RUN(if_ast->then_body);
     }
     else if (!if_ast->else_body)
     {
-        return 1;
+        return 0;
     }
     else
     {
