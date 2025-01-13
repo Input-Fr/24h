@@ -1,5 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 
+#include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -65,6 +66,7 @@ int main(int argc, char *argv[])
     // init lexer
     struct lexer *lexer = lexer_new();
     lexer->file = value;
+    int ret_code = 0;
 
     // launch parser
     enum parser_status status;
@@ -74,19 +76,23 @@ int main(int argc, char *argv[])
         return 0;
     }
     struct ast *ast = parse(&status, lexer);
+    if (!ast)
+    {
+        errx(2, "Wrong grammar");
+    }
     if (argc > 1 && !strcmp(argv[1], "-p"))
     {
         pretty_print_ast(ast);
     }
     else
     {
-        (*ast->ftable->run)(ast);
+        ret_code = (*ast->ftable->run)(ast);
     }
     (*ast->ftable->free)(ast);
 
     lexer_free(lexer);
 
-    return 0;
+    return ret_code;
 }
 
 /*

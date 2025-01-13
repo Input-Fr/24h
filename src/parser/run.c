@@ -1,7 +1,11 @@
 #include <assert.h>
+#include <err.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include "ast.h"
@@ -142,14 +146,21 @@ int cmd_run(struct ast *ast)
         }
         else
         {
-            if (fork() == 0)
+            pid_t pid = fork();
+            if (pid == 0)
             {
                 int status_code = execvp(cmd->words[0], cmd->words);
                 if (status_code == -1)
                 {
-                    printf("Terminated Incorrectly\n");
-                    return 2;
+                    exit(2);
                 }
+            }
+            int wstatus;
+            waitpid(pid, &wstatus, 0);
+            int return_value = WEXITSTATUS(wstatus);
+            if (return_value == 2)
+            {
+                errx(2, "Terminated Incorrectly\n");
             }
         }
         return 0;
