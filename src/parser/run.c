@@ -187,11 +187,25 @@ int if_run(struct ast *ast)
 }
 
 
-// negation
-
+// negation ast eval
 int negation_run(struct ast * ast)
 {
     assert(ast && ast->type == AST_NEGATION);
     struct ast_negation * nega = (struct ast_negation *) ast;
     return RUN(nega->condition) == 0;
 }
+
+// boucle (until and while) ast eval 
+int boucle_run(struct ast * ast)
+{
+    assert(ast && ast->type == AST_BOUCLE);
+    struct ast_boucle * boucle = (struct ast_boucle *) ast;
+    int res = 0;
+    while (RUN(boucle->condition) == boucle->run_condition)
+    {
+        res = RUN(boucle->do_body);
+    }
+    return res;
+}
+
+

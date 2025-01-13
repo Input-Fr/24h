@@ -64,10 +64,30 @@ int negation_pretty_print(struct ast * ast, int actual)
 {
     assert(ast && ast->type == AST_NEGATION);
     struct ast_negation * nega = (struct ast_negation *)ast;
-    printf("\t%d [ label = \"!\", color=red];\n", actual);
+    printf("\t%d [ label = \"NOT\", color=red];\n", actual);
     printf("\t%d -> %d",actual, (actual + 1));
-    return PRINT(nega->condition,(actual  + 1));
+    return PRINT(nega->condition,(actual  + 1)) + 1;
 }
+
+// boucle (until and while) print
+int boucle_pretty_print(struct ast * ast, int actual)
+{
+    assert(ast && ast->type == AST_BOUCLE);
+    struct ast_boucle * boucle = (struct ast_boucle *)ast;
+    if(boucle->run_condition)
+    {
+        printf("\t%d [ label = \"UNTIL\"];\n",actual);
+    }
+    else
+    {
+        printf("\t%d [ label = \"WHILE\"];\n",actual);
+    }
+    int t = PRINT(boucle->condition,(actual + 1)) + 1;
+    printf("\t%d -> %d [label = \"condition\"];\n",actual, (actual + 1));
+    printf("\t%d -> %d [label = \"do\"];\n",actual, t);
+    return PRINT(boucle->do_body,t) + 1;
+}
+
 
 void pretty_print_ast(struct ast *ast)
 {

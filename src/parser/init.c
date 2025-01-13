@@ -106,3 +106,25 @@ struct ast * ast_negation_init(struct ast * condition)
     return &nega->base;
 }
 
+
+// boucle (while and until ) initialisation
+struct ast * ast_boucle_init(struct ast * condition,
+        struct ast * do_body, int run_condition)
+{
+    static struct ast_ftable ftable = {
+        .run = &boucle_run,
+        .free = &boucle_free,
+        .pretty_print = &boucle_pretty_print,
+    };
+    struct ast_boucle * boucle = malloc(sizeof(struct ast_boucle));
+    if (!boucle)
+    {
+        return NULL;
+    }
+    boucle->base.type = AST_BOUCLE;
+    boucle->base.ftable = &ftable;
+    boucle->condition = condition;
+    boucle->do_body = do_body;
+    boucle->run_condition = run_condition;
+    return &boucle->base;
+}

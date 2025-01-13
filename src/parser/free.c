@@ -57,3 +57,14 @@ void negation_free(struct ast * ast)
     FREE(nega->condition);
     free(ast);
 }
+
+// boucle (until and while) free
+void boucle_free(struct ast * ast)
+{
+    assert(ast && ast->type == AST_BOUCLE);
+    struct ast_boucle * boucle = (struct ast_boucle *) ast;
+    FREE(boucle->condition);
+    FREE(boucle->do_body);
+    free(ast);
+}
+
