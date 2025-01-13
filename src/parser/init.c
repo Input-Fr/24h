@@ -5,6 +5,8 @@
 
 #include "ast.h"
 
+
+// list of command initiation
 struct ast *ast_cmd_init(char **word)
 {
     static struct ast_ftable ftable = {
@@ -23,6 +25,7 @@ struct ast *ast_cmd_init(char **word)
     return &cmd->base;
 }
 
+// if initiation
 struct ast *ast_if_init(struct ast *condition, struct ast *then_body,
                         struct ast *else_body)
 {
@@ -44,6 +47,9 @@ struct ast *ast_if_init(struct ast *condition, struct ast *then_body,
     return &if_ast->base;
 }
 
+
+
+// List initiation
 struct ast *ast_list_init(void)
 {
     static struct ast_ftable ftable = {
@@ -79,3 +85,24 @@ void list_push(struct ast *list_ast, struct ast *new_children)
         list->cmd[index] = new_children;
     }
 }
+
+// negation initiation
+
+struct ast * ast_negation_init(struct ast * condition)
+{
+    static struct ast_ftable ftable = {
+        .run  = &negation_run,
+        .free = &negation_free,
+        .pretty_print = &negation_pretty_print,
+    };
+    struct ast_negation * nega = malloc(sizeof(struct ast_negation));
+    if (!nega)
+    {
+        return NULL;
+    }
+    nega->base.type = AST_NEGATION;
+    nega->base.ftable = &ftable;
+    nega->condition = condition;
+    return &nega->base;
+}
+

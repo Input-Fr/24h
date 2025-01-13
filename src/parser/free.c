@@ -48,3 +48,12 @@ void if_free(struct ast *ast)
     }
     free(ast);
 }
+
+// negation free
+void negation_free(struct ast * ast)
+{
+    assert(ast && ast->type == AST_NEGATION);
+    struct ast_negation * nega = (struct ast_negation *) ast;
+    FREE(nega->condition);
+    free(ast);
+}

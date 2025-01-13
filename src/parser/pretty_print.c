@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "ast.h"
+#include <stddef.h>
 
 #define PRINT(AST, C) (*(AST)->ftable->pretty_print)((AST), (C))
 // list pretty_print
@@ -56,6 +57,18 @@ int cmd_pretty_print(struct ast *ast, int actual)
     return actual + 1;
 }
 
+
+// negation pretty print
+
+int negation_pretty_print(struct ast * ast, int actual)
+{
+    assert(ast && ast->type == AST_NEGATION);
+    struct ast_negation * nega = (struct ast_negation *)ast;
+    printf("\t%d [ label = \"!\", color=red];\n", actual);
+    printf("\t%d -> %d",actual, (actual + 1));
+    return PRINT(nega->condition,(actual  + 1));
+}
+
 void pretty_print_ast(struct ast *ast)
 {
     printf("digraph { \n");
@@ -64,3 +77,5 @@ void pretty_print_ast(struct ast *ast)
     PRINT(ast, 1);
     printf("\n}\n");
 }
+
+

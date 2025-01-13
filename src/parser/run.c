@@ -185,3 +185,13 @@ int if_run(struct ast *ast)
         return RUN(if_ast->else_body);
     }
 }
+
+
+// negation
+
+int negation_run(struct ast * ast)
+{
+    assert(ast && ast->type == AST_NEGATION);
+    struct ast_negation * nega = (struct ast_negation *) ast;
+    return RUN(nega->condition) == 0;
+}

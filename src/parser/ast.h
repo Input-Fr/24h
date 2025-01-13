@@ -8,6 +8,7 @@ enum AST_TYPE
     AST_LIST,
     AST_COMMAND,
     AST_IF,
+    AST_NEGATION,
 };
 
 struct ast_ftable;
@@ -46,11 +47,28 @@ struct ast_list
     struct ast **cmd; // the list of command
 };
 
+
+struct ast_negation
+{
+    struct ast base;
+    struct ast * condition;
+};
+
+
+// init of every ast type
+
+// cmd
 struct ast *ast_cmd_init(char **word);
+
+// if
 struct ast *ast_if_init(struct ast *condition, struct ast *then_body,
                         struct ast *else_body);
-
+// list of command
 struct ast *ast_list_init(void);
+
+// negation
+
+struct ast * ast_negation_init(struct ast * condition);
 
 // list ast function
 int list_run(struct ast *ast);
@@ -67,6 +85,12 @@ int cmd_pretty_print(struct ast *ast, int actual);
 int if_run(struct ast *ast);
 void if_free(struct ast *ast);
 int if_pretty_print(struct ast *ast, int actual);
+
+
+//negation ast function
+int negation_run(struct ast * ast);
+void negation_free(struct ast * ast);
+int negation_pretty_print(struct ast * ast,int actual);
 
 // pretty_print the entire_ast
 void pretty_print_ast(struct ast *ast);
