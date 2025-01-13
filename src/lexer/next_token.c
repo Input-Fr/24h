@@ -142,24 +142,16 @@ static void operator_1(struct lexer *lexer)
     {
         lexer->current_tok.type = TOKEN_SEMI;
     }
-    else if (c == '!')
-    {
-        lexer->current_tok.type = TOKEN_BANG;
-    }
     else if (c == '|')
     {
         lexer->current_tok.type = TOKEN_PIPE;
     }
-    //else if (c == '&' || c == '>' || c == '<')
-    //{
-    //    lexer->current_tok.type = TOKEN_;
-    //}
 }
 
 static int test_operator_1(struct lexer *lexer)
 {
     char c = lexer->input;
-    if (c == ';' || c == '!' || c == '|' || c == '&' || c == '>' || c == '<')
+    if (c == ';' || c == '|' || c == '&' || c == '>' || c == '<')
     {
         return 1;
     }
@@ -177,59 +169,48 @@ static int test_operator(struct lexer *lexer)
     if (length == 1 && lexer->current_tok.data->str[0] == ';' && c == ';')
     {
         lexer->current_tok.type = TOKEN_DSEMI;
-        //free(lexer->current_tok.data->str);
     }
     else if (length == 1 && lexer->current_tok.data->str[0] == '&' && c == '&')
     {
         lexer->current_tok.type = TOKEN_AND_IF;
-        //free(lexer->current_tok.data->str);
     }
     else if (length == 1 && lexer->current_tok.data->str[0] == '|' && c == '|')
     {
         lexer->current_tok.type = TOKEN_OR_IF;
-        //free(lexer->current_tok.data->str);
     }
     else if (length == 1 && lexer->current_tok.data->str[0] == '>' && c == '>')
     {
         lexer->current_tok.type = TOKEN_DGREAT;
-        //free(lexer->current_tok.data->str);
     }
     else if (length == 1 && lexer->current_tok.data->str[0] == '<' && c == '<')
     {
         lexer->current_tok.type = TOKEN_DLESS;
-        //free(lexer->current_tok.data->str);
     }
     else if (length == 1 && lexer->current_tok.data->str[0] == '>' && c == '&')
     {
         lexer->current_tok.type = TOKEN_GREATAND;
-        //free(lexer->current_tok.data->str);
     }
     else if (length == 1 && lexer->current_tok.data->str[0] == '<' && c == '&')
     {
         lexer->current_tok.type = TOKEN_LESSAND;
-        //free(lexer->current_tok.data->str);
     }
     else if (length == 1 && lexer->current_tok.data->str[0] == '<' && c == '>')
     {
         lexer->current_tok.type = TOKEN_LESSGREAT;
-        //free(lexer->current_tok.data->str);
     }
     else if (length == 2 && lexer->current_tok.data->str[0] == '<'
             && lexer->current_tok.data->str[0] == '<' && c == '-')
     {
         lexer->current_tok.type = TOKEN_DLESSDASH;
-        //free(lexer->current_tok.data->str);
     }
     else if (length == 1 && lexer->current_tok.data->str[0] == '>' && c == '|')
     {
         lexer->current_tok.type = TOKEN_CLOBBER;
-        //free(lexer->current_tok.data->str);
     }
     else
     {
         return 0;
     }
-    //free(lexer->current_tok.data->str);
     return 1;
 }
 

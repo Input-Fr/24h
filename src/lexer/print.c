@@ -36,6 +36,8 @@ static void print(char *string, enum token_type type)
         printf("rw: for\n");
     else if (type == TOKEN_SEMI)
         printf("se: ;\n");
+    else if (type == TOKEN_PIPE)
+        printf("rw: |\n");
     else if (type == TOKEN_NEWLINE)
         printf("nl: newline\n");
     else if (type == TOKEN_AND_IF)
@@ -58,6 +60,14 @@ static void print(char *string, enum token_type type)
         printf("op: <<-\n");
     else if (type == TOKEN_CLOBBER)
         printf("op: >|\n");
+    else if (type == TOKEN_LBRACE)
+        printf("rw: {\n");
+    else if (type == TOKEN_RBRACE)
+        printf("rw: }\n");
+    else if (type == TOKEN_BANG)
+        printf("rw: !\n");
+    else if (type == TOKEN_IN)
+        printf("rw: in\n");
     else
         printf("?:\n");
 }
