@@ -21,7 +21,7 @@
 enum token_type
 {
 //reserved words
-    TOKEN_WORD, // command
+    TOKEN_WORD,
     TOKEN_IF, // if
     TOKEN_THEN, // then
     TOKEN_ELIF, // elif

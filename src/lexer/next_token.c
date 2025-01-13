@@ -27,10 +27,6 @@ static struct token rule_one(struct lexer *lexer, int *word, int *operator)
 static struct token rule_three(struct lexer *lexer)
 {
     ungetc(lexer->input, lexer->file);
-    //if (lexer->current_tok.type == NO_TOKEN)
-    //{
-    //    return error;
-    //}
     return lexer->current_tok;
 }
 
@@ -250,6 +246,53 @@ struct token lexer_next_token(struct lexer *lexer)
             //4
             rule_four(lexer);
         }
+        //else if (lexer->Quoting == NO_QUOTE && c == '$' || c == '`') //5
+        //{
+        //    mbt_str_pushc(lexer->current_tok.data, c);
+        //    c = lexer_file(lexer->file);
+        //    mbt_str_pushc(lexer->current_tok.data, c);
+        //    if (c == '{')
+        //    {
+        //        //parameter_expansion();
+        //        while (1)
+        //        {
+        //            c = lexer_file(lexer->file);
+        //            mbt_str_pushc(lexer->current_tok.data, c);
+        //            if (c == ')')
+        //            {
+        //                c = lexer_file(lexer->file);
+        //                mbt_str_pushc(lexer->current_tok.data, c);
+        //                if (c == ')')
+        //                {
+        //                    break;
+        //                }
+        //            }
+        //        }
+        //    }
+        //    else if (c == '(')
+        //    {
+        //        c = lexer_file(lexer->file);
+        //        mbt_str_pushc(lexer->current_tok.data, c);
+        //        if (c == '(')
+        //        {
+        //            while (1)
+        //            {
+        //                c = lexer_file(lexer->file);
+        //                mbt_str_pushc(lexer->current_tok.data, c);
+        //                if (c == ')')
+        //                {
+        //                    c = lexer_file(lexer->file);
+        //                    mbt_str_pushc(lexer->current_tok.data, c);
+        //                    if (c == ')')
+        //                    {
+        //                        break;
+        //                    }
+        //                }
+        //            }
+        //            return lexer->current_tok;
+        //        }
+        //    }
+        //}
         else if (lexer->Quoting == NO_QUOTE && test_operator_1(lexer)) //6
         {
             //6
