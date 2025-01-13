@@ -20,7 +20,10 @@ struct lexer *lexer_new(void)
 
 void lexer_free(struct lexer *lexer)
 {
-    free(lexer->current_tok.data); // free the mbt_str
+    if (lexer->current_tok.data != NULL)
+    {
+        free(lexer->current_tok.data); // free the mbt_str
+    }
     free(lexer); // free the lexer
 }
 
