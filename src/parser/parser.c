@@ -461,7 +461,8 @@ static struct ast *parse_simple_command(enum parser_status *status,
                                         struct lexer *lexer)
 {
     // TODO
-    struct ast *ast_prefix = 
+    struct ast *ast_prefix = parse_prefix(status, lexer);
+    (void)ast_prefix;
     struct token tok = lexer_peek(lexer);
     if (tok.type == TOKEN_WORD)
     {
