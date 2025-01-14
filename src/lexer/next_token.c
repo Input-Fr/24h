@@ -72,6 +72,55 @@ static void rule_four(struct lexer *lexer)
     }
 }
 
+static void rule_five(struct lexer *lexer)
+{
+    char c = lexer->input;
+    mbt_str_pushc(lexer->current_tok.data, c);
+    c = lexer_file(lexer->file);
+    mbt_str_pushc(lexer->current_tok.data, c);
+    size_t count = 0;
+    if (c == '{')
+    {
+        while (1)
+        {
+            c = lexer_file(lexer->file);
+            mbt_str_pushc(lexer->current_tok.data, c);
+            if (c == '{')
+            {
+                count += 1;
+            }
+            if (c == '}' && count == 0)
+            {
+                break;
+            }
+            else if (c == '}')
+            {
+                count -= 1;
+            }
+        }
+    }
+    if (c == '(')
+    {
+        while (1)
+        {
+            c = lexer_file(lexer->file);
+            mbt_str_pushc(lexer->current_tok.data, c);
+            if (c == '(')
+            {
+                count += 1;
+            }
+            if (c == ')' && count == 0)
+            {
+                break;
+            }
+            else if (c == ')')
+            {
+                count -= 1;
+            }
+        }
+    }
+}
+
 static struct token rule_six(struct lexer *lexer)
 {
     ungetc(lexer->input, lexer->file);
@@ -131,88 +180,6 @@ static void begin_word(struct lexer *lexer)
 
 }
 
-static void operator_1(struct lexer *lexer)
-{
-    char c = lexer->input;
-    if (c == ';')
-    {
-        lexer->current_tok.type = TOKEN_SEMI;
-    }
-    else if (c == '|')
-    {
-        lexer->current_tok.type = TOKEN_PIPE;
-    }
-    else if (c == '&')
-    {
-        lexer->current_tok.type = TOKEN_AND;
-    }
-}
-
-static int test_operator_1(struct lexer *lexer)
-{
-    char c = lexer->input;
-    if (c == ';' || c == '|' || c == '&' || c == '>' || c == '<')
-    {
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
-}
-
-
-static int test_operator(struct lexer *lexer)
-{
-    char c = lexer->input;
-    size_t length = lexer->current_tok.data->size;
-    if (length == 1 && lexer->current_tok.data->str[0] == ';' && c == ';')
-    {
-        lexer->current_tok.type = TOKEN_DSEMI;
-    }
-    else if (length == 1 && lexer->current_tok.data->str[0] == '&' && c == '&')
-    {
-        lexer->current_tok.type = TOKEN_AND_IF;
-    }
-    else if (length == 1 && lexer->current_tok.data->str[0] == '|' && c == '|')
-    {
-        lexer->current_tok.type = TOKEN_OR_IF;
-    }
-    else if (length == 1 && lexer->current_tok.data->str[0] == '>' && c == '>')
-    {
-        lexer->current_tok.type = TOKEN_DGREAT;
-    }
-    else if (length == 1 && lexer->current_tok.data->str[0] == '<' && c == '<')
-    {
-        lexer->current_tok.type = TOKEN_DLESS;
-    }
-    else if (length == 1 && lexer->current_tok.data->str[0] == '>' && c == '&')
-    {
-        lexer->current_tok.type = TOKEN_GREATAND;
-    }
-    else if (length == 1 && lexer->current_tok.data->str[0] == '<' && c == '&')
-    {
-        lexer->current_tok.type = TOKEN_LESSAND;
-    }
-    else if (length == 1 && lexer->current_tok.data->str[0] == '<' && c == '>')
-    {
-        lexer->current_tok.type = TOKEN_LESSGREAT;
-    }
-    else if (length == 2 && lexer->current_tok.data->str[0] == '<'
-            && lexer->current_tok.data->str[0] == '<' && c == '-')
-    {
-        lexer->current_tok.type = TOKEN_DLESSDASH;
-    }
-    else if (length == 1 && lexer->current_tok.data->str[0] == '>' && c == '|')
-    {
-        lexer->current_tok.type = TOKEN_CLOBBER;
-    }
-    else
-    {
-        return 0;
-    }
-    return 1;
-}
 
 
 struct token lexer_next_token(struct lexer *lexer)
@@ -246,57 +213,15 @@ struct token lexer_next_token(struct lexer *lexer)
             //4
             rule_four(lexer);
         }
-        else if (lexer->Quoting == NO_QUOTE && c == '$')// || c == '`') //5
+        else if (lexer->Quoting == NO_QUOTE && c == '$')// || c == '`')
         {
+            //5
             if (!word)
             {
                 lexer->current_tok.data = mbt_str_init();
+                word = 1;
             }
-            word = 1;
-            mbt_str_pushc(lexer->current_tok.data, c);
-            c = lexer_file(lexer->file);
-            mbt_str_pushc(lexer->current_tok.data, c);
-            size_t count = 0;
-            if (c == '{')
-            {
-                while (1)
-                {
-                    c = lexer_file(lexer->file);
-                    mbt_str_pushc(lexer->current_tok.data, c);
-                    if (c == '{')
-                    {
-                        count += 1;
-                    }
-                    if (c == '}' && count == 0)
-                    {
-                        break;
-                    }
-                    else if (c == '}')
-                    {
-                        count -= 1;
-                    }
-                }
-            }
-            if (c == '(')
-            {
-                while (1)
-                {
-                    c = lexer_file(lexer->file);
-                    mbt_str_pushc(lexer->current_tok.data, c);
-                    if (c == '(')
-                    {
-                        count += 1;
-                    }
-                    if (c == ')' && count == 0)
-                    {
-                        break;
-                    }
-                    else if (c == ')')
-                    {
-                        count -= 1;
-                    }
-                }
-            }
+            rule_five(lexer);
         }
         else if (lexer->Quoting == NO_QUOTE && test_operator_1(lexer)) //6
         {
@@ -315,10 +240,12 @@ struct token lexer_next_token(struct lexer *lexer)
         }
         else if (lexer->Quoting == NO_QUOTE && c == '\n')
         {
+            //7
             return rule_seven(lexer, &word);
         }
         else if ((lexer->Quoting == NO_QUOTE && c == ' '))
         {
+            //8
             if (word)
             {
                 return rule_eight(lexer);
@@ -330,6 +257,7 @@ struct token lexer_next_token(struct lexer *lexer)
         }
         else if (lexer->Quoting == NO_QUOTE && c == '#')
         {
+            //9
             return rule_nine(lexer);
         }
         else

@@ -152,7 +152,11 @@ void clear_current_tok(struct lexer *lex);
 char lexer_file(FILE *hd);
 void lexer_file_back(FILE *hd);
 
-//test_operator_begin :
+//test_operator :
+
+void operator_1(struct lexer *lexer);
+int test_operator_1(struct lexer *lexer);
+int test_operator(struct lexer *lexer);
 
 
 #endif /* !LEXER_H */
