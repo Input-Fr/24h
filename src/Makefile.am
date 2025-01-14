@@ -7,7 +7,7 @@ bin_PROGRAMS = 42sh
 
 42sh_CPPFLAGS = -I%D%
 
-42sh_CFLAGS = -O0 -std=c99 -Werror -Wall -Wextra -Wvla -pedantic -fsanitize=address
+42sh_CFLAGS = -std=c99 -Werror -Wall -Wextra -Wvla -pedantic
 
 # linking phase
 42sh_LDADD =  lexer/liblexer.a parser/libparser.a

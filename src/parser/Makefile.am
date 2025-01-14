@@ -7,5 +7,5 @@ libparser_a_SOURCES = parser.c ast.h parser.h pretty_print.c run.c free.c init.c
 # flags needed for the libparser
 libparser_a_CPPFLAGS = -I$(top_srcdir)/src
 
-libparser_a_CFLAGS = -O0 -std=c99 -Werror -Wall -Wextra -Wvla -pedantic -fsanitize=address
+libparser_a_CFLAGS = -std=c99 -Werror -Wall -Wextra -Wvla -pedantic
 noinst_LIBRARIES = libparser.a

@@ -7,6 +7,6 @@ liblexer_a_SOURCES = lexer.c lexer.h next_token.c test_reserved_words.c mbt_str.
 # flags needed for the liblexer
 liblexer_a_CPPFLAGS = -I$(top_srcdir)/src
 
-liblexer_a_CFLAGS = -O0 -std=c99 -Werror -Wall -Wextra -Wvla -pedantic -fsanitize=address
+liblexer_a_CFLAGS = -std=c99 -Werror -Wall -Wextra -Wvla -pedantic
 
 noinst_LIBRARIES = liblexer.a
