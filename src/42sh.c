@@ -78,6 +78,8 @@ int main(int argc, char *argv[])
     struct ast *ast = parse(&status, lexer);
     if (!ast)
     {
+        if (status == PARSER_OK)
+            exit(0);
         errx(2, "Wrong grammar");
     }
     if (argc > 1 && !strcmp(argv[1], "-p"))
