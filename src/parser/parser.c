@@ -2,6 +2,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <dirent.h>
+#include <string.h>
+#include <errno.h>
+#include <limits.h>
+#include <ctype.h>
 
 #include "../lexer/lexer.h"
 #include "ast.h"
@@ -37,6 +43,55 @@ static struct ast *parse_simple_command(enum parser_status *status,
                                         struct lexer *lexer);
 
 static char *parse_element(enum parser_status *status, struct lexer *lexer);
+
+static struct ast *parse_prefix(enum parser_status *status, struct lexer *lexer);
+
+static struct ast *parse_redirection(enum parser_status *status, struct lexer *lexer);
+
+static int *list_fd(void)
+{
+    pid_t pid = getpid();
+
+    int *fd_lst = calloc(1024, sizeof(int));
+
+    char proc_path[PATH_MAX];
+    snprintf(proc_path, sizeof(proc_path), "/proc/%d/fd", pid);
+
+    DIR *dir = opendir(proc_fd_path);
+    if (!dir)
+    {
+        perror("Failed to open /proc/{pid}/fd");
+        return NULL;
+    }
+
+    struct dirent *entry;
+    size_t arr_len = 0;
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+        {
+            continue;
+        }
+        fd_lst[arr_len] = atoi(entry->d_name);
+        arr_len++;
+    }
+
+    closedir(dir);
+    return fd_lst;
+}
+
+static int in_list(int *fd_lst, int fd)
+{
+    size_t i = 0;
+    while (fd_lst[i])
+    {
+        if (fd_lst[i] == fd)
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 /*
 input = list '\n'
@@ -388,6 +443,64 @@ static char *parse_element(enum parser_status *status, struct lexer *lexer)
     else
     {
         // do not respect grammar, invalid word
+        *status = PARSER_UNEXPECTED_TOKEN;
+        return NULL;
+    }
+}
+
+// prefix = redirection ;
+static struct ast *parse_prefix(enum parser_status *status, struct lexer *lexer)
+{
+    return parse_redirection(status, lexer);
+}
+
+static int isnum(const char *str)
+{
+    char *endptr;
+    if (*str == 0) // nan
+        return 0;
+
+    strtol(str, &endptr, 10);
+    return *endptr == 0;
+}
+
+static int redir_op(struct token tok)
+{
+    return tok.type == TOKEN_LESS || tok.type == TOKEN_GREAT 
+        || tok.type == TOKEN_DGREAT || tok.type == TOKEN_LESSAND 
+        || tok.type == TOKEN_GREATAND || tok.type == TOKEN_CLOBBER
+        || tok.type == TOKEN_LESSGREAT;
+}
+
+static struct ast *parse_redirection(enum parser_status *status, struct lexer *lexer)
+{
+    struct token tok = lexer_peek(lexer);
+    if (tok.type == TOKEN_WORD && isnum(tok.data->str) 
+            && in_list(list_fd(), atoi(tok.data->str)))
+    {
+        int fd = atoi(tok.data->str); // the fd
+        printf("redir found : %d\n", fd);
+        lexer_pop(lexer);
+    }
+    tok = lexer_peek(lexer);
+    if (redir_op(tok))
+    {
+        lexer_pop(lexer);
+        tok = lexer_peek(lexer);
+        if (tok.type == TOKEN_WORD)
+        {
+            printf("%s\n", tok.data->str); // the word
+            // build the AST
+            lexer_pop(lexer);
+        }
+        else
+        {
+            *status = PARSER_UNEXPECTED_TOKEN;
+            return NULL; 
+        }
+    }
+    else
+    {
         *status = PARSER_UNEXPECTED_TOKEN;
         return NULL;
     }
