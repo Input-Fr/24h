@@ -246,53 +246,58 @@ struct token lexer_next_token(struct lexer *lexer)
             //4
             rule_four(lexer);
         }
-        //else if (lexer->Quoting == NO_QUOTE && c == '$' || c == '`') //5
-        //{
-        //    mbt_str_pushc(lexer->current_tok.data, c);
-        //    c = lexer_file(lexer->file);
-        //    mbt_str_pushc(lexer->current_tok.data, c);
-        //    if (c == '{')
-        //    {
-        //        //parameter_expansion();
-        //        while (1)
-        //        {
-        //            c = lexer_file(lexer->file);
-        //            mbt_str_pushc(lexer->current_tok.data, c);
-        //            if (c == ')')
-        //            {
-        //                c = lexer_file(lexer->file);
-        //                mbt_str_pushc(lexer->current_tok.data, c);
-        //                if (c == ')')
-        //                {
-        //                    break;
-        //                }
-        //            }
-        //        }
-        //    }
-        //    else if (c == '(')
-        //    {
-        //        c = lexer_file(lexer->file);
-        //        mbt_str_pushc(lexer->current_tok.data, c);
-        //        if (c == '(')
-        //        {
-        //            while (1)
-        //            {
-        //                c = lexer_file(lexer->file);
-        //                mbt_str_pushc(lexer->current_tok.data, c);
-        //                if (c == ')')
-        //                {
-        //                    c = lexer_file(lexer->file);
-        //                    mbt_str_pushc(lexer->current_tok.data, c);
-        //                    if (c == ')')
-        //                    {
-        //                        break;
-        //                    }
-        //                }
-        //            }
-        //            return lexer->current_tok;
-        //        }
-        //    }
-        //}
+        else if (lexer->Quoting == NO_QUOTE && c == '$')// || c == '`') //5
+        {
+            if (!word)
+            {
+                lexer->current_tok.data = mbt_str_init();
+            }
+            word = 1;
+            mbt_str_pushc(lexer->current_tok.data, c);
+            c = lexer_file(lexer->file);
+            mbt_str_pushc(lexer->current_tok.data, c);
+            size_t count = 0;
+            if (c == '{')
+            {
+                while (1)
+                {
+                    c = lexer_file(lexer->file);
+                    mbt_str_pushc(lexer->current_tok.data, c);
+                    if (c == '{')
+                    {
+                        count += 1;
+                    }
+                    if (c == '}' && count == 0)
+                    {
+                        break;
+                    }
+                    else if (c == '}')
+                    {
+                        count -= 1;
+                    }
+                }
+            }
+            if (c == '(')
+            {
+                while (1)
+                {
+                    c = lexer_file(lexer->file);
+                    mbt_str_pushc(lexer->current_tok.data, c);
+                    if (c == '(')
+                    {
+                        count += 1;
+                    }
+                    if (c == ')' && count == 0)
+                    {
+                        break;
+                    }
+                    else if (c == ')')
+                    {
+                        count -= 1;
+                    }
+                }
+            }
+        }
         else if (lexer->Quoting == NO_QUOTE && test_operator_1(lexer)) //6
         {
             //6
