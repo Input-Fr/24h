@@ -11,6 +11,9 @@ enum AST_TYPE
     AST_NEGATION,
     AST_BOUCLE, // while and until
     AST_FOR,
+    AST_REDIRECTION;
+    AST_OPERATOR, // and// pr
+    AST_ELEMENT,
 };
 
 struct ast_ftable;
@@ -65,6 +68,31 @@ struct ast_boucle
 };
 
 
+// element
+
+enum ELEMENT_TYPE
+{
+    WORD,
+    REDIRECTION,
+}
+
+struct ast_element
+{
+    enum ELEMENT_TYPE type,
+    union element
+    {
+        char * word;
+        struct ast * redirection;
+    } elt;
+}
+
+struct ast_redirection
+{
+    struct ast base;
+    int  fd ;
+    char * word;
+    char * redirection_type;
+}
 // init of every ast type
 
 // cmd
@@ -82,6 +110,18 @@ struct ast * ast_negation_init(struct ast * condition);
 // boucle (until and while)
 struct ast * ast_boucle_init(struct  ast  * condition,
         struct ast * do_body, int run_condition);
+
+// redirection 
+struct ast * ast_redirection_init(int fd, char * word,
+        char * redirection_type);
+
+//word
+struct ast * ast_word_init(char * word);
+
+
+// element
+struct ast * ast_element_init(enum ELEMENT_TYPE type, char * word,
+        struct ast * ast);
 
 // list ast function
 int list_run(struct ast *ast);
@@ -110,6 +150,15 @@ int negation_pretty_print(struct ast * ast,int actual);
 int boucle_run(struct ast * ast);
 void boucle_free(struct ast * ast);
 int boucle_pretty_print(struct ast * ast, int actual);
+
+// redirection 
+int redirection_run(struct ast * ast);
+void redirection_free(struct ast * ast);
+int redirection_pretty_print(struct ast * ast, int actual);
+
+int element_run(struct ast * ast);
+void element_free(struct ast *ast);
+int element_pretty_print(struct ast * ast, int actual);
 
 // pretty_print the entire_ast
 void pretty_print_ast(struct ast *ast);

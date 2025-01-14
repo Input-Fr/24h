@@ -128,3 +128,52 @@ struct ast * ast_boucle_init(struct ast * condition,
     boucle->run_condition = run_condition;
     return &boucle->base;
 }
+
+struct ast * ast_redirection_init(int fd, char * words, 
+        char * redirection_type)
+{
+    static struct ast_ftable ftable = {
+        .run = &redirectin_run,
+        .free = &redirection_free,
+        .pretty_print = &redirection_pretty_print,
+    };
+    struct ast_redirection * redi = malloc(sizeof(struct ast_redirection));
+    if (!redi)
+    {
+        return NULL;
+    }
+    redi->base.type = AST_REDIRECTION;
+    redi->base.ftable = &ftable;
+    redi->fd = fd;
+    redi->words = words;
+    redi->redirection_type = redirection_type;
+    return &redi->base;
+}
+
+struct ast * ast_element_init(enum ELEMENT_TYPE type,char * word,
+        struct ast * ast)
+{
+    static struct ast_ftable ftable = {
+        .run = &element_run,
+        .free = &element_free,
+        .pretty_print = &element_pretty_print,
+    };
+    struct ast_element* element = malloc(sizeof(struct ast_element));
+    if (!words)
+    {
+        return NULL;
+    }
+    element->base.type = AST_WORD;
+    element->base.ftable = &ftable;
+    element->type = type;
+    if (type == WORD)
+    {
+        element->elt->redirection = ast;
+    }
+    else
+    {
+        element->elt->word = word;
+    }
+    return &element->base;
+}
+

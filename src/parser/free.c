@@ -68,3 +68,24 @@ void boucle_free(struct ast * ast)
     free(ast);
 }
 
+// redirection
+void redirection_free(struct ast * ast)
+{
+    assert(ast && ast->type == AST_REDIRECTION);
+    struct ast_redirection * redir = (struct ast_redirection *)ast;
+    return;
+}
+
+
+// element
+void element_free(struct ast * ast)
+{
+    assert(ast && ast->type == AST_ELEMENT);
+    struct ast_element * elt = (struct ast_element *) ast;
+    if (elt->type != WORD)
+    {
+        FREE(elt->elt->redirection);
+    }
+}
+
+

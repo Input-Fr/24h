@@ -88,6 +88,31 @@ int boucle_pretty_print(struct ast * ast, int actual)
     return PRINT(boucle->do_body,t) + 1;
 }
 
+int redirection_pretty_print(struct ast * ast, int actual)
+{
+    return actual + 1;
+}
+
+int element_pretty_print(struct ast * ast, int actual)
+{
+    assert(ast && ast->type == AST_ELEMENT);
+    struct ast_element * elt = (struct ast_element *) ast;
+    if (elt->type ==  WORD)
+    {
+       printf("\t%d [ label = \"WORD\"];\n",actual);
+       printf("\t%d [label = \"%s\", color=black];\n",(actual + 1));
+       printf("\t%d -> %d ;\n",actual, (actual + 1));
+       return actual + 2;
+    }
+    else
+    {
+       printf("\t%d [ label = \"REDIRECTION\"];\n",actual);
+       printf("\t%d [label = \"%s\", color=black];\n",(actual + 1));
+       printf("\t%d -> %d ;\n",actual, (actual + 1));
+       return PRINT(elt->elt->ast, (actual + 1));
+    }
+}
+
 
 void pretty_print_ast(struct ast *ast)
 {

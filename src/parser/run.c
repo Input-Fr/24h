@@ -12,6 +12,18 @@
 
 #define RUN(AST) (*(AST)->ftable->run)((AST))
 
+enum REDIRECTION_TYPE
+{
+    LEFT_DUP,// <
+    LEFT_APPEND, // <<
+    RIGHT_DUP, // >
+    RIGHT_APPEND, // >>
+}
+
+struct dico_redirection
+{
+    
+}
 static void printWbackslash(char *carg)
 {
     size_t idx = 0;
@@ -208,4 +220,25 @@ int boucle_run(struct ast * ast)
     return res;
 }
 
+// redirection ast eval
+int redirection_run(struct ast * ast)
+{
+    assert(ast && ast->type == AST_REDIRECTION);
+    struct ast_redirection * redi = (struct ast_redirection *)ast;
+   return 1;
+}
 
+// element ast eval
+int element_run(struct ast * ast)
+{
+    assert(ast && ast->type == AST_ELEMENT);  
+    struct ast_element * elt = (struct ast_element *)ast;
+    if (elt->type == WORD)
+    {
+        return 0;
+    }
+    else
+    {
+        return RUN(elt->elt->redirection);
+    }
+}
