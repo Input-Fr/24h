@@ -166,44 +166,38 @@ static int test_in(struct lexer *lexer)
 
 enum token_type reserved_word(struct lexer *lexer)
 {
-    if (lexer->current_tok.type == TOKEN_QUOTE)
-    {
-        return TOKEN_WORD;
-    }
+    if (test_if(lexer))
+        return TOKEN_IF;
+    else if (test_fi(lexer))
+        return TOKEN_FI;
+    else if (test_elif(lexer))
+        return TOKEN_ELIF;
+    else if (test_else(lexer))
+        return TOKEN_ELSE;
+    else if (test_then(lexer))
+        return TOKEN_THEN;
+    else if (test_do(lexer))
+        return TOKEN_DO;
+    else if (test_done(lexer))
+        return TOKEN_DONE;
+    else if (test_case(lexer))
+        return TOKEN_CASE;
+    else if (test_esac(lexer))
+        return TOKEN_ESAC;
+    else if (test_while(lexer))
+        return TOKEN_WHILE;
+    else if (test_until(lexer))
+        return TOKEN_UNTIL;
+    else if (test_for(lexer))
+        return TOKEN_FOR;
+    else if (test_lbrace(lexer))
+        return TOKEN_LBRACE;
+    else if (test_rbrace(lexer))
+        return TOKEN_RBRACE;
+    else if (test_bang(lexer))
+        return TOKEN_BANG;
+    else if (test_in(lexer))
+        return TOKEN_IN;
     else
-    {
-        if (test_if(lexer))
-            return TOKEN_IF;
-        else if (test_fi(lexer))
-            return TOKEN_FI;
-        else if (test_elif(lexer))
-            return TOKEN_ELIF;
-        else if (test_else(lexer))
-            return TOKEN_ELSE;
-        else if (test_then(lexer))
-            return TOKEN_THEN;
-        else if (test_do(lexer))
-            return TOKEN_DO;
-        else if (test_done(lexer))
-            return TOKEN_DONE;
-        else if (test_case(lexer))
-            return TOKEN_CASE;
-        else if (test_esac(lexer))
-            return TOKEN_ESAC;
-        else if (test_while(lexer))
-            return TOKEN_WHILE;
-        else if (test_until(lexer))
-            return TOKEN_UNTIL;
-        else if (test_for(lexer))
-            return TOKEN_FOR;
-        else if (test_lbrace(lexer))
-            return TOKEN_LBRACE;
-        else if (test_rbrace(lexer))
-            return TOKEN_RBRACE;
-        else if (test_bang(lexer))
-            return TOKEN_BANG;
-        else if (test_in(lexer))
-            return TOKEN_IN;
-    }
-    return TOKEN_WORD;
+        return TOKEN_WORD;
 }

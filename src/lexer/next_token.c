@@ -11,6 +11,7 @@ static struct token rule_one(struct lexer *lexer, int *word, int *operator)
     if (*word || *operator)
     {
         ungetc(EOF, lexer->file);
+        printf("%d\n",lexer->current_tok.type);
         if (lexer->current_tok.type == TOKEN_WORD)
         {
             lexer->current_tok.type = reserved_word(lexer);
@@ -26,6 +27,7 @@ static struct token rule_one(struct lexer *lexer, int *word, int *operator)
 
 static struct token rule_three(struct lexer *lexer)
 {
+    // --3
     ungetc(lexer->input, lexer->file);
     return lexer->current_tok;
 }
@@ -40,11 +42,14 @@ static void rule_four(struct lexer *lexer)
     {
         if (lexer->Quoting == NO_QUOTE && c == '\'')
         {
+            lexer->current_tok.type = TOKEN_WORD;
+            lexer->current_tok.data = mbt_str_init();
+            mbt_str_pushc(lexer->current_tok.data, '\'');
             lexer->Quoting = SINGLE_QUOTE;
         }
         else if (lexer->Quoting == SINGLE_QUOTE && c == '\'')
         {
-            lexer->current_tok.type = TOKEN_QUOTE;
+            mbt_str_pushc(lexer->current_tok.data, '\'');
             lexer->Quoting = NO_QUOTE;
         }
     }
@@ -54,12 +59,15 @@ static void rule_four(struct lexer *lexer)
     {
         if (lexer->Quoting == NO_QUOTE && c == '"')
         {
+            lexer->current_tok.type = TOKEN_WORD;
+            lexer->current_tok.data = mbt_str_init();
+            mbt_str_pushc(lexer->current_tok.data, '"');
             lexer->Quoting = DOUBLE_QUOTE;
         }
         else if (lexer->Quoting == DOUBLE_QUOTE && c == '"')
         {
-            lexer->current_tok.type = TOKEN_QUOTE;
             lexer->Quoting = NO_QUOTE;
+            mbt_str_pushc(lexer->current_tok.data, '"');
         }
     }
 
@@ -211,6 +219,7 @@ struct token lexer_next_token(struct lexer *lexer)
         else if ((c == '\\') || c == '\'' || c == '"') //4    cas \n
         {
             //4
+            word = 1;
             rule_four(lexer);
         }
         else if (lexer->Quoting == NO_QUOTE && c == '$')// || c == '`')

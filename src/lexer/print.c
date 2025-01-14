@@ -48,6 +48,10 @@ static void print(char *string, enum token_type type)
         printf("op: ||\n");
     else if (type == TOKEN_DSEMI)
         printf("op: ;;\n");
+    else if (type == TOKEN_LESS)
+        printf("op: <\n");
+    else if (type == TOKEN_GREAT)
+        printf("op: >\n");
     else if (type == TOKEN_DLESS)
         printf("op: <<\n");
     else if (type == TOKEN_DGREAT)
@@ -80,6 +84,7 @@ void print_lex(struct lexer *lexer)
     while (1)
     {
         struct token tok = lexer_pop(lexer);
+
         enum token_type type = tok.type;
         char *string = "";
         if (tok.data != NULL)

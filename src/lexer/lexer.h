@@ -41,7 +41,6 @@ enum token_type
 // ??
     TOKEN_NEWLINE, // \n
     TOKEN_COM, // #
-    TOKEN_QUOTE, // '
 // operators
     TOKEN_SEMI, // ;
     TOKEN_PIPE, // |
