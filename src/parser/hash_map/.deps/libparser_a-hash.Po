@@ -1,0 +1,5 @@
+hash_map/libparser_a-hash.o: hash_map/hash.c \
+ /run/current-system/sw/include/stdc-predef.h \
+ /nix/store/skkw2fidr9h2ikq8gzgfm6rysj1mal0r-gcc-13.2.0/lib/gcc/x86_64-unknown-linux-gnu/13.2.0/include/stddef.h
+/run/current-system/sw/include/stdc-predef.h:
+/nix/store/skkw2fidr9h2ikq8gzgfm6rysj1mal0r-gcc-13.2.0/lib/gcc/x86_64-unknown-linux-gnu/13.2.0/include/stddef.h:

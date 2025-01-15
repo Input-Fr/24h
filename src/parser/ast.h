@@ -2,6 +2,7 @@
 #define AST_H
 
 #include <stddef.h>
+#include "hash_map/hash_map.h"
 
 enum AST_TYPE
 {
@@ -21,7 +22,7 @@ struct ast
 
 struct ast_ftable
 {
-    int (*run)(struct ast *ast);
+    int (*run)(struct ast *ast, struct hash_map *h);
     void (*free)(struct ast *ast);
     int (*pretty_print)(struct ast *ast, int actual);
 };
@@ -62,24 +63,24 @@ struct ast * ast_variable_init(char *name, char *val);
 struct ast *ast_list_init(void);
 
 // list ast function
-int list_run(struct ast *ast);
+int list_run(struct ast *ast,struct hash_map *h);
 void list_free(struct ast *ast);
 int list_pretty_print(struct ast *ast, int actual);
 void list_push(struct ast *list_ast, struct ast *new_children);
 
 // cmd ast function
-int cmd_run(struct ast *ast);
+int cmd_run(struct ast *ast,struct hash_map *h);
 void cmd_free(struct ast *ast);
 int cmd_pretty_print(struct ast *ast, int actual);
 
 // if ast function
-int if_run(struct ast *ast);
+int if_run(struct ast *ast,struct hash_map *h);
 void if_free(struct ast *ast);
 int if_pretty_print(struct ast *ast, int actual);
 
 // pretty_print the entire_ast
 void pretty_print_ast(struct ast *ast);
 
-int variable_run(struct ast *ast);
+int variable_run(struct ast *ast, struct hash_map *h);
 void variable_free(struct ast *ast);
 #endif /* !AST_H */

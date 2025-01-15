@@ -138,7 +138,6 @@ static struct ast *parse_var(struct lexer *lexer)
     {
         return NULL;
     }
-
 }
 
 // list = and_or { ';' and_or } [ ';' ] ;

@@ -5,8 +5,11 @@
 #include <unistd.h>
 
 #include "ast.h"
+#include "hash_map/hash_map.h"
 
-#define RUN(AST) (*(AST)->ftable->run)((AST))
+#define RUN(AST,HASH_TABLE) (*(AST)->ftable->run)((AST),(HASH_TABLE))
+
+
 
 static void printWbackslash(char *carg)
 {
@@ -100,12 +103,12 @@ void echo_builtin(char *args[], size_t nb_args)
 // for three evaluation
 
 // list ast eval
-int list_run(struct ast *ast)
+int list_run(struct ast *ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_LIST);
     struct ast_list *list = (struct ast_list *)ast;
     size_t i = 0;
-    while (i < list->nbr_cmd && !RUN(list->cmd[i]))
+    while (i < list->nbr_cmd && !RUN(list->cmd[i],h))
     {
         i += 1;
     }
@@ -113,8 +116,12 @@ int list_run(struct ast *ast)
 }
 
 // cmd ast eval
-int cmd_run(struct ast *ast)
+int cmd_run(struct ast *ast, struct hash_map *h)
 {
+    if (h == NULL)
+    {
+        return 0;
+    }
     assert(ast && ast->type == AST_COMMAND);
     struct ast_cmd *cmd = (struct ast_cmd *)ast;
     if (!cmd->words)
@@ -157,13 +164,13 @@ int cmd_run(struct ast *ast)
 }
 
 // if ast eval
-int if_run(struct ast *ast)
+int if_run(struct ast *ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_IF);
     struct ast_if *if_ast = (struct ast_if *)ast;
-    if (RUN(if_ast->condition))
+    if (RUN(if_ast->condition, h))
     {
-        return RUN(if_ast->then_body);
+        return RUN(if_ast->then_body,h);
     }
     else if (!if_ast->else_body)
     {
@@ -171,22 +178,25 @@ int if_run(struct ast *ast)
     }
     else
     {
-        return RUN(if_ast->else_body);
+        return RUN(if_ast->else_body, h);
     }
 }
 
-int variable_run(struct ast *ast)
+int variable_run(struct ast *ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_VARIABLE);
     struct ast_variable *variable_ast = (struct ast_variable *)ast;
-    if (variable_ast->name != NULL)
-    {
-        printf("%s\n", variable_ast->name);
-    }
-    if (variable_ast->name != NULL)
-    {
-        printf("%s\n", variable_ast->val);
-        //printf("good3\n");
-    }
+    //if (variable_ast->name != NULL)
+    //{
+    //    printf("%s\n", variable_ast->name);
+    //}
+    //if (variable_ast->name != NULL)
+    //{
+    //    printf("%s\n", variable_ast->val);
+    //}
+
+    bool boo = false;
+    hash_map_insert(h, variable_ast->name, variable_ast->val, &boo);
     return 1;
 }
+

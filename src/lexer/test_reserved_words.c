@@ -172,7 +172,6 @@ static int test_name(char * name)
     ret = regcomp(&regex, "^[a-zA-Z_][a-zA-Z_0-9]*=.*", 0);
     if (ret)
     {
-        printf("here");
         return 0;
     }
     ret = regexec(&regex, name, 0, NULL, 0);

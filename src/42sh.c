@@ -8,6 +8,7 @@
 #include "lexer/lexer.h"
 #include "parser/ast.h"
 #include "parser/parser.h"
+#include "parser/hash_map/hash_map.h"
 
 static FILE *gere_usage(int argc, char *argv[])
 {
@@ -27,6 +28,14 @@ static FILE *gere_usage(int argc, char *argv[])
             begin += 1;
         }
         else if (!strcmp(argv[1], "-l"))
+        {
+            if (argc < 3)
+            {
+                return NULL;
+            }
+            begin += 1;
+        }
+        else if (!strcmp(argv[1], "-h"))
         {
             if (argc < 3)
             {
@@ -77,121 +86,24 @@ int main(int argc, char *argv[])
     }
     struct ast *ast;
     ast = parse(&status, lexer);
+
+    struct hash_map *h = hash_map_init(7);
+
+
     if (ast != NULL)
     {
-        ret_code = (*ast->ftable->run)(ast);
+        ret_code = (*ast->ftable->run)(ast,h);
     }
+
+    if (argc > 1 && !strcmp(argv[1], "-h"))
+    {
+        hash_map_print(h);
+    }
+
     (*ast->ftable->free)(ast);
 
-
-    //(*ast->ftable->free)(ast);
-
-    //while (lexer->current_tok.type != TOKEN_EOF)
-    //{
-    //    ast = parse(&status, lexer);
-    //    if (!ast)
-    //    {
-    //        if (status == PARSER_OK && lexer->current_tok.type != TOKEN_EOF)
-    //        {
-    //            continue;
-    //        }
-    //        if (status == PARSER_OK)
-    //        {
-    //            exit(0);
-    //        }
-    //        else
-    //        {
-    //            errx(2, "Wrong grammar");
-    //        }
-    //    }
-    //    if (argc > 1 && !strcmp(argv[1], "-p"))
-    //    {
-    //        pretty_print_ast(ast);
-    //    }
-    //    else
-    //    {
-    //        ret_code = (*ast->ftable->run)(ast);
-    //    }
-    //    (*ast->ftable->free)(ast);
-    //}
-
     lexer_free(lexer);
+    hash_map_free(h);
 
     return ret_code;
 }
-
-/*
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "exec_ast/exec.h"
-#include "lexer/lexer.h"
-#include "parser/ast.h"
-#include "parser/parser.h"
-
-void given_string(char *input)
-{
-    if (input)
-    {
-        return;
-    }
-}
-
-int main(int argc, char *argv[])
-{
-    if (argc == 3 && !strcmp("-c", argv[1]))
-    {
-        given_string(argv[2]);
-    }
-
-    // TEST DE PARSER
-    //
-    //const char* string = "if t; then t fi";
-    //const char* string = "if true; then t else echo caca fi";
-    //const char* string = "ls";
-    const char* string = "if echo toto then if echo tata then echo toto fi fi";
-    //
-    struct lexer *lex = lexer_new(string);
-    struct ast *ast;
-    enum parser_status status;
-    ast = parse(&status, lex);
-    ast_free(ast);
-
-    // TEST DE LEXER
-    //
-    //const char* string = "#if world \n then hello";
-    //const char* string = "if 'world then hello'";
-    //const char* string = "if world ; then hello";
-
-    //const char* string = "if 'world' then hello";
-    //const char* string = "'if' world 'then hello'";
-    //const char* string = "if world 'then' hello";
-    //const char* string = "if world then 'hello'";
-
-    //const char* string = "if world;\nthen hello";
-    //const char* string = "if world then hello";
-    //const char* string = "if #world then\nhello";
-    //const char* string = "if #world then hello";
-    //const char* string = "if world then hello";
-
-    struct lexer *lex = lexer_new(string);
-    if (argc > 1)
-    {
-        if (strcmp(argv[1],"--print") == 0)
-        {
-            print(lex);
-        }
-
-        if (strcmp(argv[1],"--pretty") == 0)
-        {
-            pretty_print(lex);
-        }
-    }
-
-    free(lex);
-
-    return 0;
-}
-*/
-
