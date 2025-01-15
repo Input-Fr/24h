@@ -20,17 +20,44 @@
 
 enum token_type
 {
-    TOKEN_WORD, // command
-    TOKEN_BOOL, // bool
+//reserved words
+    TOKEN_WORD,
+    TOKEN_ASSIGNMENT_WORD,
     TOKEN_IF, // if
     TOKEN_THEN, // then
     TOKEN_ELIF, // elif
     TOKEN_ELSE, // else
     TOKEN_FI, // fi
-    TOKEN_SEMI, // ;
+    TOKEN_CASE, //case
+    TOKEN_ESAC, //esac
+    TOKEN_WHILE, //while
+    TOKEN_UNTIL, //until
+    TOKEN_FOR, //for
+    TOKEN_DO, //do
+    TOKEN_LBRACE, // {
+    TOKEN_RBRACE, //}
+    TOKEN_BANG, // !
+    TOKEN_IN, //in
+    TOKEN_DONE, //done
+// ??
     TOKEN_NEWLINE, // \n
     TOKEN_COM, // #
-    TOKEN_QUOTE, // '
+// operators
+    TOKEN_SEMI, // ;
+    TOKEN_PIPE, // |
+    TOKEN_AND, // &
+    TOKEN_AND_IF, // &&
+    TOKEN_OR_IF, // ||
+    TOKEN_DSEMI, // ;;
+    TOKEN_LESS, // <
+    TOKEN_GREAT, // >
+    TOKEN_DLESS, // <<
+    TOKEN_DGREAT, // >>
+    TOKEN_LESSAND, // <&
+    TOKEN_GREATAND, //>&
+    TOKEN_LESSGREAT, //<>
+    TOKEN_DLESSDASH, //<<-
+    TOKEN_CLOBBER, // >|
     TOKEN_EOF,
     TOKEN_ERROR,
     NO_TOKEN,
@@ -102,19 +129,17 @@ struct token lexer_pop(struct lexer *lexer);
 // print.c :
 
 void print_lex(struct lexer *lex);
-void print_lex_peek3(struct lexer *lex);
-void print_lex_pop3(struct lexer *lex);
 
 // lexer.c :
 
 // test_reserved_words.c :
 
-int test_if(struct lexer *lexer);
-int test_else(struct lexer *lexer);
-int test_fi(struct lexer *lexer);
-int test_then(struct lexer *lexer);
-int test_elif(struct lexer *lexer);
-int test_else(struct lexer *lexer);
+//int test_if(struct lexer *lexer);
+//int test_else(struct lexer *lexer);
+//int test_fi(struct lexer *lexer);
+//int test_then(struct lexer *lexer);
+//int test_elif(struct lexer *lexer);
+//int test_else(struct lexer *lexer);
 enum token_type reserved_word(struct lexer *lexer);
 
 // token.c :
@@ -128,5 +153,12 @@ void clear_current_tok(struct lexer *lex);
 
 char lexer_file(FILE *hd);
 void lexer_file_back(FILE *hd);
+
+//test_operator :
+
+void operator_1(struct lexer *lexer);
+int test_operator_1(struct lexer *lexer);
+int test_operator(struct lexer *lexer);
+
 
 #endif /* !LEXER_H */

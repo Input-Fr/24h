@@ -4,15 +4,23 @@
 
 #include "lexer.h"
 
-void clear_current_tok(struct lexer *lex)
+void clear_current_tok(struct lexer *lexer)
 {
-    mbt_str_free(lex->current_tok.data);
-    lex->current_tok.data = mbt_str_init();
+    if (lexer->current_tok.data != NULL)
+    {
+        if (lexer->current_tok.type != TOKEN_WORD
+                && lexer->current_tok.data->str != NULL)
+        {
+                free(lexer->current_tok.data->str);
+        }
+        mbt_str_free(lexer->current_tok.data);
+        lexer->current_tok.data = NULL;
+        lexer->current_tok.type = NO_TOKEN;
+    }
 }
 
 void mbt_str_free(struct mbt_str *str)
 {
-    // free(str->str);
     free(str);
 }
 

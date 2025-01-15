@@ -1,5 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 
+#include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,6 +19,14 @@ static FILE *gere_usage(int argc, char *argv[])
     {
         int begin = 1;
         if (!strcmp(argv[1], "-p"))
+        {
+            if (argc < 3)
+            {
+                return NULL;
+            }
+            begin += 1;
+        }
+        else if (!strcmp(argv[1], "-l"))
         {
             if (argc < 3)
             {
@@ -57,22 +66,48 @@ int main(int argc, char *argv[])
     // init lexer
     struct lexer *lexer = lexer_new();
     lexer->file = value;
+    int ret_code = 0;
 
     // launch parser
     enum parser_status status;
-    struct ast *ast = parse(&status, lexer);
-    if (argc > 1 && !strcmp(argv[1], "-p"))
+    if (argc > 1 && !strcmp(argv[1], "-l"))
     {
-        pretty_print_ast(ast);
+        print_lex(lexer);
+        return 0;
     }
-    else
+    struct ast *ast;
+    while (lexer->current_tok.type != TOKEN_EOF)
     {
-        (*ast->ftable->run)(ast);
+        ast = parse(&status, lexer);
+        if (!ast)
+        {
+            if (status == PARSER_OK && lexer->current_tok.type != TOKEN_EOF)
+            {
+                continue;
+            }
+            if (status == PARSER_OK)
+            {
+                exit(0);
+            }
+            else
+            {
+                errx(2, "Wrong grammar");
+            }
+        }
+        if (argc > 1 && !strcmp(argv[1], "-p"))
+        {
+            pretty_print_ast(ast);
+        }
+        else
+        {
+            ret_code = (*ast->ftable->run)(ast);
+        }
+        (*ast->ftable->free)(ast);
     }
-    (*ast->ftable->free)(ast);
-    free(lexer);
 
-    return 0;
+    lexer_free(lexer);
+
+    return ret_code;
 }
 
 /*
@@ -149,3 +184,4 @@ int main(int argc, char *argv[])
     return 0;
 }
 */
+

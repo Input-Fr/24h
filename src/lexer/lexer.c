@@ -11,7 +11,7 @@ struct lexer *lexer_new(void)
     lex->input = '\0';
     struct token tok;
     tok.type = NO_TOKEN;
-    tok.data = mbt_str_init();
+    tok.data = NULL;
     lex->current_tok = tok;
     lex->Quoting = NO_QUOTE;
     lex->peek = 0;
@@ -20,7 +20,11 @@ struct lexer *lexer_new(void)
 
 void lexer_free(struct lexer *lexer)
 {
-    free(lexer);
+    if (lexer->current_tok.data != NULL)
+    {
+        free(lexer->current_tok.data); // free the mbt_str
+    }
+    free(lexer); // free the lexer
 }
 
 struct token lexer_peek(struct lexer *lexer)
@@ -28,10 +32,6 @@ struct token lexer_peek(struct lexer *lexer)
     if (!lexer->peek)
     {
         lexer->peek = 1;
-        if (lexer->current_tok.type != TOKEN_WORD)
-        {
-            free(lexer->current_tok.data->str);
-        }
         return lexer_next_token(lexer);
     }
     else
@@ -44,10 +44,6 @@ struct token lexer_pop(struct lexer *lexer)
 {
     if (!lexer->peek)
     {
-        if (lexer->current_tok.type != TOKEN_WORD)
-        {
-            free(lexer->current_tok.data->str);
-        }
         return lexer_next_token(lexer);
     }
     else
