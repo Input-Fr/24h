@@ -511,6 +511,7 @@ static void for_parenthesis(enum parser_status *status, struct lexer *lexer,
                             struct ast *ast_for)
 {
     // TODO
+    (void)ast_for;
     struct token tok = lexer_peek(lexer);
     if (tok.type == TOKEN_SEMI)
     {
@@ -553,6 +554,7 @@ static void handle_end(enum parser_status *status, struct lexer *lexer,
                             struct ast *ast_for)
 {
     // TODO
+    (void)ast_for;
     struct ast *ast_cmpd_lst = parse_compound_list(status, lexer);
     (void)ast_cmpd_lst;
     if (*status != PARSER_OK)
@@ -561,7 +563,7 @@ static void handle_end(enum parser_status *status, struct lexer *lexer,
         return;
     }
     // add cmpd list to exec part of 'for'
-    tok = lexer_peek(lexer);
+    struct token tok = lexer_peek(lexer);
     if (tok.type == TOKEN_DONE)
     {
         lexer_pop(lexer);

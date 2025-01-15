@@ -98,7 +98,6 @@ enum ELEMENT_TYPE
     REDIRECTION,
 };
 
-
 union element
 {
     char * word;
