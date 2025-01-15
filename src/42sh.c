@@ -76,34 +76,44 @@ int main(int argc, char *argv[])
         return 0;
     }
     struct ast *ast;
-    while (lexer->current_tok.type != TOKEN_EOF)
+    ast = parse(&status, lexer);
+    if (ast != NULL)
     {
-        ast = parse(&status, lexer);
-        if (!ast)
-        {
-            if (status == PARSER_OK && lexer->current_tok.type != TOKEN_EOF)
-            {
-                continue;
-            }
-            if (status == PARSER_OK)
-            {
-                exit(0);
-            }
-            else
-            {
-                errx(2, "Wrong grammar");
-            }
-        }
-        if (argc > 1 && !strcmp(argv[1], "-p"))
-        {
-            pretty_print_ast(ast);
-        }
-        else
-        {
-            ret_code = (*ast->ftable->run)(ast);
-        }
-        (*ast->ftable->free)(ast);
+        ret_code = (*ast->ftable->run)(ast);
     }
+    (*ast->ftable->free)(ast);
+
+
+    //(*ast->ftable->free)(ast);
+
+    //while (lexer->current_tok.type != TOKEN_EOF)
+    //{
+    //    ast = parse(&status, lexer);
+    //    if (!ast)
+    //    {
+    //        if (status == PARSER_OK && lexer->current_tok.type != TOKEN_EOF)
+    //        {
+    //            continue;
+    //        }
+    //        if (status == PARSER_OK)
+    //        {
+    //            exit(0);
+    //        }
+    //        else
+    //        {
+    //            errx(2, "Wrong grammar");
+    //        }
+    //    }
+    //    if (argc > 1 && !strcmp(argv[1], "-p"))
+    //    {
+    //        pretty_print_ast(ast);
+    //    }
+    //    else
+    //    {
+    //        ret_code = (*ast->ftable->run)(ast);
+    //    }
+    //    (*ast->ftable->free)(ast);
+    //}
 
     lexer_free(lexer);
 

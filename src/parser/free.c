@@ -48,3 +48,14 @@ void if_free(struct ast *ast)
     }
     free(ast);
 }
+
+
+
+void variable_free(struct ast *ast)
+{
+    assert(ast && ast->type == AST_VARIABLE);
+    struct ast_variable *variable_ast = (struct ast_variable *)ast;
+    free(variable_ast->name);
+    free(variable_ast->val);
+    free(ast);
+}

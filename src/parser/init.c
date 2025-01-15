@@ -2,6 +2,7 @@
 #include <err.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "ast.h"
 
@@ -78,4 +79,19 @@ void list_push(struct ast *list_ast, struct ast *new_children)
         list->cmd = ast;
         list->cmd[index] = new_children;
     }
+}
+
+
+struct ast * ast_variable_init(char *name, char *val)
+{
+    static struct ast_ftable ftable = {
+        .run = &variable_run,
+        .free = &variable_free,
+    };
+    struct ast_variable *ast_variable = malloc(sizeof(struct ast_if));
+    ast_variable->base.type = AST_VARIABLE;
+    ast_variable->base.ftable = &ftable;
+    ast_variable->name = name;
+    ast_variable->val = val;
+    return &ast_variable->base;
 }

@@ -8,6 +8,7 @@ enum AST_TYPE
     AST_LIST,
     AST_COMMAND,
     AST_IF,
+    AST_VARIABLE,
 };
 
 struct ast_ftable;
@@ -46,10 +47,18 @@ struct ast_list
     struct ast **cmd; // the list of command
 };
 
+struct ast_variable
+{
+    struct ast base;
+    char *name;
+    char *val;
+};
+
 struct ast *ast_cmd_init(char **word);
 struct ast *ast_if_init(struct ast *condition, struct ast *then_body,
                         struct ast *else_body);
 
+struct ast * ast_variable_init(char *name, char *val);
 struct ast *ast_list_init(void);
 
 // list ast function
@@ -70,4 +79,7 @@ int if_pretty_print(struct ast *ast, int actual);
 
 // pretty_print the entire_ast
 void pretty_print_ast(struct ast *ast);
+
+int variable_run(struct ast *ast);
+void variable_free(struct ast *ast);
 #endif /* !AST_H */

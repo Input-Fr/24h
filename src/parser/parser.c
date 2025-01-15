@@ -2,9 +2,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "../lexer/lexer.h"
 #include "ast.h"
+static struct ast *parse_var(struct lexer *lexer);
 
 static struct ast *parse_list(enum parser_status *status, struct lexer *lexer);
 
@@ -38,6 +40,29 @@ static struct ast *parse_simple_command(enum parser_status *status,
 
 static char *parse_element(enum parser_status *status, struct lexer *lexer);
 
+
+void separator_equal(char *name, char *val, char *as)
+{
+    size_t i = 0;
+    while (as[i] != '\0' && as[i] != '=')
+    {
+        name[i] = as[i];
+        i += 1;
+    }
+    name[i] = '\0';
+    size_t j = 0;
+    i+=1;
+    while (as[i] != '\0')
+    {
+        val[j] = as[i];
+        j += 1;
+        i += 1;
+    }
+    val[j] = '\0';
+}
+
+
+
 /*
 input = list '\n'
     | list EOF
@@ -45,8 +70,14 @@ input = list '\n'
     | EOF
     ;
 */
+
 struct ast *parse(enum parser_status *status, struct lexer *lexer)
 {
+    if (lexer_peek(lexer).type == TOKEN_ASSIGNMENT_WORD)
+    {
+        struct ast *lst = parse_var(lexer);
+        return lst;
+    }
     if (lexer_peek(lexer).type == TOKEN_ERROR)
     {
         *status = PARSER_UNEXPECTED_TOKEN;
@@ -69,17 +100,9 @@ struct ast *parse(enum parser_status *status, struct lexer *lexer)
     }
     else // it can respect the grammar
     {
-        struct token tok = lexer_peek(lexer);
         if (lexer_peek(lexer).type == TOKEN_EOF
             || lexer_peek(lexer).type == TOKEN_NEWLINE) // end of file
         {
-            if (lexer_peek(lexer).type == TOKEN_EOF)
-            {
-                // A
-                // mbt_str_free(lexer_peek(lexer).data);
-                free(tok.data->str);
-                free(tok.data);
-            }
             return lst;
         }
         else
@@ -90,6 +113,32 @@ struct ast *parse(enum parser_status *status, struct lexer *lexer)
         }
     }
     return NULL;
+}
+
+static struct ast *parse_var(struct lexer *lexer)
+{
+    struct token tok = lexer_pop(lexer);
+    if (tok.type == TOKEN_ASSIGNMENT_WORD)
+    {
+        char *name = calloc(1,strlen(tok.data->str));
+        char *val = calloc(1,strlen(tok.data->str));
+        separator_equal(name, val, tok.data->str);
+        free(tok.data->str);
+        struct ast * ast_variable = ast_variable_init(name, val);
+        //(*ast_variable->ftable->free)(ast_variable);
+        //tok = lexer_pop(lexer);
+        //if (tok.type == TOKEN_WORD)
+        //{
+        //    printf("good1\n");
+        //}
+        //printf("name :%s\n",name);
+        return ast_variable;
+    }
+    else
+    {
+        return NULL;
+    }
+
 }
 
 // list = and_or { ';' and_or } [ ';' ] ;

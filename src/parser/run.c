@@ -174,3 +174,19 @@ int if_run(struct ast *ast)
         return RUN(if_ast->else_body);
     }
 }
+
+int variable_run(struct ast *ast)
+{
+    assert(ast && ast->type == AST_VARIABLE);
+    struct ast_variable *variable_ast = (struct ast_variable *)ast;
+    if (variable_ast->name != NULL)
+    {
+        printf("%s\n", variable_ast->name);
+    }
+    if (variable_ast->name != NULL)
+    {
+        printf("%s\n", variable_ast->val);
+        //printf("good3\n");
+    }
+    return 1;
+}
