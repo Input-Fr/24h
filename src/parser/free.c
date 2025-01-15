@@ -49,15 +49,6 @@ void if_free(struct ast *ast)
     free(ast);
 }
 
-// negation free
-void negation_free(struct ast * ast)
-{
-    assert(ast && ast->type == AST_NEGATION);
-    struct ast_negation * nega = (struct ast_negation *) ast;
-    FREE(nega->condition);
-    free(ast);
-}
-
 // boucle (until and while) free
 void boucle_free(struct ast * ast)
 {
@@ -74,7 +65,9 @@ void redirection_free(struct ast * ast)
     assert(ast && ast->type == AST_REDIRECTION);
     struct ast_redirection * redir = (struct ast_redirection *)ast;
     // tu dois free le word et le type de redirection
-    return;
+    free(word);
+    free(redir_op);
+    free(ast);
 }
 
 
@@ -89,4 +82,15 @@ void element_free(struct ast * ast)
     }
 }
 
+void shell_cmd_free(struct ast * ast)
+{
+    assert(ast && ast->type == AST_SHELL_CMD);
+    struct ast_cmd_shell * cmd = (struct ast_cmd_shell *) ast;
+    for (int i = 0; i < cmd->nbr_redirection; i++)
+    {
+        FREE(cmd->redirection[i]);
+    }
+    FREE(cmd->rule);
+    free(ast);
+}
 

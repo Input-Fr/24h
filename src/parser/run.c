@@ -128,6 +128,8 @@ int list_run(struct ast *ast)
     return !(i >= list->nbr_cmd);
 }
 
+
+/*
 // cmd ast eval
 int cmd_run(struct ast *ast)
 {
@@ -177,7 +179,7 @@ int cmd_run(struct ast *ast)
         }
         return 0;
     }
-}
+} */
 
 // if ast eval
 int if_run(struct ast *ast)
@@ -199,13 +201,6 @@ int if_run(struct ast *ast)
 }
 
 
-// negation ast eval
-int negation_run(struct ast * ast)
-{
-    assert(ast && ast->type == AST_NEGATION);
-    struct ast_negation * nega = (struct ast_negation *) ast;
-    return RUN(nega->condition) == 0;
-}
 
 // boucle (until and while) ast eval 
 int boucle_run(struct ast * ast)
@@ -242,3 +237,17 @@ int element_run(struct ast * ast)
         return RUN(elt->elt->redirection);
     }
 }
+
+int shell_cmd_run(struct ast * ast)
+{
+    assert(ast && ast->type == AST_SHELL_CMD);
+    struct ast_shell_cmd * cmd = (struct ast_shell_cmd * ) ast;
+    int i = 0;
+    for (int i = 0; i < cmd->nbr_redirection; i++)
+    {
+         i = RUN(cmd->redirection[i]);
+    }
+    i = RUN(cmd->rule);
+    return i;
+}
+
