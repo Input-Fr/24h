@@ -6,25 +6,6 @@
 #include "ast.h"
 
 
-// list of command initiation
-struct ast *ast_cmd_init(char **word)
-{
-    static struct ast_ftable ftable = {
-        .run = &cmd_run,
-        .free = &cmd_free,
-        .pretty_print = &cmd_pretty_print,
-    };
-    struct ast_cmd *cmd = malloc(sizeof(struct ast_cmd));
-    if (!cmd)
-    {
-        return NULL;
-    }
-    cmd->base.type = AST_COMMAND;
-    cmd->base.ftable = &ftable;
-    cmd->words = word;
-    return &cmd->base;
-}
-
 // if initiation
 struct ast *ast_if_init(struct ast *condition, struct ast *then_body,
                         struct ast *else_body)
@@ -33,6 +14,7 @@ struct ast *ast_if_init(struct ast *condition, struct ast *then_body,
         .run = &if_run,
         .free = &if_free,
         .pretty_print = &if_pretty_print,
+        .push = &if_push,
     };
     struct ast_if *if_ast = malloc(sizeof(struct ast_if));
     if (!if_ast)
@@ -56,6 +38,7 @@ struct ast *ast_list_init(void)
         .run = &list_run,
         .free = &list_free,
         .pretty_print = &list_pretty_print,
+        .push = &list_push,
     };
     struct ast_list *list = calloc(1, sizeof(struct ast_list));
     if (!list)
@@ -67,46 +50,6 @@ struct ast *ast_list_init(void)
     return &list->base;
 }
 
-void list_push(struct ast *list_ast, struct ast *new_children)
-{
-    assert(list_ast && list_ast->type == AST_LIST);
-    struct ast_list *list = (struct ast_list *)list_ast;
-    size_t index = list->nbr_cmd;
-    list->nbr_cmd += 1;
-    struct ast **ast = NULL;
-    ast = realloc(list->cmd, sizeof(struct ast *) * list->nbr_cmd);
-    if (ast == NULL)
-    {
-        return;
-    }
-    else
-    {
-        list->cmd = ast;
-        list->cmd[index] = new_children;
-    }
-}
-
-// negation initiation
-
-struct ast * ast_negation_init(struct ast * condition)
-{
-    static struct ast_ftable ftable = {
-        .run  = &negation_run,
-        .free = &negation_free,
-        .pretty_print = &negation_pretty_print,
-    };
-    struct ast_negation * nega = malloc(sizeof(struct ast_negation));
-    if (!nega)
-    {
-        return NULL;
-    }
-    nega->base.type = AST_NEGATION;
-    nega->base.ftable = &ftable;
-    nega->condition = condition;
-    return &nega->base;
-}
-
-
 // boucle (while and until ) initialisation
 struct ast * ast_boucle_init(struct ast * condition,
         struct ast * do_body, int run_condition)
@@ -115,6 +58,7 @@ struct ast * ast_boucle_init(struct ast * condition,
         .run = &boucle_run,
         .free = &boucle_free,
         .pretty_print = &boucle_pretty_print,
+        .push = &boucle_push
     };
     struct ast_boucle * boucle = malloc(sizeof(struct ast_boucle));
     if (!boucle)
@@ -136,6 +80,7 @@ struct ast * ast_redirection_init(int fd, char * words,
         .run = &redirectin_run,
         .free = &redirection_free,
         .pretty_print = &redirection_pretty_print,
+        .push = &redirection_push,
     };
     struct ast_redirection * redi = malloc(sizeof(struct ast_redirection));
     if (!redi)
@@ -144,9 +89,9 @@ struct ast * ast_redirection_init(int fd, char * words,
     }
     redi->base.type = AST_REDIRECTION;
     redi->base.ftable = &ftable;
-    redi->fd = fd;
+    redi->n = fd;
     redi->words = words;
-    redi->redirection_type = redirection_type;
+    redi->redi_op = redirection_type;
     return &redi->base;
 }
 
@@ -157,6 +102,7 @@ struct ast * ast_element_init(enum ELEMENT_TYPE type,char * word,
         .run = &element_run,
         .free = &element_free,
         .pretty_print = &element_pretty_print,
+        .push = &element_push,
     };
     struct ast_element* element = malloc(sizeof(struct ast_element));
     if (!words)
@@ -176,4 +122,24 @@ struct ast * ast_element_init(enum ELEMENT_TYPE type,char * word,
     }
     return &element->base;
 }
+
+struct ast * ast_shell_cmd_init(struct ast * rule)
+{
+    static struct ast_ftable ftable = {
+        .run  = &shell_cmd_run,
+        .free = &shell_cmd_free,
+        .pretty_print = &shell_cmd_pretty_print,
+        .push = &shell_cmd_push,
+    }
+    struct ast_shell_cmd * cmd = malloc(sizeof(struct ast_shell_cmd));
+    if (!cmd)
+    {
+        return NULL;
+    }
+    cmd->base.type = AST_SHELL_CMD;
+    cmd->base.ftable = &ftable;
+    cmd->rule = rule;
+    return  &cmd->base;
+}
+
 

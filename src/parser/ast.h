@@ -6,9 +6,10 @@
 enum AST_TYPE
 {
     AST_LIST,
-    AST_COMMAND,
+    AST_SIMPLE_CMD,
+    AST_SHELL_CMD,
     AST_IF,
-    AST_NEGATION,
+    AST_PIPELINE,
     AST_BOUCLE, // while and until
     AST_FOR,
     AST_REDIRECTION,
@@ -29,13 +30,32 @@ struct ast_ftable
     int (*run)(struct ast *ast);
     void (*free)(struct ast *ast);
     int (*pretty_print)(struct ast *ast, int actual);
+    void (*push)(struct ast * ast,struct ast * add);
 };
 
-struct ast_cmd
+
+enum CMD_TYPE
+{
+    SHELL,
+    SIMPLE,
+};
+
+struct ast_shell_cmd
+{
+    struct ast  base;
+    struct ast ** redirection;
+    struct ast * rule;
+    int nbr_redirection;
+}
+
+struct ast_simp_cmd
 {
     struct ast base;
-    char **words;
-};
+    int nbr_element;
+    int nbr_prefix;
+    struct ast ** element;
+    struct ast ** prefix; 
+}
 
 struct ast_if
 {
@@ -53,10 +73,12 @@ struct ast_list
 };
 
 
-struct ast_negation
+struct ast_pipeline
 {
     struct ast base;
-    struct ast * condition;
+    int negation;
+    struct ast ** cmd;
+    int nbr_cmd;
 };
 
 struct ast_boucle
@@ -76,36 +98,34 @@ enum ELEMENT_TYPE
     REDIRECTION,
 };
 
+
+union element
+{
+    char * word;
+    struct ast * redirection;
+};
+
 struct ast_element
 {
     enum ELEMENT_TYPE type,
-    union element
-    {
-        char * word;
-        struct ast * redirection;
-    } elt;
+    union element elt;
 };
 
 struct ast_redirection
 {
     struct ast base;
-    int  fd ;
+    int  n;
     char * word;
-    char * redirection_type;
+    char * redir_op;
 };
 // init of every ast type
 
-// cmd
-struct ast *ast_cmd_init(char **word);
 
 // if
 struct ast *ast_if_init(struct ast *condition, struct ast *then_body,
                         struct ast *else_body);
 // list of command
 struct ast *ast_list_init(void);
-
-// negation
-struct ast * ast_negation_init(struct ast * condition);
 
 // boucle (until and while)
 struct ast * ast_boucle_init(struct  ast  * condition,
@@ -115,50 +135,64 @@ struct ast * ast_boucle_init(struct  ast  * condition,
 struct ast * ast_redirection_init(int fd, char * word,
         char * redirection_type);
 
-//word
-struct ast * ast_word_init(char * word);
-
-
 // element
 struct ast * ast_element_init(enum ELEMENT_TYPE type, char * word,
         struct ast * ast);
+
+struct ast * ast_shell_cmd_init(struct ast * rule_if);
+
 
 // list ast function
 int list_run(struct ast *ast);
 void list_free(struct ast *ast);
 int list_pretty_print(struct ast *ast, int actual);
-void list_push(struct ast *list_ast, struct ast *new_children);
+void list_push(struct ast *ast, struct ast *add);
 
-// cmd ast function
-int cmd_run(struct ast *ast);
-void cmd_free(struct ast *ast);
-int cmd_pretty_print(struct ast *ast, int actual);
 
 // if ast function
 int if_run(struct ast *ast);
 void if_free(struct ast *ast);
 int if_pretty_print(struct ast *ast, int actual);
-
-
-//negation ast function
-int negation_run(struct ast * ast);
-void negation_free(struct ast * ast);
-int negation_pretty_print(struct ast * ast,int actual);
-
+void if_push(struct ast * ast, struct ast * add); 
 
 //boucle (until and while)
 int boucle_run(struct ast * ast);
 void boucle_free(struct ast * ast);
 int boucle_pretty_print(struct ast * ast, int actual);
+void boucle_push(struct ast * ast, struct ast * add); 
 
 // redirection 
-int redirection_run(struct ast * ast);
+int redirection_run(struct ast * ast); //TODO
 void redirection_free(struct ast * ast);
 int redirection_pretty_print(struct ast * ast, int actual);
+void redirection_push(struct ast * ast, struct ast * add);
 
+
+//element
 int element_run(struct ast * ast);
 void element_free(struct ast *ast);
 int element_pretty_print(struct ast * ast, int actual);
+void element_cmd_push(struct ast * ast, struct ast * ast);
+
+
+
+// simple command //TODO
+int simple_cmd_run(struct ast * ast);
+void simple_cmd_free(struct ast * ast);
+int simple_cmd_pretty_print(struct ast * ast, int actual);
+void simple_cmd_push(struct ast * ast, struct ast * ast);
+
+// shell command 
+int shell_cmd_run(struct ast * ast);
+void shell_cmd_free(struct ast * ast);
+int shell_cmd_pretty_print(struct ast * ast,int actual);
+void shell_cmd_push(struct ast * ast,struct ast * ast);
+
+//pipeline command // TODO
+int pipeline_run(struct ast* ast);
+void pipeline_free(struct ast * ast);
+int pipeline_pretty_print(struct ast * ast, int actual);
+void pipeline_push(struct ast * ast, struct ast * add);
 
 // pretty_print the entire_ast
 void pretty_print_ast(struct ast *ast);

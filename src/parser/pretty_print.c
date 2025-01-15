@@ -90,6 +90,7 @@ int boucle_pretty_print(struct ast * ast, int actual)
 
 int redirection_pretty_print(struct ast * ast, int actual)
 {
+    (void)(ast);
     return actual + 1;
 }
 
@@ -113,7 +114,13 @@ int element_pretty_print(struct ast * ast, int actual)
     }
 }
 
-
+int chell_cmd_pretty_print(struct ast * ast, int actual)
+{
+    assert(ast && ast->type == AST_SHELL_CMD);
+    struct ast_shell_cmd * cmd = (struct ast_shell_cmd *)ast;
+    printf("\t%d [ label = \"SHELL_CMD\"];\n",actual);
+    return actual + 1;
+}
 void pretty_print_ast(struct ast *ast)
 {
     printf("digraph { \n");
