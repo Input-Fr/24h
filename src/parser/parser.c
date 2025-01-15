@@ -153,6 +153,7 @@ struct ast *parse(enum parser_status *status, struct lexer *lexer)
 // list = and_or { ';' and_or } [ ';' ] ;
 static struct ast *parse_list(enum parser_status *status, struct lexer *lexer)
 {
+    // TODO
     struct ast *and_or = parse_and_or(status, lexer);
     if (*status != PARSER_OK)
     {
@@ -207,7 +208,6 @@ static struct ast *parse_and_or(enum parser_status *status, struct lexer *lexer)
         // add pipeline to and_or
         tok = lexer_peek(lexer);
     }
-    
     return NULL; // return and or AST
 }
 
@@ -250,7 +250,7 @@ static struct ast *parse_pipeline(enum parser_status *status,
         cmd = parse_command(status, lexer);
         if (*status != PARSER_OK)
         {
-            // free the pipeline
+            // error -> free the pipeline
             return NULL;
         }
         // add cmd to pipeline ast
@@ -503,15 +503,69 @@ static struct ast *parse_rule_until(enum parser_status *status,
     return NULL;
 }
 
-// rule_for = 'for' WORD ( [';'] | [ {'\n'} 'in' { WORD } ( ';' | '\n' ) ] ) {'\n'}
-//            'do' compound_list 'done' ;
-static struct ast *parse_rule_for(enum parser_status *status,
-                                 struct lexer *lexer)
+// rule_for = 'for' WORD ( [';'] | [ {'\n'} 'in' { WORD } ( ';' | '\n' ) ] ) 
+//            {'\n'} 'do' compound_list 'done' ;
+
+// to handle : [';'] | [ {'\n'} 'in' { WORD } ( ';' | '\n' ) ]
+static void for_parenthesis(enum parser_status *status, struct lexer *lexer)
 {
     // TODO
     (void)status;
     (void)lexer;
-    return NULL;
+    return;
+}
+
+static struct ast *parse_rule_for(enum parser_status *status,
+                                 struct lexer *lexer)
+{
+    // TODO
+    struct token tok = lexer_peek(lexer);
+    if (tok.type != TOKEN_FOR)
+    {
+        *status = PARSER_UNEXPECTED_TOKEN;
+        return NULL;
+    }
+    lexer_pop(lexer);
+    tok = lexer_pop(lexer);
+    if (tok.type != TOKEN_WORD)
+    {
+        *status = PARSER_UNEXPECTED_TOKEN;
+        return NULL;
+    }
+    for_parenthesis(status, lexer);
+    tok = lexer_peek(lexer);
+    while(tok.type == TOKEN_NEWLINE)
+    {
+        lexer_pop(lexer);
+        tok = lexer_peek(lexer);
+    }
+    if (tok.type == TOKEN_DO)
+    {
+        lexer_pop(lexer);
+    }
+    else
+    {
+        *status = PARSER_UNEXPECTED_TOKEN;
+        return NULL;
+    }
+    struct ast *ast_cmpd_lst = parse_compound_list(status, lexer);
+    (void)ast_cmpd_lst;
+    if (*status != PARSER_OK)
+    {
+        *status = PARSER_UNEXPECTED_TOKEN;
+        return NULL;
+    }
+    tok = lexer_peek(lexer);
+    if (tok.type == TOKEN_DONE)
+    {
+        lexer_pop(lexer);
+    }
+    else
+    {
+        *status = PARSER_UNEXPECTED_TOKEN;
+        return NULL;
+    }
+    return NULL; // return AST
 }
 
 /*
