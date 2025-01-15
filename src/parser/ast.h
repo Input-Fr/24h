@@ -79,7 +79,7 @@ enum ELEMENT_TYPE
 struct ast_element
 {
     enum ELEMENT_TYPE type,
-    union element
+    union
     {
         char * word;
         struct ast * redirection;

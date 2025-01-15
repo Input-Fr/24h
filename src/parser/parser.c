@@ -507,12 +507,71 @@ static struct ast *parse_rule_until(enum parser_status *status,
 //            {'\n'} 'do' compound_list 'done' ;
 
 // to handle : [';'] | [ {'\n'} 'in' { WORD } ( ';' | '\n' ) ]
-static void for_parenthesis(enum parser_status *status, struct lexer *lexer)
+static void for_parenthesis(enum parser_status *status, struct lexer *lexer,
+                            struct ast *ast_for)
 {
     // TODO
-    (void)status;
-    (void)lexer;
-    return;
+    struct token tok = lexer_peek(lexer);
+    if (tok.type == TOKEN_SEMI)
+    {
+        return; // nothing to return
+    }
+    else
+    {
+        while(tok.type == TOKEN_NEWLINE)
+        {
+            lexer_pop(lexer);
+            tok = lexer_peek(lexer);
+        }
+        if (tok.type != TOKEN_IN)
+        {
+            *status = PARSER_UNEXPECTED_TOKEN;
+            return;
+        }
+        else
+        {
+            lexer_pop(lexer);
+            tok = lexer_peek(lexer);
+            while(tok.type == TOKEN_WORD)
+            {
+                // add word to ast for iteration list
+                lexer_pop(lexer);
+                tok = lexer_peek(lexer);
+            }
+            if (tok.type != TOKEN_SEMI && tok.type != TOKEN_NEWLINE)
+            {
+                *status = PARSER_UNEXPECTED_TOKEN;
+                return;
+            }
+            lexer_pop(lexer);
+        }
+    }
+}
+
+// to handle : compound_list 'done'
+static void handle_end(enum parser_status *status, struct lexer *lexer,
+                            struct ast *ast_for)
+{
+    // TODO
+    struct ast *ast_cmpd_lst = parse_compound_list(status, lexer);
+    (void)ast_cmpd_lst;
+    if (*status != PARSER_OK)
+    {
+        *status = PARSER_UNEXPECTED_TOKEN;
+        return;
+    }
+    // add cmpd list to exec part of 'for'
+    tok = lexer_peek(lexer);
+    if (tok.type == TOKEN_DONE)
+    {
+        lexer_pop(lexer);
+    }
+    else
+    {
+        *status = PARSER_UNEXPECTED_TOKEN;
+        return;
+    }
+
 }
 
 static struct ast *parse_rule_for(enum parser_status *status,
@@ -532,7 +591,12 @@ static struct ast *parse_rule_for(enum parser_status *status,
         *status = PARSER_UNEXPECTED_TOKEN;
         return NULL;
     }
-    for_parenthesis(status, lexer);
+    // add word (tok.data->str) to variable name
+    for_parenthesis(status, lexer, NULL); // replace null with AST
+    if (*status != PARSER_OK)
+    {
+        return NULL;
+    }
     tok = lexer_peek(lexer);
     while(tok.type == TOKEN_NEWLINE)
     {
@@ -548,21 +612,10 @@ static struct ast *parse_rule_for(enum parser_status *status,
         *status = PARSER_UNEXPECTED_TOKEN;
         return NULL;
     }
-    struct ast *ast_cmpd_lst = parse_compound_list(status, lexer);
-    (void)ast_cmpd_lst;
+
+    handle_end(status, lexer, NULL); // replace null with AST
     if (*status != PARSER_OK)
     {
-        *status = PARSER_UNEXPECTED_TOKEN;
-        return NULL;
-    }
-    tok = lexer_peek(lexer);
-    if (tok.type == TOKEN_DONE)
-    {
-        lexer_pop(lexer);
-    }
-    else
-    {
-        *status = PARSER_UNEXPECTED_TOKEN;
         return NULL;
     }
     return NULL; // return AST
