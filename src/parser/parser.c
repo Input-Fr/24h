@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include "parser.h"
 
 #include <stdio.h>
@@ -52,7 +53,7 @@ static struct ast *parse_compound_list(enum parser_status *status,
 static struct ast *parse_simple_command(enum parser_status *status,
                                         struct lexer *lexer);
 
-static char *parse_element(enum parser_status *status, struct lexer *lexer);
+static struct ast *parse_element(enum parser_status *status, struct lexer *lexer);
 
 static struct ast *parse_prefix(enum parser_status *status, struct lexer *lexer);
 
@@ -176,20 +177,86 @@ static struct ast *parse_list(enum parser_status *status, struct lexer *lexer)
 }
 
 /*
-and_or = pipeline ;
+and_or = pipeline { ( '&&' | '||' ) {'\n'} pipeline } ;
 */
 static struct ast *parse_and_or(enum parser_status *status, struct lexer *lexer)
 {
-    return parse_pipeline(status, lexer);
+    // TODO
+    struct ast *ast_pipe = parse_pipeline(status, lexer);
+    if (*status != PARSER_OK)
+    {
+        return NULL;
+    }
+    (void)ast_pipe; // add pipeline to and_or
+    struct token tok = lexer_peek(lexer);
+    while(tok.type == TOKEN_AND_IF || tok.type == TOKEN_OR_IF)
+    {
+        lexer_pop(lexer);
+        tok = lexer_peek(lexer);
+        while(tok.type == TOKEN_NEWLINE)
+        {
+            lexer_pop(lexer);
+            tok = lexer_peek(lexer);
+        }
+        struct ast *ast_pipe = parse_pipeline(status, lexer);
+        (void)ast_pipe;
+        if (*status != PARSER_OK)
+        {
+            return NULL;
+        }
+        // add pipeline to and_or
+        tok = lexer_peek(lexer);
+    }
+    
+    return NULL; // return and or AST
 }
 
 /*
-pipeline = command ;
+pipeline =  ['!'] command { '|' {'\n'} command } ;
 */
 static struct ast *parse_pipeline(enum parser_status *status,
                                   struct lexer *lexer)
 {
-    return parse_command(status, lexer);
+    // TODO
+    int neg = 0;
+    struct token tok = lexer_peek(lexer);
+    if (tok.type == TOKEN_BANG)
+    {
+        lexer_pop(lexer);
+        neg = 1;
+    }
+    struct ast *cmd = parse_command(status, lexer);
+    (void)cmd;
+    if (*status != PARSER_OK)
+    {
+        return NULL;
+    }
+    // add cmd to pipeline ast
+    if (neg)
+    {
+        // tell the pipeline it is a negated expression
+        (void)1;
+    }
+    tok = lexer_peek(lexer);
+    while(tok.type == TOKEN_PIPE)
+    {
+        lexer_pop(lexer);
+        tok = lexer_peek(lexer);
+        while(tok.type == TOKEN_NEWLINE)
+        {
+            lexer_pop(lexer);
+            tok = lexer_peek(lexer);
+        }
+        cmd = parse_command(status, lexer);
+        if (*status != PARSER_OK)
+        {
+            // free the pipeline
+            return NULL;
+        }
+        // add cmd to pipeline ast
+        tok = lexer_peek(lexer);
+    }
+    return NULL; // return AST
 }
 
 /*
@@ -252,7 +319,17 @@ static struct ast *parse_shell_command(enum parser_status *status,
     {
         return ast_rule;
     }
-    return parse_rule_until(status, lexer);
+
+    ast_rule = parse_rule_until(status, lexer);
+    if (*status != PARSER_OK)
+    {
+        *status = PARSER_OK;
+    }
+    else
+    {
+        return ast_rule;
+    }
+    return parse_rule_for(status, lexer);
 }
 
 /*
@@ -339,7 +416,7 @@ static struct ast *parse_rule_while(enum parser_status *status,
             *status = PARSER_UNEXPECTED_TOKEN;
             return NULL;
         }
-        tok = lexer_pop(parser);
+        tok = lexer_pop(lexer);
         if (tok.type == TOKEN_DO)
         {
             struct ast *ast_cmpd_lst2 = parse_compound_list(status, lexer);
@@ -363,14 +440,15 @@ static struct ast *parse_rule_while(enum parser_status *status,
         }
         else
         {
+            (*ast_cmpd_lst->ftable->free)(ast_cmpd_lst);
             *status = PARSER_UNEXPECTED_TOKEN;
             return NULL;
         }
     }
     else
     {
-        *status = parser_unexpected_token;
-        return null;
+        *status = PARSER_UNEXPECTED_TOKEN;
+        return NULL;
     }
     return NULL;
 }
@@ -389,7 +467,7 @@ static struct ast *parse_rule_until(enum parser_status *status,
             *status = PARSER_UNEXPECTED_TOKEN;
             return NULL;
         }
-        tok = lexer_pop(parser);
+        tok = lexer_pop(lexer);
         if (tok.type == TOKEN_DO)
         {
             struct ast *ast_cmpd_lst2 = parse_compound_list(status, lexer);
@@ -419,7 +497,7 @@ static struct ast *parse_rule_until(enum parser_status *status,
     }
     else
     {
-        *status = parser_unexpected_token;
+        *status = PARSER_UNEXPECTED_TOKEN;
         return NULL;
     }
     return NULL;
@@ -564,64 +642,90 @@ static struct ast *parse_simple_command(enum parser_status *status,
     struct ast *ast_prefix = parse_prefix(status, lexer);
     while (*status == PARSER_OK)
     {
+        // put ast_prefix in list
         ast_prefix = parse_prefix(status, lexer);
     }
     *status = PARSER_OK;
-    struct token tok = lexer_pop(lexer);
+    struct token tok = lexer_peek(lexer);
     if (!ast_prefix)
     {
         if (tok.type != TOKEN_WORD)
         {
             *status = PARSER_UNEXPECTED_TOKEN;
+            return NULL;
         }
-    }
-    /*
-    struct token tok = lexer_peek(lexer);
-    if (tok.type == TOKEN_WORD)
-    {
-        lexer_pop(lexer);
-        int nb_words = 2; // une liste de mot de taille 2
-        char **words = calloc(nb_words, sizeof(char *));
-        words[nb_words - 2] = tok.data->str;
-        char *word = parse_element(status, lexer);
-        while (*status == PARSER_OK)
+        else // second case
         {
-            nb_words++;
-            words = realloc(words, nb_words * sizeof(char *));
-            words[nb_words - 1] = 0;
-            words[nb_words - 2] = word;
-            word = parse_element(status, lexer);
+            lexer_pop(lexer);
+            // add word to ast
+            struct ast *ast_elt = parse_element(status, lexer);
+            (void)ast_elt;
+            while(*status == PARSER_OK)
+            {
+                // add elt to ast
+                ast_elt = parse_element(status, lexer);
+            }
+            *status = PARSER_OK;
         }
-        *status = PARSER_OK;
-        return ast_cmd_init(words);
     }
     else
     {
-        *status = PARSER_UNEXPECTED_TOKEN;
-        return NULL;
+        if (tok.type == TOKEN_WORD) // second case
+        {
+            lexer_pop(lexer);
+            // add word to ast
+            struct ast *ast_elt = parse_element(status, lexer);
+            (void)ast_elt;
+            while(*status == PARSER_OK)
+            {
+                // add elt to ast
+                ast_elt = parse_element(status, lexer);
+            }
+            *status = PARSER_OK;
+        }
     }
-    */
+    return NULL; // return the AST
 }
 
 /*
 element = WORD
         | redirection ;
 */
+static int redir_op(struct token tok);
 
-static char *parse_element(enum parser_status *status, struct lexer *lexer)
+static struct ast *parse_element(enum parser_status *status, struct lexer *lexer)
 {
-    // TODO
     struct token tok = lexer_peek(lexer);
     if (tok.type == TOKEN_WORD)
     {
         lexer_pop(lexer);
-        return tok.data->str;
+        if (redir_op(lexer_peek(lexer)))
+        {
+            struct ast *ast_redir = parse_redirection(status, lexer);
+            if (*status == PARSER_OK)
+            {
+                ((struct ast_redirection *)ast_redir)->fd = atoi(tok.data->str);
+                return ast_element_init(REDIRECTION, NULL, ast_redir);
+            }
+            else
+            {
+                return NULL; // invalid
+            }
+
+        }
+        else
+        {
+            return ast_element_init(WORD, tok.data->str, NULL);
+        }
+    }
+    struct ast *ast_redir = parse_redirection(status, lexer);
+    if (*status == PARSER_OK)
+    {
+        return ast_element_init(REDIRECTION, NULL, ast_redir);
     }
     else
     {
-        // do not respect grammar, invalid word
-        *status = PARSER_UNEXPECTED_TOKEN;
-        return NULL;
+        return NULL; // invalid
     }
 }
 
@@ -631,47 +735,33 @@ static struct ast *parse_prefix(enum parser_status *status, struct lexer *lexer)
     return parse_redirection(status, lexer);
 }
 
-static int isnum(const char *str)
-{
-    char *endptr;
-    if (*str == 0) // nan
-        return 0;
-
-    strtol(str, &endptr, 10);
-    return *endptr == 0;
-}
-
-static int redir_op(struct token tok)
-{
-    return tok.type == TOKEN_LESS || tok.type == TOKEN_GREAT 
-        || tok.type == TOKEN_DGREAT || tok.type == TOKEN_LESSAND 
-        || tok.type == TOKEN_GREATAND || tok.type == TOKEN_CLOBBER
-        || tok.type == TOKEN_LESSGREAT;
-}
 
 // redirection = [IONUMBER] ( '>' | '<' | '>>' | '>&' | '<&' | '>|' | '<>' ) WORD ;
+
+static int isnum(const char *str);
+
+static char *strop(struct token op);
+
 static struct ast *parse_redirection(enum parser_status *status, struct lexer *lexer)
 {
-    // TODO
     struct token tok = lexer_peek(lexer);
+    int fd = 1;
     if (tok.type == TOKEN_WORD && isnum(tok.data->str) 
             && in_list(list_fd(), atoi(tok.data->str)))
     {
-        int fd = atoi(tok.data->str); // the fd
-        printf("redir found : %d\n", fd);
+        fd = atoi(tok.data->str); // the fd
         lexer_pop(lexer);
     }
     tok = lexer_peek(lexer);
     if (redir_op(tok))
     {
         lexer_pop(lexer);
-        tok = lexer_peek(lexer);
-        if (tok.type == TOKEN_WORD)
+        struct token tok2 = lexer_peek(lexer);
+        if (tok2.type == TOKEN_WORD)
         {
-            printf("%s\n", tok.data->str); // the word
-            // build the AST
+            struct ast *ast_redir = ast_redirection_init(fd, tok2.data->str, strdup(strop(tok)));
             lexer_pop(lexer);
-            return NULL; // return the AST
+            return ast_redir; // return the AST
         }
         else
         {
@@ -685,3 +775,61 @@ static struct ast *parse_redirection(enum parser_status *status, struct lexer *l
         return NULL;
     }
 }
+
+// FONCTIONS ANNEXES REDIR
+
+static char *strop(struct token op)
+{
+    if (op.type == TOKEN_LESS)
+    {
+        return "<";
+    }
+    else if (op.type == TOKEN_GREAT)
+    {
+        return ">";
+    }
+    else if (op.type == TOKEN_DGREAT)
+    {
+        return ">>";
+    }
+    else if (op.type == TOKEN_DLESS)
+    {
+        return "<<";
+    }
+    else if (op.type == TOKEN_LESSAND)
+    {
+        return "<&";
+    }
+    else if (op.type == TOKEN_GREATAND)
+    {
+        return ">&";
+    }
+    else if (op.type == TOKEN_CLOBBER)
+    {
+        return ">|";
+    }
+    else
+    {
+        return "<>";
+    }
+}
+
+static int redir_op(struct token tok)
+{
+    return tok.type == TOKEN_LESS || tok.type == TOKEN_GREAT 
+        || tok.type == TOKEN_DGREAT || tok.type == TOKEN_LESSAND 
+        || tok.type == TOKEN_GREATAND || tok.type == TOKEN_CLOBBER
+        || tok.type == TOKEN_LESSGREAT;
+}
+
+static int isnum(const char *str)
+{
+    char *endptr;
+    if (*str == 0) // nan
+        return 0;
+
+    strtol(str, &endptr, 10);
+    return *endptr == 0;
+}
+
+// -------------------------------------------

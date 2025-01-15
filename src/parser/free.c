@@ -73,6 +73,7 @@ void redirection_free(struct ast * ast)
 {
     assert(ast && ast->type == AST_REDIRECTION);
     struct ast_redirection * redir = (struct ast_redirection *)ast;
+    // tu dois free le word et le type de redirection
     return;
 }
 

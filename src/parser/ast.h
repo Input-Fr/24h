@@ -11,7 +11,7 @@ enum AST_TYPE
     AST_NEGATION,
     AST_BOUCLE, // while and until
     AST_FOR,
-    AST_REDIRECTION;
+    AST_REDIRECTION,
     AST_OPERATOR, // and// pr
     AST_ELEMENT,
 };
@@ -74,7 +74,7 @@ enum ELEMENT_TYPE
 {
     WORD,
     REDIRECTION,
-}
+};
 
 struct ast_element
 {
@@ -84,7 +84,7 @@ struct ast_element
         char * word;
         struct ast * redirection;
     } elt;
-}
+};
 
 struct ast_redirection
 {
@@ -92,7 +92,7 @@ struct ast_redirection
     int  fd ;
     char * word;
     char * redirection_type;
-}
+};
 // init of every ast type
 
 // cmd
