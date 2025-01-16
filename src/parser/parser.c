@@ -813,7 +813,7 @@ static struct ast *parse_element(enum parser_status *status, struct lexer *lexer
             struct ast *ast_redir = parse_redirection(status, lexer);
             if (*status == PARSER_OK)
             {
-                ((struct ast_redirection *)ast_redir)->fd = atoi(tok.data->str);
+                ((struct ast_redirection *)ast_redir)->n = atoi(tok.data->str);
                 return ast_element_init(REDIRECTION, NULL, ast_redir);
             }
             else

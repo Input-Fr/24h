@@ -46,7 +46,7 @@ struct ast_shell_cmd
     struct ast ** redirection;
     struct ast * rule;
     int nbr_redirection;
-}
+};
 
 struct ast_simp_cmd
 {
@@ -55,7 +55,7 @@ struct ast_simp_cmd
     int nbr_prefix;
     struct ast ** element;
     struct ast ** prefix; 
-}
+};
 
 struct ast_if
 {
