@@ -264,13 +264,56 @@ int pipeline_run(struct ast* ast)
     struct ast_pipeline *ast_pipe = (struct ast_pipeline *)ast;
     int save_stdout = dup(STDOUT_FILENO);
     int save_stdin = dup(STDIN_FILENO);
-    (void)save_stdin;
-    (void)save_stdout;
-    int ret = RUN(ast_pipe->cmd[0]);
-    for (int i = 1; i < ast_pipe->nbr_cmd; i++)
+    int pipefd[2];
+    int ret;
+    for (int i = 0; i < ast_pipe->nbr_cmd; i++)
     {
+        if (i < ast_pipe->nbr_cmd - 1)
+        {
+            if (pipe(pipefd) == -1)
+            {
+                perror("pipe");
+                ret = 1;
+                break;
+            }
+
+            if (dup2(pipefd[1], STDOUT_FILENO) == -1)
+            {
+                perror("dup2");
+                ret = 1;
+                break;
+            } 
+            close(pipefd[1]);
+        }
+        else // derniere commande
+        {
+            if (dup2(save_stdout, STDOUT_FILENO) == -1)
+            {
+                perror("dup2");
+                ret = 1;
+                break;
+            }
+        }
         ret = RUN(ast_pipe->cmd[i]);
+
+        if (i < ast_pipe->nbr_cmd - 1)
+        {
+            if (dup2(pipefd[0], STDIN_FILENO) == -1)
+            {
+                perror("dup2");
+                ret = 1;
+                break;
+            }
+            close(pipefd[0]);
+        }
     }
+    if (dup2(save_stdin, STDIN_FILENO) == -1)
+    {
+        perror("dup2");
+        ret = 1;
+    }
+    close(save_stdin);
+    close(save_stdout);
     ret = ast_pipe->negation ? !ret : ret;
     return ret;
 }
