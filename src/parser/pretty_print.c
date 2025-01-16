@@ -2,7 +2,6 @@
 #include <stdio.h>
 
 #include "ast.h"
-#include <stddef.h>
 
 #define PRINT(AST, C) (*(AST)->ftable->pretty_print)((AST), (C))
 // list pretty_print
@@ -39,7 +38,7 @@ int list_pretty_print(struct ast *ast, int actual)
     }
     return t;
 }
-/*
+
 // cmd pretty_print
 int cmd_pretty_print(struct ast *ast, int actual)
 {
@@ -57,70 +56,6 @@ int cmd_pretty_print(struct ast *ast, int actual)
     return actual + 1;
 }
 
-
-// negation pretty print
-
-int negation_pretty_print(struct ast * ast, int actual)
-{
-    assert(ast && ast->type == AST_NEGATION);
-    struct ast_negation * nega = (struct ast_negation *)ast;
-    printf("\t%d [ label = \"NOT\", color=red];\n", actual);
-    printf("\t%d -> %d",actual, (actual + 1));
-    return PRINT(nega->condition,(actual  + 1)) + 1;
-}
-
-// boucle (until and while) print
-int boucle_pretty_print(struct ast * ast, int actual)
-{
-    assert(ast && ast->type == AST_BOUCLE);
-    struct ast_boucle * boucle = (struct ast_boucle *)ast;
-    if(boucle->run_condition)
-    {
-        printf("\t%d [ label = \"UNTIL\"];\n",actual);
-    }
-    else
-    {
-        printf("\t%d [ label = \"WHILE\"];\n",actual);
-    }
-    int t = PRINT(boucle->condition,(actual + 1)) + 1;
-    printf("\t%d -> %d [label = \"condition\"];\n",actual, (actual + 1));
-    printf("\t%d -> %d [label = \"do\"];\n",actual, t);
-    return PRINT(boucle->do_body,t) + 1;
-}
-
-int redirection_pretty_print(struct ast * ast, int actual)
-{
-    (void)(ast);
-    return actual + 1;
-}
-
-int element_pretty_print(struct ast * ast, int actual)
-{
-    assert(ast && ast->type == AST_ELEMENT);
-    struct ast_element * elt = (struct ast_element *) ast;
-    if (elt->type ==  WORD)
-    {
-       printf("\t%d [ label = \"WORD\"];\n",actual);
-       printf("\t%d [label = \"%s\", color=black];\n",(actual + 1));
-       printf("\t%d -> %d ;\n",actual, (actual + 1));
-       return actual + 2;
-    }
-    else
-    {
-       printf("\t%d [ label = \"REDIRECTION\"];\n",actual);
-       printf("\t%d [label = \"%s\", color=black];\n",(actual + 1));
-       printf("\t%d -> %d ;\n",actual, (actual + 1));
-       return PRINT(elt->elt->ast, (actual + 1));
-    }
-}
-
-int chell_cmd_pretty_print(struct ast * ast, int actual)
-{
-    assert(ast && ast->type == AST_SHELL_CMD);
-    struct ast_shell_cmd * cmd = (struct ast_shell_cmd *)ast;
-    printf("\t%d [ label = \"SHELL_CMD\"];\n",actual);
-    return actual + 1;
-}
 void pretty_print_ast(struct ast *ast)
 {
     printf("digraph { \n");
@@ -129,5 +64,3 @@ void pretty_print_ast(struct ast *ast)
     PRINT(ast, 1);
     printf("\n}\n");
 }
-
-*/

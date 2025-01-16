@@ -62,9 +62,6 @@ int main(int argc, char *argv[])
     {
         return -1;
     }
-    
-    printf("%d\n", atoi("11"));
-
     // init lexer
     struct lexer *lexer = lexer_new();
     lexer->file = value;
