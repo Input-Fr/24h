@@ -94,3 +94,13 @@ void shell_cmd_free(struct ast * ast)
     free(ast);
 }
 
+void pipeline_free(struct ast * ast)
+{
+    assert(ast && ast->type == AST_PIPELINE);
+    struct ast_pipeline *ast_pipe = (struct ast_pipeline *)ast;
+    for(int i = 0; i < ast_pipe->nbr_cmd; i++)
+    {
+        FREE(ast_pipe->cmd[i]);
+    }
+    free(ast);
+}

@@ -142,4 +142,22 @@ struct ast * ast_shell_cmd_init(struct ast * rule)
     return  &cmd->base;
 }
 
+struct ast *ast_pipeline_init(int neg, struct ast *cmd)
+{
+    static struct ast_ftable ftable = {
+        .run  = &pipeline_run,
+        .free = &pipeline_free,
+        .pretty_print = &pipeline_pretty_print,
+        .push = &pipeline_push,
+    }
 
+    struct ast_pipeline *pipe = calloc(1, sizeof(struct ast_pipeline));
+    if (!cmd)
+    {
+        return NULL;
+    }
+    pipe->base.type = AST_PIPELINE;
+    pipe->base.ftable = &ftable;
+    pipe->negation = neg;
+    return &pipe->base;
+}

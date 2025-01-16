@@ -56,7 +56,7 @@ static void printWbackslash(char *carg)
 }
 
 // args est de la forme ["arg1", "arg2", "arg3"]
-void echo_builtin(char *args[], size_t nb_args)
+static void echo_builtin(char *args[], size_t nb_args)
 {
     bool newline = true;
     bool backslash = false;
@@ -246,7 +246,15 @@ int shell_cmd_run(struct ast * ast)
          i = RUN(cmd->redirection[i]);
     }
     i = RUN(cmd->rule);
+    restore();
     return i;
+}
+
+int pipeline_run(struct ast* ast)
+{
+    assert(ast && ast->type == AST_PIPELINE);
+    struct ast_pipeline *ast_pipe = (struct ast_pipeline *)ast;
+    return 0;
 }
 
 // FONCTION ANNEXE REDIR
@@ -282,7 +290,7 @@ static int save_fd(int fd)
     return 0;
 }
 
-void restore(void)
+static void restore(void)
 {
     while(s_redir)
     {

@@ -174,7 +174,6 @@ pipeline =  ['!'] command { '|' {'\n'} command } ;
 static struct ast *parse_pipeline(enum parser_status *status,
                                   struct lexer *lexer)
 {
-    // TODO
     int neg = 0;
     struct token tok = lexer_peek(lexer);
     if (tok.type == TOKEN_BANG)
@@ -183,17 +182,11 @@ static struct ast *parse_pipeline(enum parser_status *status,
         neg = 1;
     }
     struct ast *cmd = parse_command(status, lexer);
-    (void)cmd;
     if (*status != PARSER_OK)
     {
         return NULL;
     }
-    // add cmd to pipeline ast
-    if (neg)
-    {
-        // tell the pipeline it is a negated expression
-        (void)1;
-    }
+    struct ast *ast_pipeline = ast_pipeline_init(neg, cmd);
     tok = lexer_peek(lexer);
     while(tok.type == TOKEN_PIPE)
     {
@@ -207,13 +200,12 @@ static struct ast *parse_pipeline(enum parser_status *status,
         cmd = parse_command(status, lexer);
         if (*status != PARSER_OK)
         {
-            // error -> free the pipeline
             return NULL;
         }
-        // add cmd to pipeline ast
+        pipeline_push(ast_pipeline, cmd);
         tok = lexer_peek(lexer);
     }
-    return NULL; // return AST
+    return ast_pipeline;
 }
 
 /*
@@ -230,18 +222,18 @@ static struct ast *parse_command(enum parser_status *status,
         return ast_simplec;
     }
     *status = PARSER_OK;
-    struct ast *ast_shellc = parse_shell_command(status, lexer);
+    struct ast *ast_rule = parse_shell_command(status, lexer);
     if (*status == PARSER_OK)
     {
+        struct ast *ast_shellcmd = ast_shell_cmd_init(ast_rule);
         struct ast *ast_redir = parse_redirection(status, lexer);
         while (*status == PARSER_OK)
         {
-            // add to ast
-            (void)ast_redir;
+            shell_cmd_push(ast_shellcmd, ast_redir);
             ast_redir = parse_redirection(status, lexer);
         }
         *status = PARSER_OK;
-        return ast_shellc;
+        return ast_shellcmd;
     }
     return NULL;
 }
@@ -949,5 +941,5 @@ static int in_list(int *fd_lst, int fd)
     }
     return 0;
 }
-V*/
+*/
 // -------------------------------------------

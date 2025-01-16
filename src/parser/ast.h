@@ -171,7 +171,7 @@ int boucle_pretty_print(struct ast * ast, int actual);
 void boucle_push(struct ast * ast, struct ast * add); 
 
 // redirection 
-int redirection_run(struct ast * ast); //TODO
+int redirection_run(struct ast * ast);
 void redirection_free(struct ast * ast);
 int redirection_pretty_print(struct ast * ast, int actual);
 void redirection_push(struct ast * ast, struct ast * add);
@@ -181,7 +181,7 @@ void redirection_push(struct ast * ast, struct ast * add);
 int element_run(struct ast * ast);
 void element_free(struct ast *ast);
 int element_pretty_print(struct ast * ast, int actual);
-void element_cmd_push(struct ast * ast, struct ast * ast);
+void element_cmd_push(struct ast * ast, struct ast * add);
 
 
 
@@ -189,16 +189,16 @@ void element_cmd_push(struct ast * ast, struct ast * ast);
 int simple_cmd_run(struct ast * ast);
 void simple_cmd_free(struct ast * ast);
 int simple_cmd_pretty_print(struct ast * ast, int actual);
-void simple_cmd_push(struct ast * ast, struct ast * ast);
+void simple_cmd_push(struct ast * ast, struct ast * add);
 
 // shell command 
 int shell_cmd_run(struct ast * ast);
 void shell_cmd_free(struct ast * ast);
 int shell_cmd_pretty_print(struct ast * ast,int actual);
-void shell_cmd_push(struct ast * ast,struct ast * ast);
+void shell_cmd_push(struct ast * ast,struct ast * add);
 
-//pipeline command // TODO
-int pipeline_run(struct ast* ast);
+//pipeline command
+int pipeline_run(struct ast* ast); // TODO
 void pipeline_free(struct ast * ast);
 int pipeline_pretty_print(struct ast * ast, int actual);
 void pipeline_push(struct ast * ast, struct ast * add);
