@@ -93,29 +93,88 @@ static char *delete_dollar(char *word)
 }
 
 
-static char *expand(struct hash_map *h, char *str)
+static char *delimite_var(char *prev, char *next, char *word)
 {
-    if (str[0] == '$')
+    char *tmp = word;
+    prev = strcpy(prev, word);
+    size_t j = 0;
+    while (*word != '\0' && *word != '$')
     {
-        char *string = delete_dollar(str);
-        char *res = hash_map_get(h, string);
-
-        free(string);
-        return res;
+        j += 1;
+        word += 1;
     }
-    //else if (str[0] == '"')
-    //{
 
-    //}
+    if (*word != '\0')
+    {
+        prev[j] = '\0';
+    }
     else
     {
-        //char result[100];
-        //snprintf(result, sizeof(result), "%s%s", res, str);
-        //printf("%s",result);
-        return str;
+        next = NULL;
     }
+
+    char *new = calloc(1, strlen(word) + 1);
+    new = strcpy(new, word);
+    size_t i = 0;
+    while (*word != '\0' && *word != '}')
+    {
+        word+=1;
+        i += 1;
+    }
+
+    if (*word != '\0')
+    {
+        next = strcpy(next, word + 1);
+    }
+    new[i + 1] = '\0';
+    word = tmp;
+    //free(word);
+    return new;
 }
 
+
+static char *expand(struct hash_map *h, char *str)
+{
+    char *result = calloc(1, strlen(str) + 1);
+    char *prev = calloc(1,strlen(str) + 1);
+    char *next = calloc(1,strlen(str) + 1); 
+    str = delimite_var(prev, next, str);
+    char *key = delete_dollar(str);
+    char *val = hash_map_get(h,key);
+    snprintf(result, 100, "%s%s%s", prev, val, next);
+
+    //printf("key :%s\n",key);
+    //printf("val :%s\n",val);
+    //printf("str :%s\n",result);
+    free(prev);
+    free(next);
+    free(key);
+    //free(val);
+    free(str);
+
+    return result;
+}
+
+int test_var(char *str)
+{
+    size_t i = 0;
+    while (str[i] != '\0')
+    {
+        if (str[i] == '$')
+        {
+            if (str[i+ 1] != '\0' && str[i+1] == '{')
+            {
+                return 1;
+            }
+            if (str[i+ 1] != '\0' && str[i+1] != ' ')
+            {
+                return 1;
+            }
+        }
+        i += 1;
+    }
+    return 0;
+}
 // args est de la forme ["arg1", "arg2", "arg3"]
 void echo_builtin(char *args[], size_t nb_args, struct hash_map *h)
 {
@@ -155,8 +214,16 @@ void echo_builtin(char *args[], size_t nb_args, struct hash_map *h)
         else
         {
             char *str = args[i];
-            str = expand(h, str);
-            printf("%s", str);
+            if (str[0] != '\'' && test_var(str))
+            {
+                char *string = expand(h, str);
+                printf("%s", string);
+                free(string);
+            }
+            else
+            {
+                printf("%s", str);
+            }
         }
         if (i < nb_args - 1) // on sépare tout les argument d'un espace
         {

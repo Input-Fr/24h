@@ -88,6 +88,7 @@ int main(int argc, char *argv[])
     ast = parse(&status, lexer);
 
     struct hash_map *h = hash_map_init(7);
+
     hash_map_insert(h, "abc", "4135");
 
     if (ast != NULL)

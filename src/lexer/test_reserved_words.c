@@ -168,23 +168,14 @@ static int test_in(struct lexer *lexer)
 static int test_name(char * name)
 {
     regex_t regex;
-    int ret;
-    ret = regcomp(&regex, "^[a-zA-Z_][a-zA-Z_0-9]*=.*", 0);
-    if (ret)
-    {
-        return 0;
-    }
+    int ret = regcomp(&regex, "^[a-zA-Z_][a-zA-Z_0-9]*=.*", 0);
     ret = regexec(&regex, name, 0, NULL, 0);
     if (!ret) //match
-    {
-        regfree(&regex);
-        return 1;
-    }
+        ret = 1;
     else
-    {
-        regfree(&regex);
-        return 0;
-    }
+        ret = 1;
+    regfree(&regex);
+    return ret;
 }
 
 static int test_ass(struct lexer *lexer)
