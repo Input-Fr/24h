@@ -33,6 +33,16 @@ struct ast_ftable
     void (*push)(struct ast * ast,struct ast * add);
 };
 
+enum REDIRECTION_TYPE
+{
+    LESS,// <
+    GREATER_AND, // >&
+    GREATER, // >
+    DGREATER, // >>
+    LESS_AND, // <&
+    CLOBBER, // >|
+    LESS_GREATER, // <>
+};
 
 enum CMD_TYPE
 {
@@ -115,7 +125,7 @@ struct ast_redirection
     struct ast base;
     int  n;
     char * word;
-    char * redir_op;
+    enum REDIRECTION_TYPE redir_op;
 };
 // init of every ast type
 
@@ -132,7 +142,7 @@ struct ast * ast_boucle_init(struct  ast  * condition,
 
 // redirection 
 struct ast * ast_redirection_init(int fd, char * word,
-        char * redirection_type);
+        enum REDIRECTION_TYPE redirection_type);
 
 // element
 struct ast * ast_element_init(enum ELEMENT_TYPE type, char * word,

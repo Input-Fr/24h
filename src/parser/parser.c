@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <string.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <ctype.h>
 #include <sys/types.h>
@@ -59,50 +60,6 @@ static struct ast *parse_prefix(enum parser_status *status, struct lexer *lexer)
 
 static struct ast *parse_redirection(enum parser_status *status, struct lexer *lexer);
 
-static int *list_fd(void)
-{
-    pid_t pid = getpid();
-
-    int *fd_lst = calloc(1024, sizeof(int));
-
-    char proc_path[PATH_MAX];
-    snprintf(proc_path, sizeof(proc_path), "/proc/%d/fd", pid);
-
-    DIR *dir = opendir(proc_path);
-    if (!dir)
-    {
-        perror("Failed to open /proc/{pid}/fd");
-        return NULL;
-    }
-
-    struct dirent *entry;
-    size_t arr_len = 0;
-    while ((entry = readdir(dir)) != NULL)
-    {
-        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-        {
-            continue;
-        }
-        fd_lst[arr_len] = atoi(entry->d_name);
-        arr_len++;
-    }
-
-    closedir(dir);
-    return fd_lst;
-}
-
-static int in_list(int *fd_lst, int fd)
-{
-    size_t i = 0;
-    while (fd_lst[i])
-    {
-        if (fd_lst[i] == fd)
-        {
-            return 1;
-        }
-    }
-    return 0;
-}
 
 /*
 input = list '\n'
@@ -849,16 +806,19 @@ static struct ast *parse_prefix(enum parser_status *status, struct lexer *lexer)
 
 static int isnum(const char *str);
 
-static char *strop(struct token op);
+static enum REDIRECTION_TYPE strop(struct token op);
+
+static int valid_fd(int fd);
 
 static struct ast *parse_redirection(enum parser_status *status, struct lexer *lexer)
 {
     struct token tok = lexer_peek(lexer);
-    int fd = 1;
+    int fd = -1;
     if (tok.type == TOKEN_WORD && isnum(tok.data->str) 
-            && in_list(list_fd(), atoi(tok.data->str)))
+            && valid_fd(atoi(tok.data->str)))
     {
         fd = atoi(tok.data->str); // the fd
+        free(tok.data->str);
         lexer_pop(lexer);
     }
     tok = lexer_peek(lexer);
@@ -868,7 +828,7 @@ static struct ast *parse_redirection(enum parser_status *status, struct lexer *l
         struct token tok2 = lexer_peek(lexer);
         if (tok2.type == TOKEN_WORD)
         {
-            struct ast *ast_redir = ast_redirection_init(fd, tok2.data->str, strdup(strop(tok)));
+            struct ast *ast_redir = ast_redirection_init(fd, tok2.data->str, strop(tok));
             lexer_pop(lexer);
             return ast_redir; // return the AST
         }
@@ -887,39 +847,39 @@ static struct ast *parse_redirection(enum parser_status *status, struct lexer *l
 
 // FONCTIONS ANNEXES REDIR
 
-static char *strop(struct token op)
+static enum REDIRECTION_TYPE strop(struct token op)
 {
     if (op.type == TOKEN_LESS)
     {
-        return "<";
+        return LESS;
     }
     else if (op.type == TOKEN_GREAT)
     {
-        return ">";
+        return GREATER;
     }
     else if (op.type == TOKEN_DGREAT)
     {
-        return ">>";
+        return DGREATER;
     }
     else if (op.type == TOKEN_DLESS)
     {
-        return "<<";
+        return LESS; // not to implement yet
     }
     else if (op.type == TOKEN_LESSAND)
     {
-        return "<&";
+        return LESS_AND;
     }
     else if (op.type == TOKEN_GREATAND)
     {
-        return ">&";
+        return GREATER_AND;
     }
     else if (op.type == TOKEN_CLOBBER)
     {
-        return ">|";
+        return CLOBBER;
     }
     else
     {
-        return "<>";
+        return LESS_GREATER;
     }
 }
 
@@ -940,5 +900,54 @@ static int isnum(const char *str)
     strtol(str, &endptr, 10);
     return *endptr == 0;
 }
+static int valid_fd(int fd)
+{
+    return fcntl(fd, F_GETFL) != -1 || errno != EBADF;
+}
+/*
+static int *list_fd(void)
+{
+    pid_t pid = getpid();
 
+    int *fd_lst = calloc(1024, sizeof(int));
+
+    char proc_path[PATH_MAX];
+    snprintf(proc_path, sizeof(proc_path), "/proc/%d/fd", pid);
+
+    DIR *dir = opendir(proc_path);
+    if (!dir)
+    {
+        perror("Failed to open /proc/{pid}/fd");
+        return NULL;
+    }
+
+    struct dirent *entry;
+    size_t arr_len = 0;
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+        {
+            continue;
+        }
+        fd_lst[arr_len] = atoi(entry->d_name);
+        arr_len++;
+    }
+
+    closedir(dir);
+    return fd_lst;
+}
+
+static int in_list(int *fd_lst, int fd)
+{
+    size_t i = 0;
+    while (fd_lst[i])
+    {
+        if (fd_lst[i] == fd)
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+V*/
 // -------------------------------------------

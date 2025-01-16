@@ -66,7 +66,7 @@ void redirection_free(struct ast * ast)
     struct ast_redirection * redir = (struct ast_redirection *)ast;
     // tu dois free le word et le type de redirection
     free(word);
-    free(redir_op);
+    //free(redir_op); //plus la peine j'ai mis des enum à la place
     free(ast);
 }
 

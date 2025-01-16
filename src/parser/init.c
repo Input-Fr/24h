@@ -74,7 +74,7 @@ struct ast * ast_boucle_init(struct ast * condition,
 }
 
 struct ast * ast_redirection_init(int fd, char * words, 
-        char * redirection_type)
+        enum REDIRECTION_TYPE redirection_type)
 {
     static struct ast_ftable ftable = {
         .run = &redirectin_run,

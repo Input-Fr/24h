@@ -7,23 +7,20 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <ctype.h>
 
 #include "ast.h"
 
 #define RUN(AST) (*(AST)->ftable->run)((AST))
 
-enum REDIRECTION_TYPE
-{
-    LEFT_DUP,// <
-    LEFT_APPEND, // <<
-    RIGHT_DUP, // >
-    RIGHT_APPEND, // >>
-}
 
+/*
 struct dico_redirection
 {
     
 }
+*/
 static void printWbackslash(char *carg)
 {
     size_t idx = 0;
@@ -220,7 +217,8 @@ int redirection_run(struct ast * ast)
 {
     assert(ast && ast->type == AST_REDIRECTION);
     struct ast_redirection * redi = (struct ast_redirection *)ast;
-   return 1;
+    int ret = handle_redirection(redi->n, redi->redir_op, redi->word);
+    return ret;
 }
 
 // element ast eval
@@ -251,3 +249,168 @@ int shell_cmd_run(struct ast * ast)
     return i;
 }
 
+// FONCTION ANNEXE REDIR
+struct s_redirection
+{
+    int original_fd;
+    int saved_fd;
+    struct s_redirection *next;
+};
+
+// liste globale des fd sauvegardés
+struct s_redirection *s_redir = NULL;
+
+static int save_fd(int fd)
+{
+    int save = dup(fd);
+    if (save == -1)
+    {
+        perror("dup");
+        return 1;
+    }
+    struct s_redirection *new = calloc(1, sizeof(struct s_redirection));
+    if (!new)
+    {
+        close(save);
+        return 1;
+    }
+
+    new->original_fd = fd;
+    new->saved_fd = save;
+    new->next = s_redir;
+    s_redir = new;
+    return 0;
+}
+
+void restore(void)
+{
+    while(s_redir)
+    {
+        struct s_redirection *cur = s_redir;
+        
+        if (dup2(cur->saved_fd, cur->original_fd) == -1)
+        {
+            perror("error during restore");
+        }
+        
+        close(cur->saved_fd);
+        s_redir = cur->next;
+        free(cur);
+    }
+}
+enum REDIRECTION_TYPE
+{
+    LESS,// <
+    GREATER_AND, // >&
+    GREATER, // >
+    DGREATER, // >>
+    LESS_AND, // <&
+    CLOBBER, // >|
+    LESS_GREATER, // <>
+};
+
+static int str_to_fd(const char *str)
+{
+    for (int i = 0; str[i]; i++)
+    {
+        if (!isdigit(str[i]))
+        {
+            return -1;
+        }
+    }
+    return atoi(str);
+}
+
+static void set_vars(int *fd, int *flags, enum REDIRECTION_TYPE redir_op)
+{
+    switch (redir_op)
+    {
+        case LESS:
+            *fd = *fd == -1 ? 0 : *fd;
+            *flags = O_RDONLY;
+            break;
+        case GREATER:
+            *fd = *fd == -1 ? 1 : *fd;
+            *flags = O_WRONLY | O_CREAT | O_TRUNC;
+            break;
+        case DGREATER:
+            *fd = *fd == -1 ? 1 : *fd;
+            *flags = O_WRONLY | O_CREAT | O_APPEND;
+            break;
+        case CLOBBER:
+            *fd = *fd == -1 ? 1 : *fd;
+            *flags = O_WRONLY | O_CREAT | O_TRUNC;
+            break;
+        case LESS_GREATER:
+            *fd = *fd == -1 ? 0 : *fd;
+            *flags = O_RDWR | O_CREAT;
+            break;
+        case GREATER_AND:
+            *fd = *fd == -1 ? 1 : *fd;
+            break;
+        case LESS_AND;
+            *fd = *fd == -1 ? 0 : *fd;
+            break;
+        default:
+            return;
+    }
+}
+
+static int handle_redirection(int fd, enum REDIRECTION_TYPE redir_op, char *word)
+{
+    int flags;
+    int new_fd;
+    set_vars(&fd, &flags, redir_op);
+
+    if (redir_op == GREATER_AND || redir_op == LESS_AND)
+    {
+        if (target_fd == -1 && word[0] == '-')
+        {
+            if (save_fd(fd) != -1)
+            {
+                close(fd);
+                return 0;
+            }
+            return 1;
+        }
+        int fd2 = str_to_fd(word);
+        if (fd2 < 0 || fcntl(fd2, F_GETFL) == -1)
+        {
+            return 1; // not a regular fd
+        }
+        if (save_fd(fd) == -1)
+        {
+            return 1;
+        }
+        if (dup2(fd2, fd) == -1)
+        {
+            return 1; // error while duplicating
+        }
+        
+        return 0;
+    }
+    if (save_fd(fd) == -1)
+    {
+        return 1;
+    }
+
+    
+    new_fd = open(word, flags, 0644);
+    if (new_fd == -1)
+    {
+        return 1; // error while opening
+    }
+
+    if (dup2(new_fd, fd) == -1)
+    {
+        perror("dup2");
+        close(new_fd);
+        return 1;
+    }
+
+    close(new_fd);
+    return 0;
+}
+
+
+// FIN ANNEXE -------------
