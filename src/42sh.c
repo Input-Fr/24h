@@ -88,12 +88,15 @@ int main(int argc, char *argv[])
     ast = parse(&status, lexer);
 
     struct hash_map *h = hash_map_init(7);
+    h->ret = ret_code;
 
-    hash_map_insert(h, "abc", "4135");
-
+    hash_map_insert(h, "abc", "1234");
+    h->nb_args = argc - 1;
+    h->all_args = argv;
     if (ast != NULL)
     {
         ret_code = (*ast->ftable->run)(ast,h);
+        h->ret = ret_code;
     }
 
     if (argc > 1 && !strcmp(argv[1], "-h"))

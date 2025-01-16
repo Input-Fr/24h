@@ -42,4 +42,6 @@ enum parser_status
 
 struct ast *parse(enum parser_status *status, struct lexer *lexer);
 
+
+
 #endif /* ! PARSER_H */

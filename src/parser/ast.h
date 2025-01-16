@@ -83,4 +83,10 @@ void pretty_print_ast(struct ast *ast);
 
 int variable_run(struct ast *ast, struct hash_map *h);
 void variable_free(struct ast *ast);
+
+//extand.c
+
+int test_var(char *str);
+char *expand(struct hash_map *h, char *str);
+
 #endif /* !AST_H */
