@@ -14,13 +14,21 @@
 
 #define RUN(AST) (*(AST)->ftable->run)((AST))
 
-
-/*
-struct dico_redirection
+// FONCTION ANNEXE REDIR
+struct s_redirection
 {
-    
-}
-*/
+    int original_fd;
+    int saved_fd;
+    struct s_redirection *next;
+};
+
+// liste globale des fd sauvegardés
+struct s_redirection *s_redir = NULL;
+
+static void restore(void);
+
+static int handle_redirection(int fd, enum REDIRECTION_TYPE redir_op, char *word);
+
 static void printWbackslash(char *carg)
 {
     size_t idx = 0;
@@ -232,7 +240,7 @@ int element_run(struct ast * ast)
     }
     else
     {
-        return RUN(elt->elt->redirection);
+        return RUN(elt->elt.redirection);
     }
 }
 
@@ -254,19 +262,19 @@ int pipeline_run(struct ast* ast)
 {
     assert(ast && ast->type == AST_PIPELINE);
     struct ast_pipeline *ast_pipe = (struct ast_pipeline *)ast;
-    return 0;
+    int save_stdout = dup(STDOUT_FILENO);
+    int save_stdin = dup(STDIN_FILENO);
+    (void)save_stdin;
+    (void)save_stdout;
+    int ret = RUN(ast_pipe->cmd[0]);
+    for (int i = 1; i < ast_pipe->nbr_cmd; i++)
+    {
+        ret = RUN(ast_pipe->cmd[i]);
+    }
+    ret = ast_pipe->negation ? !ret : ret;
+    return ret;
 }
 
-// FONCTION ANNEXE REDIR
-struct s_redirection
-{
-    int original_fd;
-    int saved_fd;
-    struct s_redirection *next;
-};
-
-// liste globale des fd sauvegardés
-struct s_redirection *s_redir = NULL;
 
 static int save_fd(int fd)
 {
@@ -306,16 +314,6 @@ static void restore(void)
         free(cur);
     }
 }
-enum REDIRECTION_TYPE
-{
-    LESS,// <
-    GREATER_AND, // >&
-    GREATER, // >
-    DGREATER, // >>
-    LESS_AND, // <&
-    CLOBBER, // >|
-    LESS_GREATER, // <>
-};
 
 static int str_to_fd(const char *str)
 {
@@ -356,7 +354,7 @@ static void set_vars(int *fd, int *flags, enum REDIRECTION_TYPE redir_op)
         case GREATER_AND:
             *fd = *fd == -1 ? 1 : *fd;
             break;
-        case LESS_AND;
+        case LESS_AND:
             *fd = *fd == -1 ? 0 : *fd;
             break;
         default:
@@ -372,7 +370,7 @@ static int handle_redirection(int fd, enum REDIRECTION_TYPE redir_op, char *word
 
     if (redir_op == GREATER_AND || redir_op == LESS_AND)
     {
-        if (target_fd == -1 && word[0] == '-')
+        if (word[0] == '-')
         {
             if (save_fd(fd) != -1)
             {

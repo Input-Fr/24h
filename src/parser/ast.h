@@ -150,6 +150,7 @@ struct ast * ast_element_init(enum ELEMENT_TYPE type, char * word,
 
 struct ast * ast_shell_cmd_init(struct ast * rule_if);
 
+struct ast *ast_pipeline_init(int neg, struct ast *cmd);
 
 // list ast function
 int list_run(struct ast *ast);

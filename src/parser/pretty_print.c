@@ -39,7 +39,7 @@ int list_pretty_print(struct ast *ast, int actual)
     }
     return t;
 }
-
+/*
 // cmd pretty_print
 int cmd_pretty_print(struct ast *ast, int actual)
 {
@@ -130,4 +130,4 @@ void pretty_print_ast(struct ast *ast)
     printf("\n}\n");
 }
 
-
+*/
