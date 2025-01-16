@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 #include "ast.h"
 #include "hash_map/hash_map.h"
@@ -45,8 +46,57 @@ static void printWbackslash(char *carg)
     }
 }
 
+static void error_var(char *word)
+{
+    //if (word[strlen(word)] != '}')
+    //{
+    //    fprintf(stdout,"bad substitution\n");
+    //    exit(1);
+    //}
+    size_t i = 0;
+    while (i < strlen(word) && word[i] != '}')
+    {
+        if (word[i] == ' ')        //erreur d'espace: ${ a } 
+        {
+            fprintf(stdout,"bad substitution\n");    
+            exit(1);
+        }
+        i+=1;
+    }
+
+}
+
+static char *delete_dollar(char *word)
+{
+    word += 1;
+    char * new = calloc(1, strlen(word) + 1);
+    if (strlen(word) > 1 && word[0] == '{')
+    {
+        error_var(word);
+        word += 1;
+        new = strcpy(new, word);
+        new[strlen(word) - 1] = '\0';
+        word -= 1;
+    }
+    else
+    {
+        new = strcpy(new, word);
+        word -= 1;
+    }
+    return new;
+}
+
+
+static char *expand(struct hash_map *h, char *str)
+{
+    char *string = delete_dollar(str);
+    char *res = hash_map_get(h, string);
+    free(string);
+    return res;
+}
+
 // args est de la forme ["arg1", "arg2", "arg3"]
-void echo_builtin(char *args[], size_t nb_args)
+void echo_builtin(char *args[], size_t nb_args, struct hash_map *h)
 {
     bool newline = true;
     bool backslash = false;
@@ -83,7 +133,12 @@ void echo_builtin(char *args[], size_t nb_args)
         }
         else
         {
-            printf("%s", args[i]);
+            char *str = args[i];
+            if (str[0] == '$')
+            {
+                str = expand(h, str);
+            }
+            printf("%s", str);
         }
         if (i < nb_args - 1) // on sépare tout les argument d'un espace
         {
@@ -137,7 +192,7 @@ int cmd_run(struct ast *ast, struct hash_map *h)
             {
                 idx++;
             }
-            echo_builtin(cmd->words + 1, idx - 1);
+            echo_builtin(cmd->words + 1, idx - 1,h);
         }
         else if (!strcmp(cmd->words[0], "true"))
         {
@@ -195,8 +250,6 @@ int variable_run(struct ast *ast, struct hash_map *h)
     //    printf("%s\n", variable_ast->val);
     //}
 
-    bool boo = false;
-    hash_map_insert(h, variable_ast->name, variable_ast->val, &boo);
+    hash_map_insert(h, variable_ast->name, variable_ast->val);
     return 1;
 }
-
