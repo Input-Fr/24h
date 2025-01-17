@@ -198,6 +198,37 @@ static void expand_pwd(char *prev, char *next, char *result)
     free(buffer);
 }
 
+static void expand_all_args(char *prev, char *next, char *result,struct hash_map *h)
+{
+    char *str = calloc(1, 1024);
+    size_t k = 0;
+    for(int i = 1; i < h->nb_args + 1; i += 1)
+    {
+        for (size_t j = 0; (h->all_args[i])[j] != '\0'; j+=1)
+        {
+            str[k] = (h->all_args[i])[j];
+            k+=1;
+        }
+        str[k] = ' ';
+        k+=1;
+    }
+    str[k-1] = '\0';
+    size_t len = strlen(prev) + strlen(next) + 1024;
+    snprintf(result,len, "%s%s%s", prev, str, next);
+    free(str);
+}
+
+static int calcul_len(int nb)
+{
+    size_t k = 0;
+    while (nb > 1)
+    {
+        nb = nb/10;
+        k += 1;
+    }
+    return k;
+}
+
 static char *_expand(struct hash_map *h, char *str)
 {
     char *word = str;
@@ -213,38 +244,42 @@ static char *_expand(struct hash_map *h, char *str)
     char *var = delimite_var(prev, next, word);
     char *key = delete_dollar(var);
     char *val = "";
-
-
-    size_t len = strlen(prev) + strlen(next) + 5;
-    if (strcmp(key,"UID") == 0)
+    //size_t len = strlen(prev) + strlen(next) + 512;
+    size_t len = 0;
+    if (strcmp(key,"?") == 0)
     {
-        expand_UID(prev,next,result);
-    }
-    else if (strcmp(key,"?") == 0)
-    {
+        len = strlen(prev) + strlen(next) + calcul_len(h->ret) + 2;
         snprintf(result,len, "%s%d%s", prev, h->ret, next);
+    }
+    else if (key[0] >= '0' && key[0] <= '9')
+    {
+        len = strlen(prev) + strlen(next) + strlen(h->all_args[atoi(key)]);
+        snprintf(result,len, "%s%s%s", prev, h->all_args[atoi(key)], next);
+    }
+    else if (strcmp(key,"#") == 0)
+    {
+        len = strlen(prev) + strlen(next) + calcul_len(h->nb_args) + 2;
+        snprintf(result,len, "%s%d%s", prev, h->nb_args, next);
+    }
+    else if (strcmp(key,"*") == 0)
+    {
+        expand_all_args(prev,next,result,h);
     }
     else if (strcmp(key,"$") == 0)
     {
         expand_processid(prev,next,result);
     }
-    else if (strcmp(key,"#") == 0)
+    else if (strcmp(key,"UID") == 0)
     {
-        snprintf(result,len, "%s%d%s", prev, h->nb_args, next);
-    }
-    else if (strcmp(key,"RANDOM") == 0)
-    {
-        expand_random(prev,next,result);
+        expand_UID(prev,next,result);
     }
     else if (strcmp(key,"PWD") == 0)
     {
         expand_pwd(prev,next,result);
     }
-    else if (key[0] >= '0' && key[0] <= '9')
+    else if (strcmp(key,"RANDOM") == 0)
     {
-        size_t len = strlen(prev) + strlen(next) + strlen(h->all_args[atoi(key)]);
-        result = realloc(result, len);
-        snprintf(result,len, "%s%s%s", prev, h->all_args[atoi(key)], next);
+        expand_random(prev,next,result);
     }
     else
     {
@@ -259,7 +294,7 @@ static char *_expand(struct hash_map *h, char *str)
     return result;
 }
 
-//a faire : $OLDPWD //$@ $* $IFS
+//a faire : $OLDPWD $@ et $IFS
 
 
 char *expand(struct hash_map *h, char *str)
