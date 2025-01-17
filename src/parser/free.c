@@ -4,36 +4,25 @@
 
 #include "ast.h"
 
-#define FREE(AST) (*(AST)->ftable->free)((AST))
+#define FREE(AST) (*(AST)->ftable->free)((AST)) // Permet d'appeler la methode free d'un ast
+#define FREE_LIST(ASTS,NBR) handle_free_astlist((ASTS),&(NBR)) // free toute une liste d'ast
 
-/*
-// commande free
-void cmd_free(struct ast *ast)
+// free une liste d'ast 
+static void handle_free_astlist(struct ast ** asts,size_t * nbr_elt)
 {
-    assert(ast && ast->type == AST_COMMAND);
-    struct ast_cmd *cmd = (struct ast_cmd *)ast;
-    if (cmd->words)
-    {
-        for (size_t i = 0; cmd->words[i] != NULL; i++)
-        {
-            free(cmd->words[i]);
-        }
-    }
-    free(cmd->words);
-    free(ast);
+	for(size_t i = 0; i < *nbr_elt; i++)
+	{
+		FREE(asts[i])
+	}
+	free(asts);
 }
-*/
 
 // list free
 void list_free(struct ast *ast)
 {
     assert(ast && ast->type == AST_LIST);
     struct ast_list *list = (struct ast_list *)ast;
-    for (size_t i = 0; i < list->nbr_cmd; i++)
-    {
-        FREE(((list->cmd)[i]));
-    }
-    free(list->cmd);
+    FREE_LIST(list->cmd,list->nbr_cmd);
     free(ast);
 }
 
@@ -84,9 +73,7 @@ void redirection_free(struct ast * ast)
 {
     assert(ast && ast->type == AST_REDIRECTION);
     struct ast_redirection * redir = (struct ast_redirection *)ast;
-    // tu dois free le word et le type de redirection
     free(redir->word);
-    //free(redir_op); //plus la peine j'ai mis des enum à la place
     free(ast);
 }
 
@@ -105,23 +92,27 @@ void element_free(struct ast * ast)
 void shell_cmd_free(struct ast * ast)
 {
     assert(ast && ast->type == AST_SHELL_CMD);
-    struct ast_shell_cmd * cmd = (struct ast_shell_cmd *) ast;
-    for (int i = 0; i < cmd->nbr_redirection; i++)
-    {
-        FREE(cmd->redirection[i]);
-    }
+    struct ast_cmd_shell * cmd = (struct ast_cmd_shell *) ast;
+    FREE_LIST(cmd->redirection,cmd->nbr_redirection);
     FREE(cmd->rule);
     free(ast);
+}
+
+void simple_cmd_free(struct ast * ast)
+{
+	assert(ast && ast->type == AST_SIMPLE_CMD);
+	struct ast_simple_cmd * cmd = (struct ast_simple_cmd *) ast;
+	FREE_LIST(cmd->prefix,cmd->nbr_prefix);
+	FREE_LIST(cmd->element,cmd->nbr_element);
+	free(word);
+	free(ast);
 }
 
 void pipeline_free(struct ast * ast)
 {
     assert(ast && ast->type == AST_PIPELINE);
     struct ast_pipeline *ast_pipe = (struct ast_pipeline *)ast;
-    for(int i = 0; i < ast_pipe->nbr_cmd; i++)
-    {
-        FREE(ast_pipe->cmd[i]);
-    }
+    FREE_LIST(ast_pipe->cmd,ast_pipe->nbr_cmd);
     free(ast);
 }
 

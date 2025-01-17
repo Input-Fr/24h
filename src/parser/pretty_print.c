@@ -39,9 +39,9 @@ int list_pretty_print(struct ast *ast, int actual)
     }
     return t;
 }
+
 /*
-// cmd pretty_print
-int cmd_pretty_print(struct ast *ast, int actual)
+static int cmd_pretty_print(struct ast *ast, int actual)
 {
     assert(ast && ast->type == AST_COMMAND);
     struct ast_cmd *cmd = (struct ast_cmd *)ast;
@@ -56,18 +56,15 @@ int cmd_pretty_print(struct ast *ast, int actual)
     printf("\t%d -> %d:%ld;\n", actual, (actual + 1), (i / 2));
     return actual + 1;
 }
-
-
-// negation pretty print
-
-int negation_pretty_print(struct ast * ast, int actual)
+*/
+int simple_cmd_pretty_print(struct ast * ast, int actual)
 {
-    assert(ast && ast->type == AST_NEGATION);
-    struct ast_negation * nega = (struct ast_negation *)ast;
-    printf("\t%d [ label = \"NOT\", color=red];\n", actual);
-    printf("\t%d -> %d",actual, (actual + 1));
-    return PRINT(nega->condition,(actual  + 1)) + 1;
+	assert(ast && ast->type == AST_SIMPLE_CMD);
+	return actual + 1;
 }
+
+// cmd pretty_print
+
 
 // boucle (until and while) print
 int boucle_pretty_print(struct ast * ast, int actual)
@@ -101,16 +98,15 @@ int element_pretty_print(struct ast * ast, int actual)
     if (elt->type ==  WORD)
     {
        printf("\t%d [ label = \"WORD\"];\n",actual);
-       printf("\t%d [label = \"%s\", color=black];\n",(actual + 1));
+       printf("\t%d [label = \"%s\", color=black];\n",(actual + 1),elt->elt.word);
        printf("\t%d -> %d ;\n",actual, (actual + 1));
        return actual + 2;
     }
     else
     {
        printf("\t%d [ label = \"REDIRECTION\"];\n",actual);
-       printf("\t%d [label = \"%s\", color=black];\n",(actual + 1));
        printf("\t%d -> %d ;\n",actual, (actual + 1));
-       return PRINT(elt->elt->ast, (actual + 1));
+       return PRINT(elt->elt.redirection, (actual + 1));
     }
 }
 
@@ -119,6 +115,7 @@ int chell_cmd_pretty_print(struct ast * ast, int actual)
     assert(ast && ast->type == AST_SHELL_CMD);
     struct ast_shell_cmd * cmd = (struct ast_shell_cmd *)ast;
     printf("\t%d [ label = \"SHELL_CMD\"];\n",actual);
+    (void)(cmd);
     return actual + 1;
 }
 void pretty_print_ast(struct ast *ast)
@@ -130,4 +127,3 @@ void pretty_print_ast(struct ast *ast)
     printf("\n}\n");
 }
 
-*/

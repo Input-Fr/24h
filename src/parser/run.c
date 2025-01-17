@@ -15,6 +15,11 @@
 
 #define RUN(AST,HASH_TABLE) (*(AST)->ftable->run)((AST),(HASH_TABLE))
 
+#define RUN_LIST(ASTS,ELT,HASH_TABLE) handle_list_ast((ASTS),(&ELT),HASH_TABLE) // évalue une liste d'ast
+
+// crée la liste d'élément pour l'ast élément
+#define MAKE_WORD(WORD,ASTS,NBR_ELT) create_words((WORD),(ASTS),&(NBR_ELT)) 
+
 // FONCTION ANNEXE REDIR
 struct s_redirection
 {
@@ -29,7 +34,7 @@ struct s_redirection *s_redir = NULL;
 static void restore(void);
 
 static int handle_redirection(int fd, enum REDIRECTION_TYPE redir_op, char *word);
-/*
+
 static void printWbackslash(char *carg)
 {
     size_t idx = 0;
@@ -62,6 +67,62 @@ static void printWbackslash(char *carg)
         }
         idx++;
     }
+}
+
+
+// fonction qui gère les les ast avec une liste d'ast en attribut
+static int handle_list_ast(struct ast ** asts,size_t * nbr_element,
+		struct hash_map * h)
+{
+	int j = 0;
+	for(size_t i = 0; i < *nbr_element; i++)
+	{
+		j = RUN(asts[i], h);
+	}
+	return j;
+}	
+
+// fonction pour la simple commande qui crée le word
+
+// check if the element is a word
+static int is_word(struct ast * ast)
+{
+	assert(ast && ast->type == AST_ELEMENT);
+	return ((struct ast_element *)ast)->type == WORD;
+}
+
+
+static char ** create_words(char * word,struct ast ** asts,int * nbr_element)
+{
+	char ** words = malloc(sizeof(char *)); 
+	words[0] = word;
+	int size = 1;
+	for (int i = 0; i < *nbr_element; i++)
+	{
+		if (is_word(asts[i]))
+		{
+			struct ast_element * elt = NULL;
+		       	elt = (struct ast_element *)(asts[i]);
+			size += 1;
+			char ** test = realloc(words,size * sizeof(char *));
+			if (!test)
+			{
+				exit(2);
+			}
+			words = test;
+			words[(size - 1)] = elt->elt.word;
+		}
+	}
+	
+	size += 1;
+	char ** test = realloc(words,size * sizeof(char *));
+	if (!test)
+	{
+		exit(2);
+	}
+	words = test;
+	words[(size - 1)] = NULL;
+	return words;
 }
 
 // args est de la forme ["arg1", "arg2", "arg3"]
@@ -128,7 +189,6 @@ static void echo_builtin(char *args[], size_t nb_args, struct hash_map *h)
 
     fflush(stdout);
 }
-*/
 // for three evaluation
 
 // list ast eval
@@ -144,33 +204,29 @@ int list_run(struct ast *ast, struct hash_map *h)
     return !(i >= list->nbr_cmd);
 }
 
-
-/*
-// cmd ast eval
-int cmd_run(struct ast *ast)
+// to run the command in simple command
+static int cmd_run(char ** words)
 {
-    assert(ast && ast->type == AST_COMMAND);
-    struct ast_cmd *cmd = (struct ast_cmd *)ast;
-    if (!cmd->words)
+    if (!words)
     {
         return 2;
     }
     else
     {
-        if (!strcmp(cmd->words[0], "echo"))
+        if (!strcmp(words[0], "echo"))
         {
             int idx = 1;
-            while (cmd->words[idx])
+            while (words[idx])
             {
                 idx++;
             }
-            echo_builtin(cmd->words + 1, idx - 1);
+            echo_builtin(words + 1, idx - 1);
         }
-        else if (!strcmp(cmd->words[0], "true"))
+        else if (!strcmp(words[0], "true"))
         {
             return 0;
         }
-        else if (!strcmp(cmd->words[0], "false"))
+        else if (!strcmp(words[0], "false"))
         {
             return 1;
         }
@@ -179,7 +235,7 @@ int cmd_run(struct ast *ast)
             pid_t pid = fork();
             if (pid == 0)
             {
-                int status_code = execvp(cmd->words[0], cmd->words);
+                int status_code = execvp(words[0], words);
                 if (status_code == -1)
                 {
                     exit(2);
@@ -195,7 +251,7 @@ int cmd_run(struct ast *ast)
         }
         return 0;
     }
-} */
+} 
 
 // if ast eval
 int if_run(struct ast *ast, struct hash_map *h)
@@ -280,12 +336,9 @@ int shell_cmd_run(struct ast * ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_SHELL_CMD);
     struct ast_shell_cmd * cmd = (struct ast_shell_cmd * ) ast;
-    int i = 0;
-    for (int i = 0; i < cmd->nbr_redirection; i++)
-    {
-         i = RUN(cmd->redirection[i], h);
-    }
-    i = RUN(cmd->rule, h);
+    int j = 0;
+    j = RUN_LIST(cmd->redirection,cmd->nbr_redirection,h);
+    j = RUN(cmd->rule, h);
     restore();
     return i;
 }
@@ -447,8 +500,8 @@ static void set_vars(int *fd, int *flags, enum REDIRECTION_TYPE redir_op)
 
 static int handle_redirection(int fd, enum REDIRECTION_TYPE redir_op, char *word)
 {
-    int flags;
-    int new_fd;
+    int flags = -1;
+    int new_fd = -1;
     set_vars(&fd, &flags, redir_op);
 
     if (redir_op == GREATER_AND || redir_op == LESS_AND)
@@ -501,5 +554,32 @@ static int handle_redirection(int fd, enum REDIRECTION_TYPE redir_op, char *word
     return 0;
 }
 
+static void free_words(char ** words)
+{
+	if (words)
+	{
+		for (size_t i = 0; words[i] != NULL; i++)
+		{
+			free(words[i]);
+		}
+	}
+	free(words);
+}
+
+int simple_cmd_run(struct ast * ast, struct hash_map * h)
+{
+	assert( ast && ast->type == AST_SIMPLE_CMD);
+	struct ast_simp_cmd * cmd = (struct ast_simp_cmd *) ast;
+	int j = RUN_LIST(cmd->prefix,cmd->nbr_prefix,h);
+	j = RUN_LIST(cmd->element,cmd->nbr_element,h);
+	if (cmd->word)
+	{
+		char ** words = MAKE_WORD(cmd->word,cmd->element,cmd->nbr_element);
+		j = cmd_run(words);
+		free_words(words);
+	}
+	return j;
+}
 
 // FIN ANNEXE -------------
+

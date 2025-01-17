@@ -77,14 +77,15 @@ struct ast_shell_cmd
     struct ast  base;
     struct ast ** redirection;
     struct ast * rule;
-    int nbr_redirection;
+    size_t nbr_redirection;
 };
 
 struct ast_simp_cmd
 {
     struct ast base;
-    int nbr_element;
-    int nbr_prefix;
+    size_t nbr_element;
+    size_t nbr_prefix;
+    char * word;
     struct ast ** element;
     struct ast ** prefix; 
 };
@@ -129,7 +130,7 @@ struct ast_pipeline
     struct ast base;
     int negation;
     struct ast ** cmd;
-    int nbr_cmd;
+    size_t nbr_cmd;
 };
 
 struct ast_boucle
@@ -190,6 +191,7 @@ struct ast * ast_element_init(enum ELEMENT_TYPE type, char * word,
         struct ast * ast);
 
 struct ast * ast_shell_cmd_init(struct ast * rule_if);
+struct ast * ast_simple_cmd_init(char * word);
 
 struct ast *ast_pipeline_init(int neg, struct ast *cmd);
 

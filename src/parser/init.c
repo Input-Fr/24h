@@ -153,7 +153,7 @@ struct ast * ast_shell_cmd_init(struct ast * rule)
         .pretty_print = &shell_cmd_pretty_print,
         .push = &shell_cmd_push,
     }
-    struct ast_shell_cmd * cmd = malloc(sizeof(struct ast_shell_cmd));
+    struct ast_shell_cmd * cmd = calloc(1,sizeof(struct ast_shell_cmd));
     if (!cmd)
     {
         return NULL;
@@ -174,7 +174,7 @@ struct ast *ast_pipeline_init(int neg, struct ast *cmd)
     }
 
     struct ast_pipeline *pipe = calloc(1, sizeof(struct ast_pipeline));
-    if (!cmd)
+    if (!pipe)
     {
         return NULL;
     }
@@ -199,3 +199,20 @@ struct ast * ast_variable_init(char *name, char *val)
 }
 
 
+
+struct ast * ast_simple_cmd_init(char * word)
+{
+	static struct ast_ftable ftable = {
+		.run = &simple_cmd_run,
+		.free = &simple_cmd_free,
+		.pretty_prin = &simple_cmd_pretty_print,
+		.push = &simple_cmd_push,
+	}
+	struct ast_simple_cmd * cmd = calloc(1,sizeof(struct ast_simple_cmd));
+	if (!cmd)
+	{
+		return NULL;
+	}
+	cmd->word = word;
+	return &cmd->base;
+}	
