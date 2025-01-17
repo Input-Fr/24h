@@ -6,6 +6,7 @@
 enum AST_TYPE
 {
     AST_LIST,
+    AST_AND_OR,
     AST_SIMPLE_CMD,
     AST_SHELL_CMD,
     AST_IF,
@@ -50,6 +51,18 @@ enum CMD_TYPE
     SIMPLE,
 };
 
+enum and_or_type
+{
+    NODE_PIPELINE,
+    NODE_AND_OR,
+};
+
+enum op
+{
+    AND_OP,
+    OR_OP,
+};
+
 struct ast_shell_cmd
 {
     struct ast  base;
@@ -82,6 +95,25 @@ struct ast_list
     struct ast **cmd; // the list of command
 };
 
+struct operation
+{
+    enum op op;
+    struct ast *left;
+    struct ast *right;
+};
+
+union content
+{
+    struct ast *pipeline;
+    struct operation *op;
+};
+
+struct ast_and_or
+{
+    struct ast base;
+    enum and_or_type t;
+    union content c;
+};
 
 struct ast_pipeline
 {
@@ -152,12 +184,19 @@ struct ast * ast_shell_cmd_init(struct ast * rule_if);
 
 struct ast *ast_pipeline_init(int neg, struct ast *cmd);
 
+struct ast *ast_and_or_init(struct ast *pipeline);
+
 // list ast function
 int list_run(struct ast *ast);
 void list_free(struct ast *ast);
 int list_pretty_print(struct ast *ast, int actual);
 void list_push(struct ast *ast, struct ast *add);
 
+// and_or ast function
+int and_or_run(struct ast *ast);
+void and_or_free(struct ast *ast);
+int and_or_pretty_print(struct ast *ast, int actual);
+void and_or_push(struct ast *ast, struct ast *add);
 
 // if ast function
 int if_run(struct ast *ast);
@@ -199,7 +238,7 @@ int shell_cmd_pretty_print(struct ast * ast,int actual);
 void shell_cmd_push(struct ast * ast,struct ast * add);
 
 //pipeline command
-int pipeline_run(struct ast* ast); // TODO
+int pipeline_run(struct ast* ast);
 void pipeline_free(struct ast * ast);
 int pipeline_pretty_print(struct ast * ast, int actual);
 void pipeline_push(struct ast * ast, struct ast * add);

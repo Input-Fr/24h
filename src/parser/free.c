@@ -35,6 +35,44 @@ void list_free(struct ast *ast)
     free(ast);
 }
 
+struct operation
+{
+    enum op op;
+    struct ast *left;
+    struct ast *right;
+};
+
+union content
+{
+    struct ast *pipeline;
+    struct operation *op;
+};
+
+struct ast_and_or
+{
+    struct ast base;
+    enum and_or_type t;
+    union content c;
+};
+
+// and_or free
+void and_or_free(struct ast *ast)
+{
+    assert(ast && ast->type == AST_AND_OR);
+    struct ast_and_or *and_or_ast = (struct ast_and_or *)ast;
+    if (and_or_ast->t == NODE_PIPELINE)
+    {
+        FREE(and_or_ast->c.pipeline);
+    }
+    else
+    {
+        FREE(and_or_ast->c.op->left);
+        FREE(and_or_ast->c.op->right);
+        free(and_or_ast->c.op);
+    }
+    free(ast);
+}
+
 // if free
 void if_free(struct ast *ast)
 {

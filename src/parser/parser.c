@@ -137,15 +137,31 @@ static struct ast *parse_list(enum parser_status *status, struct lexer *lexer)
 /*
 and_or = pipeline { ( '&&' | '||' ) {'\n'} pipeline } ;
 */
+static struct ast *push_and_or(struct ast *and_or, struct token op, struct ast *right)
+{
+    struct ast_and_or *new = (struct ast_and_or*)ast_and_or_init(NULL);
+    new->t = NODE_AND_OR;
+    new->c.op = calloc(1, sizeof(struct operation));
+    new->c.op->left = and_or;
+    new->c.op->right = right;
+    if (op.type == TOKEN_AND_IF)
+    {
+        new->c.op->op = AND_OP;
+    }
+    else
+    {
+        new->c.op->op = OR_OP;
+    }
+    return &new->base;
+}
 static struct ast *parse_and_or(enum parser_status *status, struct lexer *lexer)
 {
-    // TODO
     struct ast *ast_pipe = parse_pipeline(status, lexer);
     if (*status != PARSER_OK)
     {
         return NULL;
     }
-    (void)ast_pipe; // add pipeline to and_or
+    struct ast *ast_and_or = ast_and_or_init(ast_pipe);
     struct token tok = lexer_peek(lexer);
     while(tok.type == TOKEN_AND_IF || tok.type == TOKEN_OR_IF)
     {
@@ -157,15 +173,14 @@ static struct ast *parse_and_or(enum parser_status *status, struct lexer *lexer)
             tok = lexer_peek(lexer);
         }
         struct ast *ast_pipe = parse_pipeline(status, lexer);
-        (void)ast_pipe;
         if (*status != PARSER_OK)
         {
             return NULL;
         }
-        // add pipeline to and_or
+        ast_and_or = push_and_or(ast_and_or, tok, ast_pipe);
         tok = lexer_peek(lexer);
     }
-    return NULL; // return and or AST
+    return ast_and_or;
 }
 
 /*
@@ -215,7 +230,6 @@ command = simple_command
 static struct ast *parse_command(enum parser_status *status,
                                  struct lexer *lexer)
 {
-    // TODO
     struct ast *ast_simplec = parse_simple_command(status, lexer);
     if (*status == PARSER_OK)
     {

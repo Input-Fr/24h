@@ -50,6 +50,48 @@ struct ast *ast_list_init(void)
     return &list->base;
 }
 
+struct operation
+{
+    enum op op;
+    struct ast *left;
+    struct ast *right;
+};
+
+union content
+{
+    struct ast *pipeline;
+    struct operation *op;
+};
+
+struct ast_and_or
+{
+    struct ast base;
+    enum and_or_type t;
+    union content c;
+};
+
+// and_or initiation
+struct ast *ast_and_or_init(struct ast *pipeline)
+{
+    static struct ast_ftable ftable = {
+        .run = &and_or_run,
+        .free = &and_or_free,
+        .pretty_print = &and_or_pretty_print,
+        .push = &and_or_push,
+    };
+    struct ast_and_or *and_or = calloc(1, sizeof(struct ast_and_or));
+    if (!and_or)
+    {
+        return NULL;
+    }
+    and_or->base.type = AST_AND_OR;
+    and_or->base.ftable = &ftable;
+    and_or->t = NODE_PIPELINE;
+    and_or->c.pipeline = pipeline;
+    return &and_or->base;
+}
+
+
 // boucle (while and until ) initialisation
 struct ast * ast_boucle_init(struct ast * condition,
         struct ast * do_body, int run_condition)
