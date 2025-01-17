@@ -72,57 +72,57 @@ static void printWbackslash(char *carg)
 
 // fonction qui gère les les ast avec une liste d'ast en attribut
 static int handle_list_ast(struct ast ** asts,size_t * nbr_element,
-		struct hash_map * h)
+        struct hash_map * h)
 {
-	int j = 0;
-	for(size_t i = 0; i < *nbr_element; i++)
-	{
-		j = RUN(asts[i], h);
-	}
-	return j;
-}	
+    int j = 0;
+    for(size_t i = 0; i < *nbr_element; i++)
+    {
+        j = RUN(asts[i], h);
+    }
+    return j;
+}
 
 // fonction pour la simple commande qui crée le word
 
 // check if the element is a word
 static int is_word(struct ast * ast)
 {
-	assert(ast && ast->type == AST_ELEMENT);
-	return ((struct ast_element *)ast)->type == WORD;
+    assert(ast && ast->type == AST_ELEMENT);
+    return ((struct ast_element *)ast)->type == WORD;
 }
 
 
 static char ** create_words(char * word,struct ast ** asts,int * nbr_element)
 {
-	char ** words = malloc(sizeof(char *)); 
-	words[0] = word;
-	int size = 1;
-	for (int i = 0; i < *nbr_element; i++)
-	{
-		if (is_word(asts[i]))
-		{
-			struct ast_element * elt = NULL;
-		       	elt = (struct ast_element *)(asts[i]);
-			size += 1;
-			char ** test = realloc(words,size * sizeof(char *));
-			if (!test)
-			{
-				exit(2);
-			}
-			words = test;
-			words[(size - 1)] = elt->elt.word;
-		}
-	}
-	
-	size += 1;
-	char ** test = realloc(words,size * sizeof(char *));
-	if (!test)
-	{
-		exit(2);
-	}
-	words = test;
-	words[(size - 1)] = NULL;
-	return words;
+    char ** words = malloc(sizeof(char *)); 
+    words[0] = word;
+    int size = 1;
+    for (int i = 0; i < *nbr_element; i++)
+    {
+        if (is_word(asts[i]))
+        {
+            struct ast_element * elt = NULL;
+            elt = (struct ast_element *)(asts[i]);
+            size += 1;
+            char ** test = realloc(words,size * sizeof(char *));
+            if (!test)
+            {
+                exit(2);
+            }
+            words = test;
+            words[(size - 1)] = elt->elt.word;
+        }
+    }
+
+    size += 1;
+    char ** test = realloc(words,size * sizeof(char *));
+    if (!test)
+    {
+        exit(2);
+    }
+    words = test;
+    words[(size - 1)] = NULL;
+    return words;
 }
 
 // args est de la forme ["arg1", "arg2", "arg3"]
@@ -205,7 +205,7 @@ int list_run(struct ast *ast, struct hash_map *h)
 }
 
 // to run the command in simple command
-static int cmd_run(char ** words)
+static int cmd_run(char ** words, struct hash_map *h)
 {
     if (!words)
     {
@@ -220,7 +220,7 @@ static int cmd_run(char ** words)
             {
                 idx++;
             }
-            echo_builtin(words + 1, idx - 1);
+            echo_builtin(words + 1, idx - 1, h);
         }
         else if (!strcmp(words[0], "true"))
         {
@@ -556,29 +556,29 @@ static int handle_redirection(int fd, enum REDIRECTION_TYPE redir_op, char *word
 
 static void free_words(char ** words)
 {
-	if (words)
-	{
-		for (size_t i = 0; words[i] != NULL; i++)
-		{
-			free(words[i]);
-		}
-	}
-	free(words);
+    if (words)
+    {
+        for (size_t i = 0; words[i] != NULL; i++)
+        {
+            free(words[i]);
+        }
+    }
+    free(words);
 }
 
 int simple_cmd_run(struct ast * ast, struct hash_map * h)
 {
-	assert( ast && ast->type == AST_SIMPLE_CMD);
-	struct ast_simp_cmd * cmd = (struct ast_simp_cmd *) ast;
-	int j = RUN_LIST(cmd->prefix,cmd->nbr_prefix,h);
-	j = RUN_LIST(cmd->element,cmd->nbr_element,h);
-	if (cmd->word)
-	{
-		char ** words = MAKE_WORD(cmd->word,cmd->element,cmd->nbr_element);
-		j = cmd_run(words);
-		free_words(words);
-	}
-	return j;
+    assert( ast && ast->type == AST_SIMPLE_CMD);
+    struct ast_simp_cmd * cmd = (struct ast_simp_cmd *) ast;
+    int j = RUN_LIST(cmd->prefix,cmd->nbr_prefix,h);
+    j = RUN_LIST(cmd->element,cmd->nbr_element,h);
+    if (cmd->word)
+    {
+        char ** words = MAKE_WORD(cmd->word,cmd->element,cmd->nbr_element);
+        j = cmd_run(words, h);
+        free_words(words);
+    }
+    return j;
 }
 
 // FIN ANNEXE -------------
