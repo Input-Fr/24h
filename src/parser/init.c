@@ -50,26 +50,6 @@ struct ast *ast_list_init(void)
     return &list->base;
 }
 
-struct operation
-{
-    enum op op;
-    struct ast *left;
-    struct ast *right;
-};
-
-union content
-{
-    struct ast *pipeline;
-    struct operation *op;
-};
-
-struct ast_and_or
-{
-    struct ast base;
-    enum and_or_type t;
-    union content c;
-};
-
 // and_or initiation
 struct ast *ast_and_or_init(struct ast *pipeline)
 {

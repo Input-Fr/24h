@@ -195,7 +195,7 @@ void list_push(struct ast *ast, struct ast *add);
 // and_or ast function
 int and_or_run(struct ast *ast);
 void and_or_free(struct ast *ast);
-int and_or_pretty_print(struct ast *ast, int actual);
+int and_or_pretty_print(struct ast *ast, int actual); // TODO
 void and_or_push(struct ast *ast, struct ast *add);
 
 // if ast function

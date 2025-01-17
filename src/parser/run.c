@@ -205,7 +205,27 @@ int if_run(struct ast *ast)
     }
 }
 
-
+// and or eval
+int and_or_run(struct ast *ast)
+{
+    assert(ast && ast->type == AST_AND_OR);
+    struct ast_and_or *and_or_ast = (struct ast_and_or *)ast;
+    if(and_or_ast->t == NODE_PIPELINE)
+    {
+        return RUN(and_or_ast->c.pipeline);
+    }
+    else
+    {
+        if (and_or_ast->c.op->op == AND_OP)
+        {
+            return RUN(and_or_ast->c.op->left) && RUN(and_or_ast->c.op->right);
+        }
+        else
+        {
+            return RUN(and_or_ast->c.op->left) || RUN(and_or_ast->c.op->right);
+        }
+    }
+}
 
 // boucle (until and while) ast eval 
 int boucle_run(struct ast * ast)
