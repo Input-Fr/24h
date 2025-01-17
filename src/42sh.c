@@ -64,7 +64,7 @@ char lexer_file(FILE *hd)
     return fgetc(hd);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char **argv)
 {
     FILE *value = gere_usage(argc, argv);
     if (!value)

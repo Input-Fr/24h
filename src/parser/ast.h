@@ -88,5 +88,6 @@ void variable_free(struct ast *ast);
 
 int test_var(char *str);
 char *expand(struct hash_map *h, char *str);
+char *delete_quote(char *word);
 
 #endif /* !AST_H */

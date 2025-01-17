@@ -91,6 +91,13 @@ void echo_builtin(char *args[], size_t nb_args, struct hash_map *h)
                 printf("%s", string);
                 free(string);
             }
+            else if ((str[0] == '\'' && str[strlen(str) - 1] == '\'')
+                    || (str[0] == '"' && str[strlen(str) - 1] == '"'))
+            {
+                char *string = delete_quote(str);
+                printf("%s", string);
+                free(string);
+            }
             else
             {
                 printf("%s", str);
