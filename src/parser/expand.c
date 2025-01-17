@@ -11,8 +11,25 @@
 #include "ast.h"
 #include "hash_map/hash_map.h"
 
-int test_var(char *str)
+int test_quote(char *str)  //test if a word is quoted
 {
+    if ((str[0] == '\'' && str[strlen(str) - 1] == '\'')
+            || (str[0] == '"' && str[strlen(str) - 1] == '"'))
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+
+}
+int test_var(char *str)  //test if a variable is in a word
+{
+    if (str[0] == '\'' && str[strlen(str) - 1] == '\'')
+    {
+        return 0;
+    }
     size_t i = 0;
     while (str[i] != '\0')
     {
@@ -160,7 +177,7 @@ static void expand_UID(char *prev, char *next, char *result)
     p = getpwuid(uid = getuid());
     int vall = (int)p->pw_uid;
     size_t len = strlen(prev) + strlen(next) + 7;
-    result = realloc(result, len);
+    //result = realloc(result, len);
     snprintf(result,len, "%s%d%s", prev, vall, next);
 
 }
@@ -170,6 +187,7 @@ static void expand_processid(char *prev, char *next, char *result)
     pid_t pid = getpid();
     size_t len = strlen(prev) + strlen(next) + 7;
     snprintf(result,len, "%s%d%s", prev, pid, next);
+
 }
 
 static void expand_random(char *prev, char *next, char *result)
@@ -223,49 +241,15 @@ static int calcul_len(int nb)
     size_t k = 0;
     while (nb > 1)
     {
-        nb = nb/10;
+        nb = nb / 10;
         k += 1;
     }
     return k;
 }
 
-static char *_expand(struct hash_map *h, char *str)
+static void expand_info_var(char *key, char *prev, char *next, char *result)
 {
-    char *word = str;
-    int a = 0;
-    if (word[0] == '"')
-    {
-        word = delete_quote(str);
-        a = 1;
-    }
-    char *result = calloc(1, strlen(word) + 1024);
-    char *prev = calloc(1, strlen(word) + 1);
-    char *next = calloc(1, strlen(word) + 1);
-    char *var = delimite_var(prev, next, word);
-    char *key = delete_dollar(var);
-    char *val = "";
-    //size_t len = strlen(prev) + strlen(next) + 512;
-    size_t len = 0;
-    if (strcmp(key,"?") == 0)
-    {
-        len = strlen(prev) + strlen(next) + calcul_len(h->ret) + 2;
-        snprintf(result,len, "%s%d%s", prev, h->ret, next);
-    }
-    else if (key[0] >= '0' && key[0] <= '9')
-    {
-        len = strlen(prev) + strlen(next) + strlen(h->all_args[atoi(key)]);
-        snprintf(result,len, "%s%s%s", prev, h->all_args[atoi(key)], next);
-    }
-    else if (strcmp(key,"#") == 0)
-    {
-        len = strlen(prev) + strlen(next) + calcul_len(h->nb_args) + 2;
-        snprintf(result,len, "%s%d%s", prev, h->nb_args, next);
-    }
-    else if (strcmp(key,"*") == 0)
-    {
-        expand_all_args(prev,next,result,h);
-    }
-    else if (strcmp(key,"$") == 0)
+    if (strcmp(key,"$") == 0)
     {
         expand_processid(prev,next,result);
     }
@@ -281,12 +265,72 @@ static char *_expand(struct hash_map *h, char *str)
     {
         expand_random(prev,next,result);
     }
+}
+
+static int test_info_var(char *key)
+{
+    if (((strcmp(key,"$") == 0) || (strcmp(key,"UID") == 0) 
+                || (strcmp(key,"PWD") == 0)) ||  (strcmp(key,"RANDOM") == 0))
+        return 1;
     else
+        return 0;
+}
+
+static char *_expand(struct hash_map *h, char *str)
+{
+    char *word = str;
+    int a = 0;
+    if (word[0] == '"')
     {
-        val = hash_map_get(h,key);
-        len = strlen(prev) + strlen(val) + strlen(next) + 1;
-        snprintf(result,len, "%s%s%s", prev, val, next);
+        word = delete_quote(str);
+        a = 1;
     }
+    char *result = calloc(1, 1024);
+    char *prev = calloc(1, strlen(word) + 1); //word before the variable
+    char *next = calloc(1, strlen(word) + 1); //word after the variable
+    char *var = delimite_var(prev, next, word);//divide the word in 3 words
+    char *key = delete_dollar(var);          //${name} -> name
+    char *val = "";
+    size_t len = 0;
+
+    if (strcmp(key,"?") == 0)                //$?
+    {
+        len = strlen(prev) + strlen(next) + calcul_len(h->ret) + 2;
+        snprintf(result,len, "%s%d%s", prev, h->ret, next);
+    }
+    else if (key[0] >= '0' && key[0] <= '9') //$0, $n...
+    {
+        if (atoi(key) > h->nb_args)
+        {
+            len = strlen(prev) + strlen(next);
+            snprintf(result,len, "%s%s%s", prev, "", next);
+        }
+        else
+        {
+            len = strlen(prev) + strlen(next) + strlen(h->all_args[atoi(key)]);
+            snprintf(result,len, "%s%s%s", prev, h->all_args[atoi(key)], next);
+        }
+    }
+    else if (strcmp(key,"#") == 0)           //$#
+    {
+        len = strlen(prev) + strlen(next) + calcul_len(h->nb_args) + 2;
+        snprintf(result,len, "%s%d%s", prev, h->nb_args, next);
+    }
+    else if (strcmp(key,"*") == 0)          //$*
+    {
+        expand_all_args(prev,next,result,h);
+    }
+    else if (test_info_var(key))            //$$, $PUID, $RANDOM, $PWD
+    {
+        expand_info_var(key,prev,next,result);
+    }
+    else          // variable classique : $name, ${name},"$name"...
+    {
+        val = hash_map_get(h,key);    //get the value of the variable
+        len = strlen(prev) + strlen(val) + strlen(next) + 1;
+        snprintf(result,len, "%s%s%s", prev, val, next); //concat
+    }
+
     expand_free(prev,next,var,key);
     if (a)
         free(word);
@@ -296,8 +340,15 @@ static char *_expand(struct hash_map *h, char *str)
 
 //a faire : $OLDPWD $@ et $IFS
 
-
 char *expand(struct hash_map *h, char *str)
 {
-    return _expand(h,str);
-}
+    if (test_var(str))
+    {
+        return _expand(h,str);
+    }
+    else if (test_quote(str))
+    {
+        return delete_quote(str);
+    }
+    return "";
+}   
