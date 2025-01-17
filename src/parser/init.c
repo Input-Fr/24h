@@ -193,26 +193,26 @@ struct ast *ast_pipeline_init(int neg, struct ast *cmd)
     pipe->base.type = AST_PIPELINE;
     pipe->base.ftable = &ftable;
     pipe->negation = neg;
-    (void)(cmd);
+    (void)cmd;
     return &pipe->base;
 }
 
 
 struct ast * ast_simple_cmd_init(char * word)
 {
-	static struct ast_ftable ftable = {
-		.run = &simple_cmd_run,
-		.free = &simple_cmd_free,
-		.pretty_print = &simple_cmd_pretty_print,
-		.push = &simple_cmd_push,
-	};
-	struct ast_simp_cmd * cmd = calloc(1,sizeof(struct ast_simp_cmd));
-	if (!cmd)
-	{
-		return NULL;
-	}
-	cmd->word = word;
-	cmd->base.type = AST_SIMPLE_CMD;
-	cmd->base.ftable = &ftable; 
-	return &cmd->base;
+    static struct ast_ftable ftable = {
+        .run = &simple_cmd_run,
+        .free = &simple_cmd_free,
+        .pretty_print = &simple_cmd_pretty_print,
+        .push = &simple_cmd_push,
+    };
+    struct ast_simp_cmd * cmd = calloc(1,sizeof(struct ast_simp_cmd));
+    if (!cmd)
+    {
+        return NULL;
+    }
+    cmd->word = word;
+    cmd->base.type = AST_SIMPLE_CMD;
+    cmd->base.ftable = &ftable; 
+    return &cmd->base;
 }	

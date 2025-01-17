@@ -375,7 +375,7 @@ int pipeline_run(struct ast* ast, struct hash_map *h)
                 perror("dup2");
                 ret = 1;
                 break;
-            } 
+            }
             close(pipefd[1]);
         }
         else // derniere commande
@@ -556,13 +556,17 @@ static int handle_redirection(int fd, enum REDIRECTION_TYPE redir_op, char *word
 
 static void free_words(char ** words)
 {
+    /*
     if (words)
     {
+      
         for (size_t i = 0; words[i] != NULL; i++)
         {
             free(words[i]);
         }
+      
     }
+    */
     free(words);
 }
 

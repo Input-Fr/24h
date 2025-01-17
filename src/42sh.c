@@ -71,7 +71,6 @@ int main(int argc, char *argv[])
     {
         return -1;
     }
-    
     // init lexer
     struct lexer *lexer = lexer_new();
     lexer->file = value;

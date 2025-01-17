@@ -30,11 +30,11 @@ void and_or_free(struct ast *ast)
 // free une liste d'ast 
 static void handle_free_astlist(struct ast ** asts,size_t * nbr_elt)
 {
-	for(size_t i = 0; i < *nbr_elt; i++)
-	{
-		FREE(asts[i]);
-	}
-	free(asts);
+    for(size_t i = 0; i < *nbr_elt; i++)
+    {
+        FREE(asts[i]);
+    }
+    free(asts);
 }
 
 // list free
@@ -89,6 +89,11 @@ void element_free(struct ast * ast)
     {
         FREE(elt->elt.redirection);
     }
+    else
+    {
+        free(elt->elt.word);
+    }
+    free(ast);
 }
 
 void shell_cmd_free(struct ast * ast)
@@ -102,12 +107,12 @@ void shell_cmd_free(struct ast * ast)
 
 void simple_cmd_free(struct ast * ast)
 {
-	assert(ast && ast->type == AST_SIMPLE_CMD);
-	struct ast_simp_cmd * cmd = (struct ast_simp_cmd *) ast;
-	FREE_LIST(cmd->prefix,cmd->nbr_prefix);
-	FREE_LIST(cmd->element,cmd->nbr_element);
-	free(cmd->word);
-	free(ast);
+    assert(ast && ast->type == AST_SIMPLE_CMD);
+    struct ast_simp_cmd * cmd = (struct ast_simp_cmd *) ast;
+    FREE_LIST(cmd->prefix,cmd->nbr_prefix);
+    FREE_LIST(cmd->element,cmd->nbr_element);
+    free(cmd->word);
+    free(ast);
 }
 
 void pipeline_free(struct ast * ast)

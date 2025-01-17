@@ -202,6 +202,7 @@ static struct ast *parse_pipeline(enum parser_status *status,
         return NULL;
     }
     struct ast *ast_pipeline = ast_pipeline_init(neg, cmd);
+    pipeline_push(ast_pipeline, cmd);
     tok = lexer_peek(lexer);
     while(tok.type == TOKEN_PIPE)
     {
@@ -712,9 +713,14 @@ static struct ast *parse_simple_command(enum parser_status *status,
 {
     // TODO
     struct ast *ast_prefix = parse_prefix(status, lexer);
+    struct ast *smpcmd = ast_simple_cmd_init(NULL);
+    if (*status == PARSER_OK)
+    {
+            }
     while (*status == PARSER_OK)
     {
         // put ast_prefix in list
+        simple_cmd_push(smpcmd, ast_prefix);
         ast_prefix = parse_prefix(status, lexer);
     }
     *status = PARSER_OK;
@@ -728,13 +734,14 @@ static struct ast *parse_simple_command(enum parser_status *status,
         }
         else // second case
         {
+            ((struct ast_simp_cmd *)smpcmd)->word = tok.data->str;
             lexer_pop(lexer);
-            // add word to ast
             struct ast *ast_elt = parse_element(status, lexer);
             (void)ast_elt;
             while(*status == PARSER_OK)
             {
                 // add elt to ast
+                simple_cmd_push(smpcmd, ast_elt);
                 ast_elt = parse_element(status, lexer);
             }
             *status = PARSER_OK;
@@ -744,19 +751,20 @@ static struct ast *parse_simple_command(enum parser_status *status,
     {
         if (tok.type == TOKEN_WORD) // second case
         {
+            ((struct ast_simp_cmd *)smpcmd)->word = tok.data->str;
             lexer_pop(lexer);
             // add word to ast
             struct ast *ast_elt = parse_element(status, lexer);
-            (void)ast_elt;
             while(*status == PARSER_OK)
             {
                 // add elt to ast
+                simple_cmd_push(smpcmd, ast_elt);
                 ast_elt = parse_element(status, lexer);
             }
             *status = PARSER_OK;
         }
     }
-    return NULL; // return the AST
+    return smpcmd; // return the AST
 }
 
 /*
@@ -770,6 +778,7 @@ static struct ast *parse_element(enum parser_status *status, struct lexer *lexer
     struct token tok = lexer_peek(lexer);
     if (tok.type == TOKEN_WORD)
     {
+        char *str = tok.data->str;
         lexer_pop(lexer);
         if (redir_op(lexer_peek(lexer)))
         {
@@ -787,7 +796,7 @@ static struct ast *parse_element(enum parser_status *status, struct lexer *lexer
         }
         else
         {
-            return ast_element_init(WORD, tok.data->str, NULL);
+            return ast_element_init(WORD, str, NULL);
         }
     }
     struct ast *ast_redir = parse_redirection(status, lexer);
