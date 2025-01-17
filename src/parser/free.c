@@ -6,6 +6,7 @@
 
 #define FREE(AST) (*(AST)->ftable->free)((AST))
 
+/*
 // commande free
 void cmd_free(struct ast *ast)
 {
@@ -21,6 +22,7 @@ void cmd_free(struct ast *ast)
     free(cmd->words);
     free(ast);
 }
+*/
 
 // list free
 void list_free(struct ast *ast)
@@ -83,7 +85,7 @@ void redirection_free(struct ast * ast)
     assert(ast && ast->type == AST_REDIRECTION);
     struct ast_redirection * redir = (struct ast_redirection *)ast;
     // tu dois free le word et le type de redirection
-    free(word);
+    free(redir->word);
     //free(redir_op); //plus la peine j'ai mis des enum à la place
     free(ast);
 }
@@ -96,14 +98,14 @@ void element_free(struct ast * ast)
     struct ast_element * elt = (struct ast_element *) ast;
     if (elt->type != WORD)
     {
-        FREE(elt->elt->redirection);
+        FREE(elt->elt.redirection);
     }
 }
 
 void shell_cmd_free(struct ast * ast)
 {
     assert(ast && ast->type == AST_SHELL_CMD);
-    struct ast_cmd_shell * cmd = (struct ast_cmd_shell *) ast;
+    struct ast_shell_cmd * cmd = (struct ast_shell_cmd *) ast;
     for (int i = 0; i < cmd->nbr_redirection; i++)
     {
         FREE(cmd->redirection[i]);
@@ -120,5 +122,14 @@ void pipeline_free(struct ast * ast)
     {
         FREE(ast_pipe->cmd[i]);
     }
+    free(ast);
+}
+
+void variable_free(struct ast *ast)
+{
+    assert(ast && ast->type == AST_VARIABLE);
+    struct ast_variable *variable_ast = (struct ast_variable *)ast;
+    free(variable_ast->name);
+    free(variable_ast->val);
     free(ast);
 }

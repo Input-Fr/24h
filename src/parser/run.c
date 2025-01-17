@@ -11,8 +11,9 @@
 #include <ctype.h>
 
 #include "ast.h"
+#include "hash_map/hash_map.h"
 
-#define RUN(AST) (*(AST)->ftable->run)((AST))
+#define RUN(AST,HASH_TABLE) (*(AST)->ftable->run)((AST),(HASH_TABLE))
 
 // FONCTION ANNEXE REDIR
 struct s_redirection
@@ -28,7 +29,7 @@ struct s_redirection *s_redir = NULL;
 static void restore(void);
 
 static int handle_redirection(int fd, enum REDIRECTION_TYPE redir_op, char *word);
-
+/*
 static void printWbackslash(char *carg)
 {
     size_t idx = 0;
@@ -64,7 +65,7 @@ static void printWbackslash(char *carg)
 }
 
 // args est de la forme ["arg1", "arg2", "arg3"]
-static void echo_builtin(char *args[], size_t nb_args)
+static void echo_builtin(char *args[], size_t nb_args, struct hash_map *h)
 {
     bool newline = true;
     bool backslash = false;
@@ -101,7 +102,17 @@ static void echo_builtin(char *args[], size_t nb_args)
         }
         else
         {
-            printf("%s", args[i]);
+            char *str = args[i];
+            if (test_var(str) || test_quote(str))
+            {
+                char *string = expand(h, str);
+                printf("%s", string);
+                free(string);
+            }
+            else
+            {
+                printf("%s", str);
+            }
         }
         if (i < nb_args - 1) // on sépare tout les argument d'un espace
         {
@@ -117,16 +128,16 @@ static void echo_builtin(char *args[], size_t nb_args)
 
     fflush(stdout);
 }
-
+*/
 // for three evaluation
 
 // list ast eval
-int list_run(struct ast *ast)
+int list_run(struct ast *ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_LIST);
     struct ast_list *list = (struct ast_list *)ast;
     size_t i = 0;
-    while (i < list->nbr_cmd && !RUN(list->cmd[i]))
+    while (i < list->nbr_cmd && !RUN(list->cmd[i], h))
     {
         i += 1;
     }
@@ -187,13 +198,13 @@ int cmd_run(struct ast *ast)
 } */
 
 // if ast eval
-int if_run(struct ast *ast)
+int if_run(struct ast *ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_IF);
     struct ast_if *if_ast = (struct ast_if *)ast;
-    if (!RUN(if_ast->condition))
+    if (!RUN(if_ast->condition, h))
     {
-        return RUN(if_ast->then_body);
+        return RUN(if_ast->then_body, h);
     }
     else if (!if_ast->else_body)
     {
@@ -201,48 +212,49 @@ int if_run(struct ast *ast)
     }
     else
     {
-        return RUN(if_ast->else_body);
+        return RUN(if_ast->else_body, h);
     }
 }
 
 // and or eval
-int and_or_run(struct ast *ast)
+int and_or_run(struct ast *ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_AND_OR);
     struct ast_and_or *and_or_ast = (struct ast_and_or *)ast;
     if(and_or_ast->t == NODE_PIPELINE)
     {
-        return RUN(and_or_ast->c.pipeline);
+        return RUN(and_or_ast->c.pipeline, h);
     }
     else
     {
         if (and_or_ast->c.op->op == AND_OP)
         {
-            return RUN(and_or_ast->c.op->left) && RUN(and_or_ast->c.op->right);
+            return RUN(and_or_ast->c.op->left, h) && RUN(and_or_ast->c.op->right, h);
         }
         else
         {
-            return RUN(and_or_ast->c.op->left) || RUN(and_or_ast->c.op->right);
+            return RUN(and_or_ast->c.op->left, h) || RUN(and_or_ast->c.op->right, h);
         }
     }
 }
 
 // boucle (until and while) ast eval 
-int boucle_run(struct ast * ast)
+int boucle_run(struct ast * ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_BOUCLE);
     struct ast_boucle * boucle = (struct ast_boucle *) ast;
     int res = 0;
-    while (RUN(boucle->condition) == boucle->run_condition)
+    while (RUN(boucle->condition, h) == boucle->run_condition)
     {
-        res = RUN(boucle->do_body);
+        res = RUN(boucle->do_body, h);
     }
     return res;
 }
 
 // redirection ast eval
-int redirection_run(struct ast * ast)
+int redirection_run(struct ast * ast, struct hash_map *h)
 {
+    (void)h;
     assert(ast && ast->type == AST_REDIRECTION);
     struct ast_redirection * redi = (struct ast_redirection *)ast;
     int ret = handle_redirection(redi->n, redi->redir_op, redi->word);
@@ -250,7 +262,7 @@ int redirection_run(struct ast * ast)
 }
 
 // element ast eval
-int element_run(struct ast * ast)
+int element_run(struct ast * ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_ELEMENT);  
     struct ast_element * elt = (struct ast_element *)ast;
@@ -260,25 +272,33 @@ int element_run(struct ast * ast)
     }
     else
     {
-        return RUN(elt->elt.redirection);
+        return RUN(elt->elt.redirection, h);
     }
 }
 
-int shell_cmd_run(struct ast * ast)
+int shell_cmd_run(struct ast * ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_SHELL_CMD);
     struct ast_shell_cmd * cmd = (struct ast_shell_cmd * ) ast;
     int i = 0;
     for (int i = 0; i < cmd->nbr_redirection; i++)
     {
-         i = RUN(cmd->redirection[i]);
+         i = RUN(cmd->redirection[i], h);
     }
-    i = RUN(cmd->rule);
+    i = RUN(cmd->rule, h);
     restore();
     return i;
 }
 
-int pipeline_run(struct ast* ast)
+int variable_run(struct ast *ast, struct hash_map *h)
+{
+    assert(ast && ast->type == AST_VARIABLE);
+    struct ast_variable *variable_ast = (struct ast_variable *)ast;
+    hash_map_insert(h, variable_ast->name, variable_ast->val);
+    return 1;
+}
+
+int pipeline_run(struct ast* ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_PIPELINE);
     struct ast_pipeline *ast_pipe = (struct ast_pipeline *)ast;
@@ -314,7 +334,7 @@ int pipeline_run(struct ast* ast)
                 break;
             }
         }
-        ret = RUN(ast_pipe->cmd[i]);
+        ret = RUN(ast_pipe->cmd[i], h);
 
         if (i < ast_pipe->nbr_cmd - 1)
         {

@@ -183,3 +183,19 @@ struct ast *ast_pipeline_init(int neg, struct ast *cmd)
     pipe->negation = neg;
     return &pipe->base;
 }
+
+struct ast * ast_variable_init(char *name, char *val)
+{
+    static struct ast_ftable ftable = {
+        .run = &variable_run,
+        .free = &variable_free,
+    };
+    struct ast_variable *ast_variable = malloc(sizeof(struct ast_if));
+    ast_variable->base.type = AST_VARIABLE;
+    ast_variable->base.ftable = &ftable;
+    ast_variable->name = name;
+    ast_variable->val = val;
+    return &ast_variable->base;
+}
+
+

@@ -8,6 +8,7 @@
 #include "lexer/lexer.h"
 #include "parser/ast.h"
 #include "parser/parser.h"
+#include "parser/hash_map/hash_map.h"
 
 static FILE *gere_usage(int argc, char *argv[])
 {
@@ -27,6 +28,14 @@ static FILE *gere_usage(int argc, char *argv[])
             begin += 1;
         }
         else if (!strcmp(argv[1], "-l"))
+        {
+            if (argc < 3)
+            {
+                return NULL;
+            }
+            begin += 1;
+        }
+        else if (!strcmp(argv[1], "-h"))
         {
             if (argc < 3)
             {
@@ -78,6 +87,7 @@ int main(int argc, char *argv[])
         return 0;
     }
     struct ast *ast;
+    struct hash_map *h = hash_map_init(7);
     while (lexer->current_tok.type != TOKEN_EOF)
     {
         ast = parse(&status, lexer);
@@ -102,12 +112,16 @@ int main(int argc, char *argv[])
         }
         else
         {
+            h->ret = ret_code;
+            h->nb_args = argc - 1;
+            h->all_args = argv;
             ret_code = (*ast->ftable->run)(ast);
         }
         (*ast->ftable->free)(ast);
     }
 
     lexer_free(lexer);
+    hash_map_free(h);
 
     return ret_code;
 }
