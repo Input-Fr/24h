@@ -158,6 +158,7 @@ union element
 
 struct ast_element
 {
+    struct ast base;
     enum ELEMENT_TYPE type;
     union element elt;
 };
@@ -232,7 +233,7 @@ void redirection_push(struct ast * ast, struct ast * add);
 int element_run(struct ast * ast,struct hash_map *h);
 void element_free(struct ast *ast);
 int element_pretty_print(struct ast * ast, int actual);
-void element_cmd_push(struct ast * ast, struct ast * add);
+void element_push(struct ast * ast, struct ast * add);
 
 // variables
 struct ast * ast_variable_init(char *name, char *val);

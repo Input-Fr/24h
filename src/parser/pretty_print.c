@@ -25,6 +25,16 @@ int if_pretty_print(struct ast *ast, int actual)
     return else_int;
 }
 
+int and_or_pretty_print(struct ast * ast,int actual)
+{
+	(void)ast;
+	return actual + 1;
+}
+int pipeline_pretty_print(struct ast * ast,int actual)
+{
+	(void)ast;
+	return actual + 1;
+}
 // if  pretty_print
 int list_pretty_print(struct ast *ast, int actual)
 {
@@ -110,7 +120,7 @@ int element_pretty_print(struct ast * ast, int actual)
     }
 }
 
-int chell_cmd_pretty_print(struct ast * ast, int actual)
+int shell_cmd_pretty_print(struct ast * ast, int actual)
 {
     assert(ast && ast->type == AST_SHELL_CMD);
     struct ast_shell_cmd * cmd = (struct ast_shell_cmd *)ast;
@@ -118,6 +128,9 @@ int chell_cmd_pretty_print(struct ast * ast, int actual)
     (void)(cmd);
     return actual + 1;
 }
+
+
+
 void pretty_print_ast(struct ast *ast)
 {
     printf("digraph { \n");

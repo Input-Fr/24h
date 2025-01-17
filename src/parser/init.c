@@ -5,6 +5,40 @@
 
 #include "ast.h"
 
+struct ast * ast_variable_init(char *name, char *val)
+{
+    static struct ast_ftable ftable = {
+        .run = &variable_run,
+        .free = &variable_free,
+    };
+    struct ast_variable *ast_variable = malloc(sizeof(struct ast_if));
+    ast_variable->base.type = AST_VARIABLE;
+    ast_variable->base.ftable = &ftable;
+    ast_variable->name = name;
+    ast_variable->val = val;
+    return &ast_variable->base;
+}
+
+// and_or initiation
+struct ast *ast_and_or_init(struct ast *pipeline)
+{
+    static struct ast_ftable ftable = {
+        .run = &and_or_run,
+        .free = &and_or_free,
+        .pretty_print = &and_or_pretty_print,
+        .push = &and_or_push,
+    };
+    struct ast_and_or *and_or = calloc(1, sizeof(struct ast_and_or));
+    if (!and_or)
+    {
+        return NULL;
+    }
+    and_or->base.type = AST_AND_OR;
+    and_or->base.ftable = &ftable;
+    and_or->t = NODE_PIPELINE;
+    and_or->c.pipeline = pipeline;
+    return &and_or->base;
+}
 
 // if initiation
 struct ast *ast_if_init(struct ast *condition, struct ast *then_body,
@@ -50,28 +84,6 @@ struct ast *ast_list_init(void)
     return &list->base;
 }
 
-// and_or initiation
-struct ast *ast_and_or_init(struct ast *pipeline)
-{
-    static struct ast_ftable ftable = {
-        .run = &and_or_run,
-        .free = &and_or_free,
-        .pretty_print = &and_or_pretty_print,
-        .push = &and_or_push,
-    };
-    struct ast_and_or *and_or = calloc(1, sizeof(struct ast_and_or));
-    if (!and_or)
-    {
-        return NULL;
-    }
-    and_or->base.type = AST_AND_OR;
-    and_or->base.ftable = &ftable;
-    and_or->t = NODE_PIPELINE;
-    and_or->c.pipeline = pipeline;
-    return &and_or->base;
-}
-
-
 // boucle (while and until ) initialisation
 struct ast * ast_boucle_init(struct ast * condition,
         struct ast * do_body, int run_condition)
@@ -99,7 +111,7 @@ struct ast * ast_redirection_init(int fd, char * words,
         enum REDIRECTION_TYPE redirection_type)
 {
     static struct ast_ftable ftable = {
-        .run = &redirectin_run,
+        .run = &redirection_run,
         .free = &redirection_free,
         .pretty_print = &redirection_pretty_print,
         .push = &redirection_push,
@@ -112,8 +124,8 @@ struct ast * ast_redirection_init(int fd, char * words,
     redi->base.type = AST_REDIRECTION;
     redi->base.ftable = &ftable;
     redi->n = fd;
-    redi->words = words;
-    redi->redi_op = redirection_type;
+    redi->word = words;
+    redi->redir_op = redirection_type;
     return &redi->base;
 }
 
@@ -127,20 +139,20 @@ struct ast * ast_element_init(enum ELEMENT_TYPE type,char * word,
         .push = &element_push,
     };
     struct ast_element* element = malloc(sizeof(struct ast_element));
-    if (!words)
+    if (!element)
     {
         return NULL;
     }
-    element->base.type = AST_WORD;
+    element->base.type = AST_ELEMENT;
     element->base.ftable = &ftable;
     element->type = type;
     if (type == WORD)
     {
-        element->elt->redirection = ast;
+        element->elt.redirection = ast;
     }
     else
     {
-        element->elt->word = word;
+        element->elt.word = word;
     }
     return &element->base;
 }
@@ -152,7 +164,7 @@ struct ast * ast_shell_cmd_init(struct ast * rule)
         .free = &shell_cmd_free,
         .pretty_print = &shell_cmd_pretty_print,
         .push = &shell_cmd_push,
-    }
+    };
     struct ast_shell_cmd * cmd = calloc(1,sizeof(struct ast_shell_cmd));
     if (!cmd)
     {
@@ -171,7 +183,7 @@ struct ast *ast_pipeline_init(int neg, struct ast *cmd)
         .free = &pipeline_free,
         .pretty_print = &pipeline_pretty_print,
         .push = &pipeline_push,
-    }
+    };
 
     struct ast_pipeline *pipe = calloc(1, sizeof(struct ast_pipeline));
     if (!pipe)
@@ -181,23 +193,9 @@ struct ast *ast_pipeline_init(int neg, struct ast *cmd)
     pipe->base.type = AST_PIPELINE;
     pipe->base.ftable = &ftable;
     pipe->negation = neg;
+    (void)(cmd);
     return &pipe->base;
 }
-
-struct ast * ast_variable_init(char *name, char *val)
-{
-    static struct ast_ftable ftable = {
-        .run = &variable_run,
-        .free = &variable_free,
-    };
-    struct ast_variable *ast_variable = malloc(sizeof(struct ast_if));
-    ast_variable->base.type = AST_VARIABLE;
-    ast_variable->base.ftable = &ftable;
-    ast_variable->name = name;
-    ast_variable->val = val;
-    return &ast_variable->base;
-}
-
 
 
 struct ast * ast_simple_cmd_init(char * word)
@@ -205,14 +203,16 @@ struct ast * ast_simple_cmd_init(char * word)
 	static struct ast_ftable ftable = {
 		.run = &simple_cmd_run,
 		.free = &simple_cmd_free,
-		.pretty_prin = &simple_cmd_pretty_print,
+		.pretty_print = &simple_cmd_pretty_print,
 		.push = &simple_cmd_push,
-	}
-	struct ast_simple_cmd * cmd = calloc(1,sizeof(struct ast_simple_cmd));
+	};
+	struct ast_simp_cmd * cmd = calloc(1,sizeof(struct ast_simp_cmd));
 	if (!cmd)
 	{
 		return NULL;
 	}
 	cmd->word = word;
+	cmd->base.type = AST_SIMPLE_CMD;
+	cmd->base.ftable = &ftable; 
 	return &cmd->base;
 }	

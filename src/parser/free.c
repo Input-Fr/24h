@@ -7,24 +7,6 @@
 #define FREE(AST) (*(AST)->ftable->free)((AST)) // Permet d'appeler la methode free d'un ast
 #define FREE_LIST(ASTS,NBR) handle_free_astlist((ASTS),&(NBR)) // free toute une liste d'ast
 
-// free une liste d'ast 
-static void handle_free_astlist(struct ast ** asts,size_t * nbr_elt)
-{
-	for(size_t i = 0; i < *nbr_elt; i++)
-	{
-		FREE(asts[i])
-	}
-	free(asts);
-}
-
-// list free
-void list_free(struct ast *ast)
-{
-    assert(ast && ast->type == AST_LIST);
-    struct ast_list *list = (struct ast_list *)ast;
-    FREE_LIST(list->cmd,list->nbr_cmd);
-    free(ast);
-}
 
 // and_or free
 void and_or_free(struct ast *ast)
@@ -41,6 +23,26 @@ void and_or_free(struct ast *ast)
         FREE(and_or_ast->c.op->right);
         free(and_or_ast->c.op);
     }
+    free(ast);
+}
+
+
+// free une liste d'ast 
+static void handle_free_astlist(struct ast ** asts,size_t * nbr_elt)
+{
+	for(size_t i = 0; i < *nbr_elt; i++)
+	{
+		FREE(asts[i]);
+	}
+	free(asts);
+}
+
+// list free
+void list_free(struct ast *ast)
+{
+    assert(ast && ast->type == AST_LIST);
+    struct ast_list *list = (struct ast_list *)ast;
+    FREE_LIST(list->cmd,list->nbr_cmd);
     free(ast);
 }
 
@@ -92,7 +94,7 @@ void element_free(struct ast * ast)
 void shell_cmd_free(struct ast * ast)
 {
     assert(ast && ast->type == AST_SHELL_CMD);
-    struct ast_cmd_shell * cmd = (struct ast_cmd_shell *) ast;
+    struct ast_shell_cmd * cmd = (struct ast_shell_cmd *) ast;
     FREE_LIST(cmd->redirection,cmd->nbr_redirection);
     FREE(cmd->rule);
     free(ast);
@@ -101,10 +103,10 @@ void shell_cmd_free(struct ast * ast)
 void simple_cmd_free(struct ast * ast)
 {
 	assert(ast && ast->type == AST_SIMPLE_CMD);
-	struct ast_simple_cmd * cmd = (struct ast_simple_cmd *) ast;
+	struct ast_simp_cmd * cmd = (struct ast_simp_cmd *) ast;
 	FREE_LIST(cmd->prefix,cmd->nbr_prefix);
 	FREE_LIST(cmd->element,cmd->nbr_element);
-	free(word);
+	free(cmd->word);
 	free(ast);
 }
 

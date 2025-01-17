@@ -72,8 +72,6 @@ int main(int argc, char *argv[])
         return -1;
     }
     
-    printf("%d\n", atoi("11"));
-
     // init lexer
     struct lexer *lexer = lexer_new();
     lexer->file = value;
@@ -115,7 +113,7 @@ int main(int argc, char *argv[])
             h->ret = ret_code;
             h->nb_args = argc - 1;
             h->all_args = argv;
-            ret_code = (*ast->ftable->run)(ast);
+            ret_code = (*ast->ftable->run)(ast,h);
         }
         (*ast->ftable->free)(ast);
     }

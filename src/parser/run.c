@@ -92,12 +92,12 @@ static int is_word(struct ast * ast)
 }
 
 
-static char ** create_words(char * word,struct ast ** asts,int * nbr_element)
+static char ** create_words(char * word,struct ast ** asts,size_t * nbr_element)
 {
     char ** words = malloc(sizeof(char *)); 
     words[0] = word;
     int size = 1;
-    for (int i = 0; i < *nbr_element; i++)
+    for (size_t i = 0; i < *nbr_element; i++)
     {
         if (is_word(asts[i]))
         {
@@ -340,7 +340,7 @@ int shell_cmd_run(struct ast * ast, struct hash_map *h)
     j = RUN_LIST(cmd->redirection,cmd->nbr_redirection,h);
     j = RUN(cmd->rule, h);
     restore();
-    return i;
+    return j;
 }
 
 int variable_run(struct ast *ast, struct hash_map *h)
@@ -358,8 +358,8 @@ int pipeline_run(struct ast* ast, struct hash_map *h)
     int save_stdout = dup(STDOUT_FILENO);
     int save_stdin = dup(STDIN_FILENO);
     int pipefd[2];
-    int ret;
-    for (int i = 0; i < ast_pipe->nbr_cmd; i++)
+    int ret = 0;
+    for (size_t i = 0; i < ast_pipe->nbr_cmd; i++)
     {
         if (i < ast_pipe->nbr_cmd - 1)
         {
