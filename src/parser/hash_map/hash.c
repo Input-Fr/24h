@@ -50,9 +50,13 @@ void hash_map_free(struct hash_map *hash_map)
             while (p->next != NULL)
             {
                 struct pair_list *tmp = p->next;
+                free(p->key);
+                free(p->value);
                 free(p);
                 p = tmp;
             }
+            free(p->key);
+            free(p->value); 
             free(p);
         }
         i += 1;
