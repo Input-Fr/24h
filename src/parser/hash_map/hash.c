@@ -1,8 +1,8 @@
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
 
 #include "hash_map.h"
 
@@ -32,7 +32,6 @@ struct hash_map *hash_map_init(size_t size)
     return ha;
 }
 
-
 void hash_map_free(struct hash_map *hash_map)
 {
     if (hash_map == NULL)
@@ -56,7 +55,7 @@ void hash_map_free(struct hash_map *hash_map)
                 p = tmp;
             }
             free(p->key);
-            free(p->value); 
+            free(p->value);
             free(p);
         }
         i += 1;
@@ -64,7 +63,6 @@ void hash_map_free(struct hash_map *hash_map)
     free(hash_map->data);
     free(hash_map);
 }
-
 
 size_t hash(char *key)
 {
@@ -77,7 +75,6 @@ size_t hash(char *key)
 
     return hash;
 }
-
 
 void hash_map_print(struct hash_map *hash)
 {

@@ -1,11 +1,10 @@
+#include "hash_map.h"
+
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
-
-#include "hash_map.h"
-
 
 bool hash_map_insert(struct hash_map *hash_map, char *key, char *value)
 {
@@ -48,7 +47,6 @@ bool hash_map_insert(struct hash_map *hash_map, char *key, char *value)
     }
     return true;
 }
-
 
 char *hash_map_get(struct hash_map *hash_map, char *key)
 {

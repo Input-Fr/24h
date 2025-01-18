@@ -20,29 +20,29 @@
 
 enum token_type
 {
-//reserved words
+    // reserved words
     TOKEN_WORD,
-    TOKEN_ASSIGNMENT_WORD, //variable : i=...
+    TOKEN_ASSIGNMENT_WORD, // variable : i=...
     TOKEN_IF, // if
     TOKEN_THEN, // then
     TOKEN_ELIF, // elif
     TOKEN_ELSE, // else
     TOKEN_FI, // fi
-    TOKEN_CASE, //case
-    TOKEN_ESAC, //esac
-    TOKEN_WHILE, //while
-    TOKEN_UNTIL, //until
-    TOKEN_FOR, //for
-    TOKEN_DO, //do
+    TOKEN_CASE, // case
+    TOKEN_ESAC, // esac
+    TOKEN_WHILE, // while
+    TOKEN_UNTIL, // until
+    TOKEN_FOR, // for
+    TOKEN_DO, // do
     TOKEN_LBRACE, // {
     TOKEN_RBRACE, //}
     TOKEN_BANG, // !
-    TOKEN_IN, //in
-    TOKEN_DONE, //done
-// ??
+    TOKEN_IN, // in
+    TOKEN_DONE, // done
+    // ??
     TOKEN_NEWLINE, // \n
     TOKEN_COM, // #
-// operators
+    // operators
     TOKEN_SEMI, // ;
     TOKEN_PIPE, // |
     TOKEN_AND, // &
@@ -134,12 +134,12 @@ void print_lex(struct lexer *lex);
 
 // test_reserved_words.c :
 
-//int test_if(struct lexer *lexer);
-//int test_else(struct lexer *lexer);
-//int test_fi(struct lexer *lexer);
-//int test_then(struct lexer *lexer);
-//int test_elif(struct lexer *lexer);
-//int test_else(struct lexer *lexer);
+// int test_if(struct lexer *lexer);
+// int test_else(struct lexer *lexer);
+// int test_fi(struct lexer *lexer);
+// int test_then(struct lexer *lexer);
+// int test_elif(struct lexer *lexer);
+// int test_else(struct lexer *lexer);
 enum token_type reserved_word(struct lexer *lexer);
 
 // token.c :
@@ -154,11 +154,10 @@ void clear_current_tok(struct lexer *lex);
 char lexer_file(FILE *hd);
 void lexer_file_back(FILE *hd);
 
-//test_operator :
+// test_operator :
 
 void operator_1(struct lexer *lexer);
 int test_operator_1(struct lexer *lexer);
 int test_operator(struct lexer *lexer);
-
 
 #endif /* !LEXER_H */

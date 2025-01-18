@@ -31,7 +31,6 @@ static struct token rule_three(struct lexer *lexer)
     return lexer->current_tok;
 }
 
-
 static void rule_four(struct lexer *lexer)
 {
     // --4
@@ -184,16 +183,13 @@ static void begin_word(struct lexer *lexer)
     {
         lexer->Quoting = NO_QUOTE;
     }
-
 }
-
-
 
 struct token lexer_next_token(struct lexer *lexer)
 {
     clear_current_tok(lexer);
     int word = 0;
-    int operator = 0;
+    int operator= 0;
 
     while (1)
     {
@@ -202,28 +198,28 @@ struct token lexer_next_token(struct lexer *lexer)
 
         if (c == EOF || c == '\0')
         {
-            //1
+            // 1
             return rule_one(lexer, &word, &operator);
         }
-        else if (lexer->Quoting == NO_QUOTE && operator && test_operator(lexer))
+        else if (lexer->Quoting == NO_QUOTE && operator&& test_operator(lexer))
         {
-            //2
+            // 2
             mbt_str_pushc(lexer->current_tok.data, c);
         }
-        else if (operator && !test_operator(lexer))
+        else if (operator&& !test_operator(lexer))
         {
-            //3
+            // 3
             return rule_three(lexer);
         }
-        else if ((c == '\\') || c == '\'' || c == '"') //4    cas \n
+        else if ((c == '\\') || c == '\'' || c == '"') // 4    cas \n
         {
-            //4
+            // 4
             word = 1;
             rule_four(lexer);
         }
-        else if (lexer->Quoting == NO_QUOTE && c == '$')// || c == '`')
+        else if (lexer->Quoting == NO_QUOTE && c == '$') // || c == '`')
         {
-            //5
+            // 5
             if (!word)
             {
                 lexer->current_tok.data = mbt_str_init();
@@ -231,10 +227,10 @@ struct token lexer_next_token(struct lexer *lexer)
             }
             rule_five(lexer);
         }
-        else if (lexer->Quoting == NO_QUOTE && test_operator_1(lexer)) //6
+        else if (lexer->Quoting == NO_QUOTE && test_operator_1(lexer)) // 6
         {
-            //6
-            operator = 1;
+            // 6
+            operator= 1;
             if (word)
             {
                 return rule_six(lexer);
@@ -248,12 +244,12 @@ struct token lexer_next_token(struct lexer *lexer)
         }
         else if (lexer->Quoting == NO_QUOTE && c == '\n')
         {
-            //7
+            // 7
             return rule_seven(lexer, &word);
         }
         else if ((lexer->Quoting == NO_QUOTE && c == ' '))
         {
-            //8
+            // 8
             if (word)
             {
                 return rule_eight(lexer);
@@ -265,7 +261,7 @@ struct token lexer_next_token(struct lexer *lexer)
         }
         else if (lexer->Quoting == NO_QUOTE && c == '#')
         {
-            //9
+            // 9
             return rule_nine(lexer);
         }
         else

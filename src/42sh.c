@@ -7,8 +7,8 @@
 
 #include "lexer/lexer.h"
 #include "parser/ast.h"
-#include "parser/parser.h"
 #include "parser/hash_map/hash_map.h"
+#include "parser/parser.h"
 
 static FILE *gere_usage(int argc, char *argv[])
 {
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
             h->ret = ret_code;
             h->nb_args = argc - 1;
             h->all_args = argv;
-            ret_code = (*ast->ftable->run)(ast,h);
+            ret_code = (*ast->ftable->run)(ast, h);
         }
         (*ast->ftable->free)(ast);
     }

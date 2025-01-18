@@ -4,9 +4,10 @@
 
 #include "ast.h"
 
-#define FREE(AST) (*(AST)->ftable->free)((AST)) // Permet d'appeler la methode free d'un ast
-#define FREE_LIST(ASTS,NBR) handle_free_astlist((ASTS),&(NBR)) // free toute une liste d'ast
-
+#define FREE(AST)                                                              \
+    (*(AST)->ftable->free)((AST)) // Permet d'appeler la methode free d'un ast
+#define FREE_LIST(ASTS, NBR)                                                   \
+    handle_free_astlist((ASTS), &(NBR)) // free toute une liste d'ast
 
 // and_or free
 void and_or_free(struct ast *ast)
@@ -26,11 +27,10 @@ void and_or_free(struct ast *ast)
     free(ast);
 }
 
-
-// free une liste d'ast 
-static void handle_free_astlist(struct ast ** asts,size_t * nbr_elt)
+// free une liste d'ast
+static void handle_free_astlist(struct ast **asts, size_t *nbr_elt)
 {
-    for(size_t i = 0; i < *nbr_elt; i++)
+    for (size_t i = 0; i < *nbr_elt; i++)
     {
         FREE(asts[i]);
     }
@@ -42,7 +42,7 @@ void list_free(struct ast *ast)
 {
     assert(ast && ast->type == AST_LIST);
     struct ast_list *list = (struct ast_list *)ast;
-    FREE_LIST(list->cmd,list->nbr_cmd);
+    FREE_LIST(list->cmd, list->nbr_cmd);
     free(ast);
 }
 
@@ -61,30 +61,29 @@ void if_free(struct ast *ast)
 }
 
 // boucle (until and while) free
-void boucle_free(struct ast * ast)
+void boucle_free(struct ast *ast)
 {
     assert(ast && ast->type == AST_BOUCLE);
-    struct ast_boucle * boucle = (struct ast_boucle *) ast;
+    struct ast_boucle *boucle = (struct ast_boucle *)ast;
     FREE(boucle->condition);
     FREE(boucle->do_body);
     free(ast);
 }
 
 // redirection
-void redirection_free(struct ast * ast)
+void redirection_free(struct ast *ast)
 {
     assert(ast && ast->type == AST_REDIRECTION);
-    struct ast_redirection * redir = (struct ast_redirection *)ast;
+    struct ast_redirection *redir = (struct ast_redirection *)ast;
     free(redir->word);
     free(ast);
 }
 
-
 // element
-void element_free(struct ast * ast)
+void element_free(struct ast *ast)
 {
     assert(ast && ast->type == AST_ELEMENT);
-    struct ast_element * elt = (struct ast_element *) ast;
+    struct ast_element *elt = (struct ast_element *)ast;
     if (elt->type != WORD)
     {
         FREE(elt->elt.redirection);
@@ -96,30 +95,30 @@ void element_free(struct ast * ast)
     free(ast);
 }
 
-void shell_cmd_free(struct ast * ast)
+void shell_cmd_free(struct ast *ast)
 {
     assert(ast && ast->type == AST_SHELL_CMD);
-    struct ast_shell_cmd * cmd = (struct ast_shell_cmd *) ast;
-    FREE_LIST(cmd->redirection,cmd->nbr_redirection);
+    struct ast_shell_cmd *cmd = (struct ast_shell_cmd *)ast;
+    FREE_LIST(cmd->redirection, cmd->nbr_redirection);
     FREE(cmd->rule);
     free(ast);
 }
 
-void simple_cmd_free(struct ast * ast)
+void simple_cmd_free(struct ast *ast)
 {
     assert(ast && ast->type == AST_SIMPLE_CMD);
-    struct ast_simp_cmd * cmd = (struct ast_simp_cmd *) ast;
-    FREE_LIST(cmd->prefix,cmd->nbr_prefix);
-    FREE_LIST(cmd->element,cmd->nbr_element);
+    struct ast_simp_cmd *cmd = (struct ast_simp_cmd *)ast;
+    FREE_LIST(cmd->prefix, cmd->nbr_prefix);
+    FREE_LIST(cmd->element, cmd->nbr_element);
     free(cmd->word);
     free(ast);
 }
 
-void pipeline_free(struct ast * ast)
+void pipeline_free(struct ast *ast)
 {
     assert(ast && ast->type == AST_PIPELINE);
     struct ast_pipeline *ast_pipe = (struct ast_pipeline *)ast;
-    FREE_LIST(ast_pipe->cmd,ast_pipe->nbr_cmd);
+    FREE_LIST(ast_pipe->cmd, ast_pipe->nbr_cmd);
     free(ast);
 }
 

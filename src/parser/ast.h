@@ -2,6 +2,7 @@
 #define AST_H
 
 #include <stddef.h>
+
 #include "hash_map/hash_map.h"
 
 enum AST_TYPE
@@ -33,12 +34,12 @@ struct ast_ftable
     int (*run)(struct ast *ast, struct hash_map *h);
     void (*free)(struct ast *ast);
     int (*pretty_print)(struct ast *ast, int actual);
-    void (*push)(struct ast * ast,struct ast * add);
+    void (*push)(struct ast *ast, struct ast *add);
 };
 
 enum REDIRECTION_TYPE
 {
-    LESS,// <
+    LESS, // <
     GREATER_AND, // >&
     GREATER, // >
     DGREATER, // >>
@@ -74,9 +75,9 @@ struct ast_variable
 
 struct ast_shell_cmd
 {
-    struct ast  base;
-    struct ast ** redirection;
-    struct ast * rule;
+    struct ast base;
+    struct ast **redirection;
+    struct ast *rule;
     size_t nbr_redirection;
 };
 
@@ -85,9 +86,9 @@ struct ast_simp_cmd
     struct ast base;
     size_t nbr_element;
     size_t nbr_prefix;
-    char * word;
-    struct ast ** element;
-    struct ast ** prefix; 
+    char *word;
+    struct ast **element;
+    struct ast **prefix;
 };
 
 struct ast_if
@@ -129,18 +130,17 @@ struct ast_pipeline
 {
     struct ast base;
     int negation;
-    struct ast ** cmd;
+    struct ast **cmd;
     size_t nbr_cmd;
 };
 
 struct ast_boucle
 {
     struct ast base;
-    struct ast * condition;
-    struct ast * do_body;
+    struct ast *condition;
+    struct ast *do_body;
     int run_condition;
 };
-
 
 // element
 
@@ -152,8 +152,8 @@ enum ELEMENT_TYPE
 
 union element
 {
-    char * word;
-    struct ast * redirection;
+    char *word;
+    struct ast *redirection;
 };
 
 struct ast_element
@@ -166,12 +166,11 @@ struct ast_element
 struct ast_redirection
 {
     struct ast base;
-    int  n;
-    char * word;
+    int n;
+    char *word;
     enum REDIRECTION_TYPE redir_op;
 };
 // init of every ast type
-
 
 // if
 struct ast *ast_if_init(struct ast *condition, struct ast *then_body,
@@ -180,90 +179,88 @@ struct ast *ast_if_init(struct ast *condition, struct ast *then_body,
 struct ast *ast_list_init(void);
 
 // boucle (until and while)
-struct ast * ast_boucle_init(struct  ast  * condition,
-        struct ast * do_body, int run_condition);
+struct ast *ast_boucle_init(struct ast *condition, struct ast *do_body,
+                            int run_condition);
 
-// redirection 
-struct ast * ast_redirection_init(int fd, char * word,
-        enum REDIRECTION_TYPE redirection_type);
+// redirection
+struct ast *ast_redirection_init(int fd, char *word,
+                                 enum REDIRECTION_TYPE redirection_type);
 
 // element
-struct ast * ast_element_init(enum ELEMENT_TYPE type, char * word,
-        struct ast * ast);
+struct ast *ast_element_init(enum ELEMENT_TYPE type, char *word,
+                             struct ast *ast);
 
-struct ast * ast_shell_cmd_init(struct ast * rule_if);
-struct ast * ast_simple_cmd_init(char * word);
+struct ast *ast_shell_cmd_init(struct ast *rule_if);
+struct ast *ast_simple_cmd_init(char *word);
 
 struct ast *ast_pipeline_init(int neg, struct ast *cmd);
 
 struct ast *ast_and_or_init(struct ast *pipeline);
 
 // list ast function
-int list_run(struct ast *ast,struct hash_map *h);
+int list_run(struct ast *ast, struct hash_map *h);
 void list_free(struct ast *ast);
 int list_pretty_print(struct ast *ast, int actual);
 void list_push(struct ast *ast, struct ast *add);
 
 // and_or ast function
-int and_or_run(struct ast *ast,struct hash_map *h);
+int and_or_run(struct ast *ast, struct hash_map *h);
 void and_or_free(struct ast *ast);
 int and_or_pretty_print(struct ast *ast, int actual);
 void and_or_push(struct ast *ast, struct ast *add);
 
 // if ast function
-int if_run(struct ast *ast,struct hash_map *h);
+int if_run(struct ast *ast, struct hash_map *h);
 void if_free(struct ast *ast);
 int if_pretty_print(struct ast *ast, int actual);
-void if_push(struct ast * ast, struct ast * add); 
+void if_push(struct ast *ast, struct ast *add);
 
-//boucle (until and while)
-int boucle_run(struct ast * ast,struct hash_map *h);
-void boucle_free(struct ast * ast);
-int boucle_pretty_print(struct ast * ast, int actual);
-void boucle_push(struct ast * ast, struct ast * add); 
+// boucle (until and while)
+int boucle_run(struct ast *ast, struct hash_map *h);
+void boucle_free(struct ast *ast);
+int boucle_pretty_print(struct ast *ast, int actual);
+void boucle_push(struct ast *ast, struct ast *add);
 
-// redirection 
-int redirection_run(struct ast * ast,struct hash_map *h);
-void redirection_free(struct ast * ast);
-int redirection_pretty_print(struct ast * ast, int actual);
-void redirection_push(struct ast * ast, struct ast * add);
+// redirection
+int redirection_run(struct ast *ast, struct hash_map *h);
+void redirection_free(struct ast *ast);
+int redirection_pretty_print(struct ast *ast, int actual);
+void redirection_push(struct ast *ast, struct ast *add);
 
-
-//element
-int element_run(struct ast * ast,struct hash_map *h);
+// element
+int element_run(struct ast *ast, struct hash_map *h);
 void element_free(struct ast *ast);
-int element_pretty_print(struct ast * ast, int actual);
-void element_push(struct ast * ast, struct ast * add);
+int element_pretty_print(struct ast *ast, int actual);
+void element_push(struct ast *ast, struct ast *add);
 
 // variables
-struct ast * ast_variable_init(char *name, char *val);
+struct ast *ast_variable_init(char *name, char *val);
 struct ast *ast_list_init(void);
 int variable_run(struct ast *ast, struct hash_map *h);
 void variable_free(struct ast *ast);
 
-
 // simple command
-int simple_cmd_run(struct ast * ast,struct hash_map *h);
-void simple_cmd_free(struct ast * ast);
-int simple_cmd_pretty_print(struct ast * ast, int actual);
-void simple_cmd_push(struct ast * ast, struct ast * add);
+int simple_cmd_run(struct ast *ast, struct hash_map *h);
+void simple_cmd_free(struct ast *ast);
+int simple_cmd_pretty_print(struct ast *ast, int actual);
+void simple_cmd_push(struct ast *ast, struct ast *add);
 
-// shell command 
-int shell_cmd_run(struct ast * ast,struct hash_map *h);
-void shell_cmd_free(struct ast * ast);
-int shell_cmd_pretty_print(struct ast * ast,int actual);
-void shell_cmd_push(struct ast * ast,struct ast * add);
+// shell command
+int shell_cmd_run(struct ast *ast, struct hash_map *h);
+void shell_cmd_free(struct ast *ast);
+int shell_cmd_pretty_print(struct ast *ast, int actual);
+void shell_cmd_push(struct ast *ast, struct ast *add);
 
-//pipeline command
-int pipeline_run(struct ast* ast,struct hash_map *h);
-void pipeline_free(struct ast * ast);
-int pipeline_pretty_print(struct ast * ast, int actual);
-void pipeline_push(struct ast * ast, struct ast * add);
+// pipeline command
+int pipeline_run(struct ast *ast, struct hash_map *h);
+void pipeline_free(struct ast *ast);
+int pipeline_pretty_print(struct ast *ast, int actual);
+void pipeline_push(struct ast *ast, struct ast *add);
 
 // pretty_print the entire_ast
 void pretty_print_ast(struct ast *ast);
 
-//extand.c
+// extand.c
 
 int test_var(char *str);
 char *expand(struct hash_map *h, char *str);

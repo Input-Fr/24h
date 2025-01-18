@@ -14,13 +14,12 @@ struct pair_list
 struct hash_map
 {
     struct pair_list **data;
-    int ret;  //$?
+    int ret; //$?
     int nb_args; //$#
-    //char *arg; //$1 $2 ...
+    // char *arg; //$1 $2 ...
     char **all_args;
     size_t size;
 };
-
 
 size_t hash(char *str);
 struct hash_map *hash_map_init(size_t size);

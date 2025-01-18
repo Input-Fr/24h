@@ -1,24 +1,25 @@
 #include <assert.h>
+#include <ctype.h>
 #include <err.h>
+#include <fcntl.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
-#include <fcntl.h>
-#include <ctype.h>
 
 #include "ast.h"
 #include "hash_map/hash_map.h"
 
-#define RUN(AST,HASH_TABLE) (*(AST)->ftable->run)((AST),(HASH_TABLE))
+#define RUN(AST, HASH_TABLE) (*(AST)->ftable->run)((AST), (HASH_TABLE))
 
-#define RUN_LIST(ASTS,ELT,HASH_TABLE) handle_list_ast((ASTS),(&ELT),HASH_TABLE) // évalue une liste d'ast
+#define RUN_LIST(ASTS, ELT, HASH_TABLE)                                        \
+    handle_list_ast((ASTS), (&ELT), HASH_TABLE) // évalue une liste d'ast
 
 // crée la liste d'élément pour l'ast élément
-#define MAKE_WORD(WORD,ASTS,NBR_ELT) create_words((WORD),(ASTS),&(NBR_ELT)) 
+#define MAKE_WORD(WORD, ASTS, NBR_ELT) create_words((WORD), (ASTS), &(NBR_ELT))
 
 // FONCTION ANNEXE REDIR
 struct s_redirection
@@ -33,7 +34,8 @@ struct s_redirection *s_redir = NULL;
 
 static void restore(void);
 
-static int handle_redirection(int fd, enum REDIRECTION_TYPE redir_op, char *word);
+static int handle_redirection(int fd, enum REDIRECTION_TYPE redir_op,
+                              char *word);
 
 static void printWbackslash(char *carg)
 {
@@ -69,13 +71,12 @@ static void printWbackslash(char *carg)
     }
 }
 
-
 // fonction qui gère les les ast avec une liste d'ast en attribut
-static int handle_list_ast(struct ast ** asts,size_t * nbr_element,
-        struct hash_map * h)
+static int handle_list_ast(struct ast **asts, size_t *nbr_element,
+                           struct hash_map *h)
 {
     int j = 0;
-    for(size_t i = 0; i < *nbr_element; i++)
+    for (size_t i = 0; i < *nbr_element; i++)
     {
         j = RUN(asts[i], h);
     }
@@ -85,26 +86,25 @@ static int handle_list_ast(struct ast ** asts,size_t * nbr_element,
 // fonction pour la simple commande qui crée le word
 
 // check if the element is a word
-static int is_word(struct ast * ast)
+static int is_word(struct ast *ast)
 {
     assert(ast && ast->type == AST_ELEMENT);
     return ((struct ast_element *)ast)->type == WORD;
 }
 
-
-static char ** create_words(char * word,struct ast ** asts,size_t * nbr_element)
+static char **create_words(char *word, struct ast **asts, size_t *nbr_element)
 {
-    char ** words = malloc(sizeof(char *)); 
+    char **words = malloc(sizeof(char *));
     words[0] = word;
     int size = 1;
     for (size_t i = 0; i < *nbr_element; i++)
     {
         if (is_word(asts[i]))
         {
-            struct ast_element * elt = NULL;
+            struct ast_element *elt = NULL;
             elt = (struct ast_element *)(asts[i]);
             size += 1;
-            char ** test = realloc(words,size * sizeof(char *));
+            char **test = realloc(words, size * sizeof(char *));
             if (!test)
             {
                 exit(2);
@@ -115,7 +115,7 @@ static char ** create_words(char * word,struct ast ** asts,size_t * nbr_element)
     }
 
     size += 1;
-    char ** test = realloc(words,size * sizeof(char *));
+    char **test = realloc(words, size * sizeof(char *));
     if (!test)
     {
         exit(2);
@@ -205,7 +205,7 @@ int list_run(struct ast *ast, struct hash_map *h)
 }
 
 // to run the command in simple command
-static int cmd_run(char ** words, struct hash_map *h)
+static int cmd_run(char **words, struct hash_map *h)
 {
     if (!words)
     {
@@ -251,7 +251,7 @@ static int cmd_run(char ** words, struct hash_map *h)
         }
         return 0;
     }
-} 
+}
 
 // if ast eval
 int if_run(struct ast *ast, struct hash_map *h)
@@ -277,7 +277,7 @@ int and_or_run(struct ast *ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_AND_OR);
     struct ast_and_or *and_or_ast = (struct ast_and_or *)ast;
-    if(and_or_ast->t == NODE_PIPELINE)
+    if (and_or_ast->t == NODE_PIPELINE)
     {
         return RUN(and_or_ast->c.pipeline, h);
     }
@@ -285,20 +285,22 @@ int and_or_run(struct ast *ast, struct hash_map *h)
     {
         if (and_or_ast->c.op->op == AND_OP)
         {
-            return RUN(and_or_ast->c.op->left, h) && RUN(and_or_ast->c.op->right, h);
+            return RUN(and_or_ast->c.op->left, h)
+                && RUN(and_or_ast->c.op->right, h);
         }
         else
         {
-            return RUN(and_or_ast->c.op->left, h) || RUN(and_or_ast->c.op->right, h);
+            return RUN(and_or_ast->c.op->left, h)
+                || RUN(and_or_ast->c.op->right, h);
         }
     }
 }
 
-// boucle (until and while) ast eval 
-int boucle_run(struct ast * ast, struct hash_map *h)
+// boucle (until and while) ast eval
+int boucle_run(struct ast *ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_BOUCLE);
-    struct ast_boucle * boucle = (struct ast_boucle *) ast;
+    struct ast_boucle *boucle = (struct ast_boucle *)ast;
     int res = 0;
     while (RUN(boucle->condition, h) == boucle->run_condition)
     {
@@ -308,20 +310,20 @@ int boucle_run(struct ast * ast, struct hash_map *h)
 }
 
 // redirection ast eval
-int redirection_run(struct ast * ast, struct hash_map *h)
+int redirection_run(struct ast *ast, struct hash_map *h)
 {
     (void)h;
     assert(ast && ast->type == AST_REDIRECTION);
-    struct ast_redirection * redi = (struct ast_redirection *)ast;
+    struct ast_redirection *redi = (struct ast_redirection *)ast;
     int ret = handle_redirection(redi->n, redi->redir_op, redi->word);
     return ret;
 }
 
 // element ast eval
-int element_run(struct ast * ast, struct hash_map *h)
+int element_run(struct ast *ast, struct hash_map *h)
 {
-    assert(ast && ast->type == AST_ELEMENT);  
-    struct ast_element * elt = (struct ast_element *)ast;
+    assert(ast && ast->type == AST_ELEMENT);
+    struct ast_element *elt = (struct ast_element *)ast;
     if (elt->type == WORD)
     {
         return 0;
@@ -332,12 +334,12 @@ int element_run(struct ast * ast, struct hash_map *h)
     }
 }
 
-int shell_cmd_run(struct ast * ast, struct hash_map *h)
+int shell_cmd_run(struct ast *ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_SHELL_CMD);
-    struct ast_shell_cmd * cmd = (struct ast_shell_cmd * ) ast;
+    struct ast_shell_cmd *cmd = (struct ast_shell_cmd *)ast;
     int j = 0;
-    j = RUN_LIST(cmd->redirection,cmd->nbr_redirection,h);
+    j = RUN_LIST(cmd->redirection, cmd->nbr_redirection, h);
     j = RUN(cmd->rule, h);
     restore();
     return j;
@@ -351,7 +353,7 @@ int variable_run(struct ast *ast, struct hash_map *h)
     return 1;
 }
 
-int pipeline_run(struct ast* ast, struct hash_map *h)
+int pipeline_run(struct ast *ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_PIPELINE);
     struct ast_pipeline *ast_pipe = (struct ast_pipeline *)ast;
@@ -411,7 +413,6 @@ int pipeline_run(struct ast* ast, struct hash_map *h)
     return ret;
 }
 
-
 static int save_fd(int fd)
 {
     int save = dup(fd);
@@ -436,15 +437,15 @@ static int save_fd(int fd)
 
 static void restore(void)
 {
-    while(s_redir)
+    while (s_redir)
     {
         struct s_redirection *cur = s_redir;
-        
+
         if (dup2(cur->saved_fd, cur->original_fd) == -1)
         {
             perror("error during restore");
         }
-        
+
         close(cur->saved_fd);
         s_redir = cur->next;
         free(cur);
@@ -467,38 +468,39 @@ static void set_vars(int *fd, int *flags, enum REDIRECTION_TYPE redir_op)
 {
     switch (redir_op)
     {
-        case LESS:
-            *fd = *fd == -1 ? STDIN_FILENO : *fd;
-            *flags = O_RDONLY;
-            break;
-        case GREATER:
-            *fd = *fd == -1 ? STDOUT_FILENO : *fd;
-            *flags = O_WRONLY | O_CREAT | O_TRUNC;
-            break;
-        case DGREATER:
-            *fd = *fd == -1 ? STDOUT_FILENO : *fd;
-            *flags = O_WRONLY | O_CREAT | O_APPEND;
-            break;
-        case CLOBBER:
-            *fd = *fd == -1 ? STDOUT_FILENO : *fd;
-            *flags = O_WRONLY | O_CREAT | O_TRUNC;
-            break;
-        case LESS_GREATER:
-            *fd = *fd == -1 ? STDIN_FILENO : *fd;
-            *flags = O_RDWR | O_CREAT;
-            break;
-        case GREATER_AND:
-            *fd = *fd == -1 ? STDOUT_FILENO : *fd;
-            break;
-        case LESS_AND:
-            *fd = *fd == -1 ? STDIN_FILENO : *fd;
-            break;
-        default:
-            return;
+    case LESS:
+        *fd = *fd == -1 ? STDIN_FILENO : *fd;
+        *flags = O_RDONLY;
+        break;
+    case GREATER:
+        *fd = *fd == -1 ? STDOUT_FILENO : *fd;
+        *flags = O_WRONLY | O_CREAT | O_TRUNC;
+        break;
+    case DGREATER:
+        *fd = *fd == -1 ? STDOUT_FILENO : *fd;
+        *flags = O_WRONLY | O_CREAT | O_APPEND;
+        break;
+    case CLOBBER:
+        *fd = *fd == -1 ? STDOUT_FILENO : *fd;
+        *flags = O_WRONLY | O_CREAT | O_TRUNC;
+        break;
+    case LESS_GREATER:
+        *fd = *fd == -1 ? STDIN_FILENO : *fd;
+        *flags = O_RDWR | O_CREAT;
+        break;
+    case GREATER_AND:
+        *fd = *fd == -1 ? STDOUT_FILENO : *fd;
+        break;
+    case LESS_AND:
+        *fd = *fd == -1 ? STDIN_FILENO : *fd;
+        break;
+    default:
+        return;
     }
 }
 
-static int handle_redirection(int fd, enum REDIRECTION_TYPE redir_op, char *word)
+static int handle_redirection(int fd, enum REDIRECTION_TYPE redir_op,
+                              char *word)
 {
     int flags = -1;
     int new_fd = -1;
@@ -528,7 +530,7 @@ static int handle_redirection(int fd, enum REDIRECTION_TYPE redir_op, char *word
         {
             return 1; // error while duplicating
         }
-        
+
         return 0;
     }
     if (save_fd(fd) == -1)
@@ -536,7 +538,6 @@ static int handle_redirection(int fd, enum REDIRECTION_TYPE redir_op, char *word
         return 1;
     }
 
-    
     new_fd = open(word, flags, 0644);
     if (new_fd == -1)
     {
@@ -554,31 +555,31 @@ static int handle_redirection(int fd, enum REDIRECTION_TYPE redir_op, char *word
     return 0;
 }
 
-static void free_words(char ** words)
+static void free_words(char **words)
 {
     /*
     if (words)
     {
-      
+
         for (size_t i = 0; words[i] != NULL; i++)
         {
             free(words[i]);
         }
-      
+
     }
     */
     free(words);
 }
 
-int simple_cmd_run(struct ast * ast, struct hash_map * h)
+int simple_cmd_run(struct ast *ast, struct hash_map *h)
 {
-    assert( ast && ast->type == AST_SIMPLE_CMD);
-    struct ast_simp_cmd * cmd = (struct ast_simp_cmd *) ast;
-    int j = RUN_LIST(cmd->prefix,cmd->nbr_prefix,h);
-    j = RUN_LIST(cmd->element,cmd->nbr_element,h);
+    assert(ast && ast->type == AST_SIMPLE_CMD);
+    struct ast_simp_cmd *cmd = (struct ast_simp_cmd *)ast;
+    int j = RUN_LIST(cmd->prefix, cmd->nbr_prefix, h);
+    j = RUN_LIST(cmd->element, cmd->nbr_element, h);
     if (cmd->word)
     {
-        char ** words = MAKE_WORD(cmd->word,cmd->element,cmd->nbr_element);
+        char **words = MAKE_WORD(cmd->word, cmd->element, cmd->nbr_element);
         j = cmd_run(words, h);
         free_words(words);
     }
@@ -587,4 +588,3 @@ int simple_cmd_run(struct ast * ast, struct hash_map * h)
 }
 
 // FIN ANNEXE -------------
-

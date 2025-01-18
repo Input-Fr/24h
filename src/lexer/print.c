@@ -86,7 +86,7 @@ void print_lex(struct lexer *lexer)
     while (1)
     {
         struct token tok = lexer_pop(lexer);
-        
+
         enum token_type type = tok.type;
         char *string = "";
         if (tok.data != NULL)
