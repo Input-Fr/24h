@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <regex.h>
 
 #include "lexer.h"
 
@@ -164,8 +165,48 @@ static int test_in(struct lexer *lexer)
     return 0;
 }
 
+static int test_name(char * name)
+{
+    regex_t regex;
+    int ret = regcomp(&regex, "^[a-zA-Z_][a-zA-Z_0-9]*=.*", 0);
+    ret = regexec(&regex, name, 0, NULL, 0);
+    if (!ret) //match
+        ret = 1;
+    else
+        ret = 1;
+    regfree(&regex);
+    return ret;
+}
+
+static int test_ass(struct lexer *lexer)
+{
+    struct token tok = lexer->current_tok;
+    char *str = tok.data->str;
+
+    if (tok.type == TOKEN_WORD && str[0] != '=' 
+            && str[0] != '"' && str[0] != '\'')
+    {
+        size_t i = 0;
+        if (str[0] != '=' && (str[0] != '"' || str[0] != '\''))
+        {
+            while (str[i] != '\0' && str[i] != '=')
+            {
+                i += 1;
+            }
+            if (str[i] == '=')
+            {
+                return test_name(str);
+            }
+        }
+    }
+    return 0;
+}
+
 enum token_type reserved_word(struct lexer *lexer)
 {
+
+    if (test_ass(lexer))
+        return TOKEN_ASSIGNMENT_WORD;
     if (test_if(lexer))
         return TOKEN_IF;
     else if (test_fi(lexer))

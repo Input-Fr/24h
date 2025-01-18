@@ -11,7 +11,6 @@ static struct token rule_one(struct lexer *lexer, int *word, int *operator)
     if (*word || *operator)
     {
         ungetc(EOF, lexer->file);
-        // printf("%d\n",lexer->current_tok.type);
         if (lexer->current_tok.type == TOKEN_WORD)
         {
             lexer->current_tok.type = reserved_word(lexer);

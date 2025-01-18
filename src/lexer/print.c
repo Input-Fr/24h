@@ -8,6 +8,8 @@ static void print(char *string, enum token_type type)
 {
     if (type == TOKEN_WORD)
         printf("wd: %s\n", string);
+    else if (type == TOKEN_ASSIGNMENT_WORD)
+        printf("aw: %s\n", string);
     else if (type == TOKEN_COM)
         printf("co: ...\n");
     else if (type == TOKEN_IF)
@@ -84,14 +86,13 @@ void print_lex(struct lexer *lexer)
     while (1)
     {
         struct token tok = lexer_pop(lexer);
-
+        
         enum token_type type = tok.type;
         char *string = "";
         if (tok.data != NULL)
         {
             string = tok.data->str;
         }
-
         if (type == TOKEN_EOF)
         {
             printf("EOF\n");

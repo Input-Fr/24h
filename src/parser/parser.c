@@ -714,9 +714,6 @@ static struct ast *parse_simple_command(enum parser_status *status,
     // TODO
     struct ast *ast_prefix = parse_prefix(status, lexer);
     struct ast *smpcmd = ast_simple_cmd_init(NULL);
-    if (*status == PARSER_OK)
-    {
-            }
     while (*status == PARSER_OK)
     {
         // put ast_prefix in list
@@ -773,6 +770,8 @@ element = WORD
 */
 static int redir_op(struct token tok);
 
+static int isnum(const char *str);
+
 static struct ast *parse_element(enum parser_status *status, struct lexer *lexer)
 {
     struct token tok = lexer_peek(lexer);
@@ -785,7 +784,8 @@ static struct ast *parse_element(enum parser_status *status, struct lexer *lexer
             struct ast *ast_redir = parse_redirection(status, lexer);
             if (*status == PARSER_OK)
             {
-                ((struct ast_redirection *)ast_redir)->n = atoi(tok.data->str);
+                // ((struct ast_redirection *)ast_redir)->n = atoi(str);
+                free(str);
                 return ast_element_init(REDIRECTION, NULL, ast_redir);
             }
             else
@@ -813,13 +813,17 @@ static struct ast *parse_element(enum parser_status *status, struct lexer *lexer
 // prefix = redirection ;
 static struct ast *parse_prefix(enum parser_status *status, struct lexer *lexer)
 {
+    struct token tok = lexer_peek(lexer);
+    if (tok.type == TOKEN_ASSIGNMENT_WORD)
+    {
+        return ast_variable_init(NULL, NULL);
+    }
     return parse_redirection(status, lexer);
 }
 
 
 // redirection = [IONUMBER] ( '>' | '<' | '>>' | '>&' | '<&' | '>|' | '<>' ) WORD ;
 
-static int isnum(const char *str);
 
 static enum REDIRECTION_TYPE strop(struct token op);
 

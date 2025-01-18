@@ -8,7 +8,8 @@ void clear_current_tok(struct lexer *lexer)
 {
     if (lexer->current_tok.data != NULL)
     {
-        if (lexer->current_tok.type != TOKEN_WORD
+        if (lexer->current_tok.type != TOKEN_WORD 
+                && lexer->current_tok.type != TOKEN_ASSIGNMENT_WORD
                 && lexer->current_tok.data->str != NULL)
         {
                 free(lexer->current_tok.data->str);

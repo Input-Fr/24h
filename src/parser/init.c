@@ -146,7 +146,7 @@ struct ast * ast_element_init(enum ELEMENT_TYPE type,char * word,
     element->base.type = AST_ELEMENT;
     element->base.ftable = &ftable;
     element->type = type;
-    if (type == WORD)
+    if (type != WORD)
     {
         element->elt.redirection = ast;
     }

@@ -468,30 +468,30 @@ static void set_vars(int *fd, int *flags, enum REDIRECTION_TYPE redir_op)
     switch (redir_op)
     {
         case LESS:
-            *fd = *fd == -1 ? 0 : *fd;
+            *fd = *fd == -1 ? STDIN_FILENO : *fd;
             *flags = O_RDONLY;
             break;
         case GREATER:
-            *fd = *fd == -1 ? 1 : *fd;
+            *fd = *fd == -1 ? STDOUT_FILENO : *fd;
             *flags = O_WRONLY | O_CREAT | O_TRUNC;
             break;
         case DGREATER:
-            *fd = *fd == -1 ? 1 : *fd;
+            *fd = *fd == -1 ? STDOUT_FILENO : *fd;
             *flags = O_WRONLY | O_CREAT | O_APPEND;
             break;
         case CLOBBER:
-            *fd = *fd == -1 ? 1 : *fd;
+            *fd = *fd == -1 ? STDOUT_FILENO : *fd;
             *flags = O_WRONLY | O_CREAT | O_TRUNC;
             break;
         case LESS_GREATER:
-            *fd = *fd == -1 ? 0 : *fd;
+            *fd = *fd == -1 ? STDIN_FILENO : *fd;
             *flags = O_RDWR | O_CREAT;
             break;
         case GREATER_AND:
-            *fd = *fd == -1 ? 1 : *fd;
+            *fd = *fd == -1 ? STDOUT_FILENO : *fd;
             break;
         case LESS_AND:
-            *fd = *fd == -1 ? 0 : *fd;
+            *fd = *fd == -1 ? STDIN_FILENO : *fd;
             break;
         default:
             return;
@@ -582,6 +582,7 @@ int simple_cmd_run(struct ast * ast, struct hash_map * h)
         j = cmd_run(words, h);
         free_words(words);
     }
+    restore();
     return j;
 }
 

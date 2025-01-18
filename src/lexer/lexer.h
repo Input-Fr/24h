@@ -22,6 +22,7 @@ enum token_type
 {
 //reserved words
     TOKEN_WORD,
+    TOKEN_ASSIGNMENT_WORD, //variable : i=...
     TOKEN_IF, // if
     TOKEN_THEN, // then
     TOKEN_ELIF, // elif
