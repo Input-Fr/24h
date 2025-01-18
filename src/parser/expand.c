@@ -351,4 +351,4 @@ char *expand(struct hash_map *h, char *str)
         return delete_quote(str);
     }
     return "";
-}   
+}
