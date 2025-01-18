@@ -27,14 +27,6 @@ static FILE *gere_usage(int argc, char *argv[])
             }
             begin += 1;
         }
-        else if (!strcmp(argv[1], "-l"))
-        {
-            if (argc < 3)
-            {
-                return NULL;
-            }
-            begin += 1;
-        }
         else if (!strcmp(argv[1], "-h"))
         {
             if (argc < 3)
@@ -75,14 +67,7 @@ int main(int argc, char *argv[])
     struct lexer *lexer = lexer_new();
     lexer->file = value;
     int ret_code = 0;
-
-    // launch parser
     enum parser_status status;
-    if (argc > 1 && !strcmp(argv[1], "-l"))
-    {
-        print_lex(lexer);
-        return 0;
-    }
     struct ast *ast;
     struct hash_map *h = hash_map_init(7);
     while (lexer->current_tok.type != TOKEN_EOF)
@@ -96,7 +81,7 @@ int main(int argc, char *argv[])
             }
             if (status == PARSER_OK)
             {
-                exit(0);
+                exit(ret_code);
             }
             else
             {

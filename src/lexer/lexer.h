@@ -39,10 +39,10 @@ enum token_type
     TOKEN_BANG, // !
     TOKEN_IN, // in
     TOKEN_DONE, // done
-    // ??
+                // ??
     TOKEN_NEWLINE, // \n
     TOKEN_COM, // #
-    // operators
+               // operators
     TOKEN_SEMI, // ;
     TOKEN_PIPE, // |
     TOKEN_AND, // &

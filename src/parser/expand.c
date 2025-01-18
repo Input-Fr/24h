@@ -250,7 +250,7 @@ static int calcul_len(int nb)
     return k;
 }
 
-static char * expand_info_var(char *key, char *prev, char *next)
+static char *expand_info_var(char *key, char *prev, char *next)
 {
     if (strcmp(key, "$") == 0)
     {
@@ -284,7 +284,7 @@ static int test_info_var(char *key)
         return 0;
 }
 
-static char * expand_argn(char *key, char *prev, char *next, struct hash_map *h)
+static char *expand_argn(char *key, char *prev, char *next, struct hash_map *h)
 {
     char *result = calloc(1, 1024);
     size_t len = 0;
@@ -302,13 +302,12 @@ static char * expand_argn(char *key, char *prev, char *next, struct hash_map *h)
     }
 }
 
-static char * expand_ret(char *prev, char *next, struct hash_map *h)
+static char *expand_ret(char *prev, char *next, struct hash_map *h)
 {
     char *result = calloc(1, 1024);
     size_t len = strlen(prev) + strlen(next) + calcul_len(h->ret) + 2;
     snprintf(result, len, "%s%d%s", prev, h->ret, next);
     return result;
-
 }
 
 static char *expand_nb_args(char *prev, char *next, struct hash_map *h)
@@ -319,8 +318,8 @@ static char *expand_nb_args(char *prev, char *next, struct hash_map *h)
     return result;
 }
 
-
-static char *expand_normal_var(char *key, char *prev, char *next, struct hash_map *h)
+static char *expand_normal_var(char *key, char *prev, char *next,
+                               struct hash_map *h)
 {
     char *result = calloc(1, 1024);
     char *val = hash_map_get(h, key); // get the value of the variable
@@ -345,11 +344,11 @@ static char *_expand(struct hash_map *h, char *str)
     char *result = "";
     if (strcmp(key, "?") == 0) //$?
     {
-        result = expand_ret(prev,next,h);
+        result = expand_ret(prev, next, h);
     }
     else if (key[0] >= '1' && key[0] <= '9') //$0, $n...
     {
-        result = expand_argn(key,prev,next,h);
+        result = expand_argn(key, prev, next, h);
     }
     else if (strcmp(key, "#") == 0) //$#
     {
@@ -365,7 +364,7 @@ static char *_expand(struct hash_map *h, char *str)
     }
     else // variable classique : $name, ${name},"$name"...
     {
-        result = expand_normal_var(key,prev,next,h);
+        result = expand_normal_var(key, prev, next, h);
     }
 
     expand_free(prev, next, var, key);

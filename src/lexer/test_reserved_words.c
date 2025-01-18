@@ -226,10 +226,8 @@ static enum token_type reserved_word_1(struct lexer *lexer)
 
 static int token_rw(struct lexer *lexer)
 {
-    if (test_if(lexer)
-                || test_fi(lexer) || test_elif(lexer)
-            || test_else(lexer) || test_then(lexer)
-            || test_do(lexer) || test_done(lexer)
+    if (test_if(lexer) || test_fi(lexer) || test_elif(lexer) || test_else(lexer)
+        || test_then(lexer) || test_do(lexer) || test_done(lexer)
         || test_case(lexer))
     {
         return 1;
@@ -239,8 +237,6 @@ static int token_rw(struct lexer *lexer)
         return 0;
     }
 }
-
-
 
 enum token_type reserved_word(struct lexer *lexer)
 {

@@ -125,6 +125,13 @@ static char **create_words(char *word, struct ast **asts, size_t *nbr_element)
     return words;
 }
 
+static void print_expanded(struct hash_map *h, char *str)
+{
+    char *string = expand(h, str);
+    printf("%s", string);
+    free(string);
+}
+
 // args est de la forme ["arg1", "arg2", "arg3"]
 static void echo_builtin(char *args[], size_t nb_args, struct hash_map *h)
 {
@@ -166,9 +173,7 @@ static void echo_builtin(char *args[], size_t nb_args, struct hash_map *h)
             char *str = args[i];
             if (test_var(str) || test_quote(str))
             {
-                char *string = expand(h, str);
-                printf("%s", string);
-                free(string);
+                print_expanded(h, str);
             }
             else
             {
@@ -368,14 +373,12 @@ int pipeline_run(struct ast *ast, struct hash_map *h)
             if (pipe(pipefd) == -1)
             {
                 perror("pipe");
-                ret = 1;
                 break;
             }
 
             if (dup2(pipefd[1], STDOUT_FILENO) == -1)
             {
                 perror("dup2");
-                ret = 1;
                 break;
             }
             close(pipefd[1]);
@@ -385,7 +388,6 @@ int pipeline_run(struct ast *ast, struct hash_map *h)
             if (dup2(save_stdout, STDOUT_FILENO) == -1)
             {
                 perror("dup2");
-                ret = 1;
                 break;
             }
         }
@@ -396,17 +398,12 @@ int pipeline_run(struct ast *ast, struct hash_map *h)
             if (dup2(pipefd[0], STDIN_FILENO) == -1)
             {
                 perror("dup2");
-                ret = 1;
                 break;
             }
             close(pipefd[0]);
         }
     }
-    if (dup2(save_stdin, STDIN_FILENO) == -1)
-    {
-        perror("dup2");
-        ret = 1;
-    }
+    dup2(save_stdin, STDIN_FILENO);
     close(save_stdin);
     close(save_stdout);
     ret = ast_pipe->negation ? !ret : ret;

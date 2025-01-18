@@ -31,9 +31,10 @@ static struct token rule_three(struct lexer *lexer)
     return lexer->current_tok;
 }
 
-static void rule_four(struct lexer *lexer)
+static void rule_four(struct lexer *lexer, int *word)
 {
     // --4
+    *word = 1;
     char c = lexer->input;
     if (c == '\'') //(&& lexer->input[index] == ' ' ||
                    // lexer->input[index] == ';')
@@ -174,8 +175,9 @@ static struct token rule_nine(struct lexer *lexer)
     }
 }
 
-static void begin_word(struct lexer *lexer)
+static void begin_word(struct lexer *lexer, int *word)
 {
+    *word = 1;
     lexer->current_tok.data = mbt_str_init();
     mbt_str_pushc(lexer->current_tok.data, lexer->input);
     lexer->current_tok.type = TOKEN_WORD;
@@ -185,23 +187,45 @@ static void begin_word(struct lexer *lexer)
     }
 }
 
-struct token lexer_next_token(struct lexer *lexer)
+static int rule6(int *operator, int * word, struct lexer *lexer, char *c)
 {
-    clear_current_tok(lexer);
-    int word = 0;
-    int operator= 0;
+    *operator= 1;
+    if (*word)
+    {
+        return 1;
+    }
+    else
+    {
+        lexer->current_tok.data = mbt_str_init();
+        operator_1(lexer);
+        mbt_str_pushc(lexer->current_tok.data, *c);
+        return 0;
+    }
+}
 
+static void rule5(int *word, struct lexer *lexer)
+{
+    if (!(*word))
+    {
+        lexer->current_tok.data = mbt_str_init();
+        *word = 1;
+    }
+    rule_five(lexer);
+}
+
+struct token _lexer_next_token(struct lexer *lexer, int word, int operator)
+{
     while (1)
     {
         lexer->input = lexer_file(lexer->file);
         char c = lexer->input;
-
         if (c == EOF || c == '\0')
         {
             // 1
             return rule_one(lexer, &word, &operator);
         }
-        else if (lexer->Quoting == NO_QUOTE && operator&& test_operator(lexer))
+        else if ((lexer->Quoting == NO_QUOTE
+                  && operator&& test_operator(lexer)))
         {
             // 2
             mbt_str_pushc(lexer->current_tok.data, c);
@@ -214,32 +238,19 @@ struct token lexer_next_token(struct lexer *lexer)
         else if ((c == '\\') || c == '\'' || c == '"') // 4    cas \n
         {
             // 4
-            word = 1;
-            rule_four(lexer);
+            rule_four(lexer, &word);
         }
         else if (lexer->Quoting == NO_QUOTE && c == '$') // || c == '`')
         {
             // 5
-            if (!word)
-            {
-                lexer->current_tok.data = mbt_str_init();
-                word = 1;
-            }
-            rule_five(lexer);
+            rule5(&word, lexer);
         }
         else if (lexer->Quoting == NO_QUOTE && test_operator_1(lexer)) // 6
         {
             // 6
-            operator= 1;
-            if (word)
+            if (rule6(&operator, & word, lexer, &c))
             {
                 return rule_six(lexer);
-            }
-            else
-            {
-                lexer->current_tok.data = mbt_str_init();
-                operator_1(lexer);
-                mbt_str_pushc(lexer->current_tok.data, c);
             }
         }
         else if (lexer->Quoting == NO_QUOTE && c == '\n')
@@ -266,8 +277,13 @@ struct token lexer_next_token(struct lexer *lexer)
         }
         else
         {
-            word = 1;
-            begin_word(lexer);
+            begin_word(lexer, &word);
         }
     }
+}
+
+struct token lexer_next_token(struct lexer *lexer)
+{
+    clear_current_tok(lexer);
+    return _lexer_next_token(lexer, 0, 0);
 }
