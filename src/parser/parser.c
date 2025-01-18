@@ -722,7 +722,7 @@ static struct ast *parse_simple_command(enum parser_status *status,
     }
     *status = PARSER_OK;
     struct token tok = lexer_peek(lexer);
-    if (!ast_prefix)
+    if (!((struct ast_simp_cmd*)smpcmd)->prefix)
     {
         if (tok.type != TOKEN_WORD)
         {
@@ -839,9 +839,10 @@ void separator_equal(char *name, char *val, char *as)
 
 static struct ast *parse_var(enum parser_status *status, struct lexer *lexer)
 {
-    struct token tok = lexer_pop(lexer);
+    struct token tok = lexer_peek(lexer);
     if (tok.type == TOKEN_ASSIGNMENT_WORD)
     {
+        lexer_pop(lexer);
         char *name = calloc(1,strlen(tok.data->str));
         char *val = calloc(1,strlen(tok.data->str));
         separator_equal(name, val, tok.data->str);
