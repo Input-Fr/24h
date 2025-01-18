@@ -1,4 +1,3 @@
-#include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -165,18 +164,10 @@ static int test_in(struct lexer *lexer)
     return 0;
 }
 
-static int test_name(char *name)
-{
-    regex_t regex;
-    int ret = regcomp(&regex, "^[a-zA-Z_][a-zA-Z_0-9]*=.*", 0);
-    ret = regexec(&regex, name, 0, NULL, 0);
-    if (!ret) // match
-        ret = 1;
-    else
-        ret = 1;
-    regfree(&regex);
-    return ret;
-}
+//static int test_name(char *name)
+//{
+//    return 1;
+//}
 
 static int test_ass(struct lexer *lexer)
 {
@@ -195,7 +186,8 @@ static int test_ass(struct lexer *lexer)
             }
             if (str[i] == '=')
             {
-                return test_name(str);
+                //return test_name(str);
+                return 1;
             }
         }
     }
