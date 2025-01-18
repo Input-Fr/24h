@@ -213,6 +213,6 @@ struct ast * ast_simple_cmd_init(char * word)
     }
     cmd->word = word;
     cmd->base.type = AST_SIMPLE_CMD;
-    cmd->base.ftable = &ftable; 
+    cmd->base.ftable = &ftable;
     return &cmd->base;
-}	
+}
