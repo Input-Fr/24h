@@ -810,15 +810,66 @@ static struct ast *parse_element(enum parser_status *status, struct lexer *lexer
     }
 }
 
+// ASSIGNMENT WORDS
+void separator_equal(char *name, char *val, char *as)
+{
+    size_t i = 0;
+    while (as[i] != '\0' && as[i] != '=')
+    {
+        name[i] = as[i];
+        i += 1;
+    }
+    name[i] = '\0';
+    size_t j = 0;
+    i+=1;
+    while (as[i] != '\0')
+    {
+        val[j] = as[i];
+        j += 1;
+        i += 1;
+    }
+    val[j] = '\0';
+}
+
+
+
+
+
+
+
+static struct ast *parse_var(enum parser_status *status, struct lexer *lexer)
+{
+    struct token tok = lexer_pop(lexer);
+    if (tok.type == TOKEN_ASSIGNMENT_WORD)
+    {
+        char *name = calloc(1,strlen(tok.data->str));
+        char *val = calloc(1,strlen(tok.data->str));
+        separator_equal(name, val, tok.data->str);
+        free(tok.data->str);
+        struct ast * ast_variable = ast_variable_init(name, val);
+        return ast_variable;
+    }
+    else
+    {
+        *status = PARSER_UNEXPECTED_TOKEN;
+        return NULL;
+    }
+}
+
+
 // prefix = redirection ;
 static struct ast *parse_prefix(enum parser_status *status, struct lexer *lexer)
 {
-    struct token tok = lexer_peek(lexer);
-    if (tok.type == TOKEN_ASSIGNMENT_WORD)
+    struct ast *var = parse_var(status, lexer);
+    if (*status == PARSER_OK)
     {
-        return ast_variable_init(NULL, NULL);
+        return var;
     }
-    return parse_redirection(status, lexer);
+    else
+    {
+        *status = PARSER_OK;
+        return parse_redirection(status, lexer);
+    }
 }
 
 

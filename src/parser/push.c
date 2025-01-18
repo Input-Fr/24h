@@ -81,7 +81,7 @@ void simple_cmd_push(struct ast * ast, struct ast * add)
     {
         cmd->element = ADD(cmd->element,add,&cmd->nbr_element);
     }
-    else if (add->type == AST_REDIRECTION)
+    else if (add->type == AST_REDIRECTION || add->type == AST_VARIABLE)
     {
         cmd->prefix = ADD(cmd->prefix,add,&cmd->nbr_prefix);
     }
