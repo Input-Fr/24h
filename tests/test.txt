@@ -1,0 +1,46 @@
+[mederic@archlinux ~]$ bash --posix
+bash-5.2$ a=4
+bash-5.2$ echo ${a
+> }
+bash: ${a
+}: bad substitution
+bash-5.2$ echo ${a}
+4
+bash-5.2$ echo ${a }
+bash: ${a }: bad substitution
+bash-5.2$ echo $?
+1
+bash-5.2$ a=4
+bash-5.2$ echo "$a b"
+4 b
+bash-5.2$ echo "${a} b"
+4 b
+bash-5.2$ echo "${ a} b"
+bash: ${ a} b: bad substitution
+bash-5.2$
+bash-5.2$ echo $a?
+4?
+bash-5.2$ echo ${ a}
+bash: ${ a}: bad substitution
+bash-5.2$ echo ${a }
+bash: ${a }: bad substitution
+bash-5.2$ echo ${a}a
+4a
+bash-5.2$ echo $ {a}
+$ {a}
+bash-5.2$ echo a$a
+a4
+bash-5.2$ echo $aa
+
+bash-5.2$ echo $a?a
+4?a
+bash-5.2$
+bash-5.2$ echo "a   $a"
+a   4
+bash-5.2$ echo a   $a
+a 4
+bash-5.2$
+[mederic@archlinux ~]$ echo $?a
+0a
+[mederic@archlinux ~]$ echo a$?a
+a0a
