@@ -1,5 +1,5 @@
 # every part of 42sh
-SUBDIRS = lexer parser
+SUBDIRS = lexer parser ast hash_map
 
 bin_PROGRAMS = 42sh
 
@@ -10,4 +10,4 @@ bin_PROGRAMS = 42sh
 42sh_CFLAGS = -std=c99 -Werror -Wall -Wextra -Wvla -pedantic
 
 # linking phase
-42sh_LDADD =  lexer/liblexer.a parser/libparser.a
+42sh_LDADD =  lexer/liblexer.a parser/libparser.a ast/libast.a hash_map/libhash_map.a

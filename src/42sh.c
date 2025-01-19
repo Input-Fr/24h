@@ -6,8 +6,8 @@
 #include <string.h>
 
 #include "lexer/lexer.h"
-#include "parser/ast.h"
-#include "parser/hash_map/hash_map.h"
+#include "ast/ast.h"
+#include "hash_map/hash_map.h"
 #include "parser/parser.h"
 
 static FILE *gere_usage(int argc, char *argv[])
