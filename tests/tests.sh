@@ -2,6 +2,7 @@
 #!/bin/bash
 
 a=0
+
 b=0
 
 run_test()

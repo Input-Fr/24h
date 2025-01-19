@@ -1,5 +1,4 @@
 #define _POSIX_C_SOURCE 200809L
-#include "parser.h"
 
 #include <ctype.h>
 #include <dirent.h>
@@ -12,7 +11,8 @@
 #include <unistd.h>
 
 #include "../lexer/lexer.h"
-#include "ast.h"
+#include "parser.h"
+#include "../ast/ast.h"
 
 #define PATH_MAX 4096
 static struct ast *parse_list(enum parser_status *status, struct lexer *lexer);
