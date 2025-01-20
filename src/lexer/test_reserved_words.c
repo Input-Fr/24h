@@ -164,10 +164,10 @@ static int test_in(struct lexer *lexer)
     return 0;
 }
 
-//static int test_name(char *name)
+// static int test_name(char *name)
 //{
-//    return 1;
-//}
+//     return 1;
+// }
 
 static int test_ass(struct lexer *lexer)
 {
@@ -186,7 +186,7 @@ static int test_ass(struct lexer *lexer)
             }
             if (str[i] == '=')
             {
-                //return test_name(str);
+                // return test_name(str);
                 return 1;
             }
         }
