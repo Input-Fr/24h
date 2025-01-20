@@ -95,6 +95,17 @@ run_test "if false; then echo 'if'; fi"
 
 echo ""
 echo ""
+echo -e "\e[1;33m ------ tests folder tests_facile ------\e[0m"
+echo ""
+echo ""
+for test_file in tests/tests_facile/*; do
+    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
+        run_file "$test_file"
+    fi
+done
+
+echo ""
+echo ""
 echo -e "\e[1;33m ---- tests folder tests_basic ----\e[0m"
 echo ""
 echo ""
@@ -107,10 +118,22 @@ done
 
 echo ""
 echo ""
-echo -e "\e[1;33m ------ tests folder tests_var ------\e[0m"
+echo -e "\e[1;33m ------ tests folder while_until ------\e[0m"
 echo ""
 echo ""
-for test_file in tests/tests_var/*; do
+for test_file in tests/while_until/*; do
+    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
+        run_file "$test_file"
+    fi
+done
+
+echo ""
+echo ""
+echo -e "\e[1;33m ---- tests folder double_quotes ----\e[0m"
+echo ""
+echo ""
+
+for test_file in tests/double_quotes/*; do
     if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
         run_file "$test_file"
     fi
@@ -119,14 +142,62 @@ done
 
 echo ""
 echo ""
-echo -e "\e[1;33m ------ tests folder tests_facile ------\e[0m"
+echo -e "\e[1;33m ---- tests folder for ----\e[0m"
 echo ""
 echo ""
-for test_file in tests/tests_facile/*; do
+
+for test_file in tests/for/*; do
     if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
         run_file "$test_file"
     fi
 done
+
+
+echo ""
+echo ""
+echo -e "\e[1;33m ------ tests folder tests_variables ------\e[0m"
+echo ""
+echo ""
+for test_file in tests/variables/*; do
+    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
+        run_file "$test_file"
+    fi
+done
+
+echo ""
+echo ""
+echo -e "\e[1;33m ------ tests folder if_commands ------\e[0m"
+echo ""
+echo ""
+for test_file in tests/if_commands/*; do
+    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
+        run_file "$test_file"
+    fi
+done
+
+echo ""
+echo ""
+echo -e "\e[1;33m ------ tests folder simple_commands ------\e[0m"
+echo ""
+echo ""
+for test_file in tests/simple_commands/*; do
+    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
+        run_file "$test_file"
+    fi
+done
+
+echo ""
+echo ""
+echo -e "\e[1;33m ------ tests folder builtins ------\e[0m"
+echo ""
+echo ""
+for test_file in tests/builtins/*; do
+    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
+        run_file "$test_file"
+    fi
+done
+
+
 
 echo ""
 echo ""
@@ -161,6 +232,8 @@ a=$((a*1000))
 result=$(echo "$a / $b" | bc)
 echo""
 echo -e "\e[1;32m~~~~~~~~ RESULT =  $result % ~~~~~~~~ \e[0m"
+
+
 
 if [ "$COVERAGE" != "yes" ]; then
     echo "$a / $b" | bc > "$OUTPUT_FILE"
