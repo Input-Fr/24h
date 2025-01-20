@@ -166,7 +166,16 @@ static void echo_builtin(char *args[], size_t nb_args, struct hash_map *h)
         if (backslash)
         {
             char *cur_arg = args[i];
-            printWbackslash(cur_arg);
+            if (test_var(cur_arg) || test_quote(cur_arg))
+            {
+                char *string = expand(h, cur_arg);
+                printWbackslash(string);
+                free(string);
+            }
+            else
+            {
+                printWbackslash(cur_arg);
+            }
         }
         else
         {
