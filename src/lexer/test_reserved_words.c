@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <regex.h>
 
 #include "lexer.h"
 
@@ -165,17 +164,31 @@ static int test_in(struct lexer *lexer)
     return 0;
 }
 
-static int test_name(char * name)
+static int test_name(char *name)
 {
-    regex_t regex;
-    int ret = regcomp(&regex, "^[a-zA-Z_][a-zA-Z_0-9]*=.*", 0);
-    ret = regexec(&regex, name, 0, NULL, 0);
-    if (!ret) //match
-        ret = 1;
-    else
-        ret = 1;
-    regfree(&regex);
-    return ret;
+    size_t i = 0;
+    if (!((name[0] >= 'a' && name[0] <= 'z') ||
+                (name[0] >= 'A' && name[0] <= 'Z') || name[0] == '_'))
+    {
+        return 0;
+    }
+
+    while (name[i] != '\0' && name[i] != '=')
+    {
+        if (!((name[i] >= 'a' && name[i] <= 'z') || (name[i] >= 'A' &&
+                name[i] <= 'Z')
+                || name[i] == '_' || (name[i] >= '0' && name[i] <= '9')))
+        {
+            return 0;
+        }
+        i += 1;
+    }
+
+    if (name[i] == '=')
+    {
+        return 1;
+    }
+    return 0;
 }
 
 static int test_ass(struct lexer *lexer)
@@ -183,8 +196,8 @@ static int test_ass(struct lexer *lexer)
     struct token tok = lexer->current_tok;
     char *str = tok.data->str;
 
-    if (tok.type == TOKEN_WORD && str[0] != '=' 
-            && str[0] != '"' && str[0] != '\'')
+    if (tok.type == TOKEN_WORD && str[0] != '=' && str[0] != '"'
+        && str[0] != '\'')
     {
         size_t i = 0;
         if (str[0] != '=' && (str[0] != '"' || str[0] != '\''))
@@ -202,11 +215,8 @@ static int test_ass(struct lexer *lexer)
     return 0;
 }
 
-enum token_type reserved_word(struct lexer *lexer)
+static enum token_type reserved_word_1(struct lexer *lexer)
 {
-
-    if (test_ass(lexer))
-        return TOKEN_ASSIGNMENT_WORD;
     if (test_if(lexer))
         return TOKEN_IF;
     else if (test_fi(lexer))
@@ -223,6 +233,30 @@ enum token_type reserved_word(struct lexer *lexer)
         return TOKEN_DONE;
     else if (test_case(lexer))
         return TOKEN_CASE;
+    else
+        return NO_TOKEN;
+}
+
+static int token_rw(struct lexer *lexer)
+{
+    if (test_if(lexer) || test_fi(lexer) || test_elif(lexer) || test_else(lexer)
+        || test_then(lexer) || test_do(lexer) || test_done(lexer)
+        || test_case(lexer))
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+enum token_type reserved_word(struct lexer *lexer)
+{
+    if (test_ass(lexer))
+        return TOKEN_ASSIGNMENT_WORD;
+    else if (token_rw(lexer))
+        return reserved_word_1(lexer);
     else if (test_esac(lexer))
         return TOKEN_ESAC;
     else if (test_while(lexer))

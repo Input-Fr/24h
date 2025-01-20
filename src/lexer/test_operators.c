@@ -43,7 +43,6 @@ int test_operator_1(struct lexer *lexer)
     }
 }
 
-
 int test_operator(struct lexer *lexer)
 {
     char c = lexer->input;
@@ -81,7 +80,7 @@ int test_operator(struct lexer *lexer)
         lexer->current_tok.type = TOKEN_LESSGREAT;
     }
     else if (length == 2 && lexer->current_tok.data->str[0] == '<'
-            && lexer->current_tok.data->str[0] == '<' && c == '-')
+             && lexer->current_tok.data->str[0] == '<' && c == '-')
     {
         lexer->current_tok.type = TOKEN_DLESSDASH;
     }

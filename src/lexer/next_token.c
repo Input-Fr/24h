@@ -5,10 +5,12 @@
 
 #include "lexer.h"
 
-static struct token rule_one(struct lexer *lexer, int *word, int *operator)
+static struct token token_reco(struct lexer *lexer);
+
+static struct token end_of_file(struct lexer *lexer)
 {
     // --1
-    if (*word || *operator)
+    if (lexer->word || lexer->ope)
     {
         ungetc(EOF, lexer->file);
         if (lexer->current_tok.type == TOKEN_WORD)
@@ -24,17 +26,24 @@ static struct token rule_one(struct lexer *lexer, int *word, int *operator)
     }
 }
 
-static struct token rule_three(struct lexer *lexer)
+static struct token next_quote(struct lexer *lexer)
+{
+    // --2
+    mbt_str_pushc(lexer->current_tok.data, lexer->input);
+    return token_reco(lexer);
+}
+
+static struct token operator(struct lexer *lexer)
 {
     // --3
     ungetc(lexer->input, lexer->file);
     return lexer->current_tok;
 }
 
-
-static void rule_four(struct lexer *lexer)
+static struct token quote(struct lexer *lexer)
 {
     // --4
+    lexer->word = 1;
     char c = lexer->input;
     if (c == '\'') //(&& lexer->input[index] == ' ' ||
                    // lexer->input[index] == ';')
@@ -77,10 +86,19 @@ static void rule_four(struct lexer *lexer)
             lexer->Quoting = BACKSLASH_QUOTE;
         }
     }
+
+    return token_reco(lexer);
 }
 
-static void rule_five(struct lexer *lexer)
+static struct token var(struct lexer *lexer)
 {
+    //--5
+    if (!(lexer->word))
+    {
+        lexer->current_tok.data = mbt_str_init();
+        lexer->word = 1;
+    }
+
     char c = lexer->input;
     mbt_str_pushc(lexer->current_tok.data, c);
     c = lexer_file(lexer->file);
@@ -126,18 +144,32 @@ static void rule_five(struct lexer *lexer)
             }
         }
     }
+    return token_reco(lexer);
 }
 
-static struct token rule_six(struct lexer *lexer)
+static struct token begin_ope(struct lexer *lexer)
 {
-    ungetc(lexer->input, lexer->file);
-    lexer->current_tok.type = reserved_word(lexer);
-    return lexer->current_tok;
+    // --6
+    if (lexer->word)
+    {
+        ungetc(lexer->input, lexer->file);
+        lexer->current_tok.type = reserved_word(lexer);
+        return lexer->current_tok;
+    }
+    else
+    {
+        lexer->ope = 1;
+        lexer->current_tok.data = mbt_str_init();
+        operator_1(lexer);
+        mbt_str_pushc(lexer->current_tok.data, lexer->input);
+        return token_reco(lexer);
+    }
 }
 
-static struct token rule_seven(struct lexer *lexer, int *word)
+static struct token new_line(struct lexer *lexer)
 {
-    if (*word)
+    // --7
+    if (lexer->word)
     {
         ungetc('\n', lexer->file);
         lexer->current_tok.type = reserved_word(lexer);
@@ -150,14 +182,30 @@ static struct token rule_seven(struct lexer *lexer, int *word)
     }
 }
 
-static struct token rule_eight(struct lexer *lexer)
+static struct token blank(struct lexer *lexer)
 {
-    lexer->current_tok.type = reserved_word(lexer);
-    return lexer->current_tok;
+    // --8
+    if (lexer->word)
+    {
+        lexer->current_tok.type = reserved_word(lexer);
+        return lexer->current_tok;
+    }
+    else
+    {
+        return token_reco(lexer);
+    }
 }
 
-static struct token rule_nine(struct lexer *lexer)
+static struct token continue_word(struct lexer *lexer)
 {
+    // --9
+    mbt_str_pushc(lexer->current_tok.data, lexer->input);
+    return token_reco(lexer);
+}
+
+static struct token com(struct lexer *lexer)
+{
+    // --10
     lexer->current_tok.type = TOKEN_COM;
     while (1)
     {
@@ -175,8 +223,10 @@ static struct token rule_nine(struct lexer *lexer)
     }
 }
 
-static void begin_word(struct lexer *lexer)
+static struct token begin_word(struct lexer *lexer)
 {
+    // --11
+    lexer->word = 1;
     lexer->current_tok.data = mbt_str_init();
     mbt_str_pushc(lexer->current_tok.data, lexer->input);
     lexer->current_tok.type = TOKEN_WORD;
@@ -184,94 +234,64 @@ static void begin_word(struct lexer *lexer)
     {
         lexer->Quoting = NO_QUOTE;
     }
-
+    return token_reco(lexer);
 }
 
-
+static struct token token_reco(struct lexer *lexer)
+{
+    lexer->input = lexer_file(lexer->file);
+    char c = lexer->input;
+    if (c == EOF || c == '\0')
+    {
+        return end_of_file(lexer);   // 1
+    }
+    else if ((lexer->Quoting == NO_QUOTE
+                && lexer->ope && test_operator(lexer)))
+    {
+        return next_quote(lexer);    // 2
+    }
+    else if (lexer->ope && !test_operator(lexer))
+    {
+        return operator(lexer);      // 3
+    }
+    else if ((c == '\\') || c == '\'' || c == '"')     //cas \n
+    {
+        return quote(lexer);         // 4
+    }
+    else if (lexer->Quoting == NO_QUOTE && c == '$') // || c == '`')
+    {
+        return var(lexer);           // 5
+    }
+    else if (lexer->Quoting == NO_QUOTE && test_operator_1(lexer)) // 6
+    {
+        return begin_ope(lexer);     // 6
+    }
+    else if (lexer->Quoting == NO_QUOTE && c == '\n')
+    {
+        return new_line(lexer);      // 7
+    }
+    else if ((lexer->Quoting == NO_QUOTE && c == ' '))
+    {
+        return blank(lexer);         // 8
+    }
+    else if (lexer->word)           
+    {
+        return continue_word(lexer); // 9
+    }
+    else if (lexer->Quoting == NO_QUOTE && c == '#')
+    {
+        return com(lexer);           // 10
+    }
+    else
+    {
+        return begin_word(lexer);    // 11
+    }
+}
 
 struct token lexer_next_token(struct lexer *lexer)
 {
     clear_current_tok(lexer);
-    int word = 0;
-    int operator = 0;
-
-    while (1)
-    {
-        lexer->input = lexer_file(lexer->file);
-        char c = lexer->input;
-
-        if (c == EOF || c == '\0')
-        {
-            //1
-            return rule_one(lexer, &word, &operator);
-        }
-        else if (lexer->Quoting == NO_QUOTE && operator && test_operator(lexer))
-        {
-            //2
-            mbt_str_pushc(lexer->current_tok.data, c);
-        }
-        else if (operator && !test_operator(lexer))
-        {
-            //3
-            return rule_three(lexer);
-        }
-        else if ((c == '\\') || c == '\'' || c == '"') //4    cas \n
-        {
-            //4
-            word = 1;
-            rule_four(lexer);
-        }
-        else if (lexer->Quoting == NO_QUOTE && c == '$')// || c == '`')
-        {
-            //5
-            if (!word)
-            {
-                lexer->current_tok.data = mbt_str_init();
-                word = 1;
-            }
-            rule_five(lexer);
-        }
-        else if (lexer->Quoting == NO_QUOTE && test_operator_1(lexer)) //6
-        {
-            //6
-            operator = 1;
-            if (word)
-            {
-                return rule_six(lexer);
-            }
-            else
-            {
-                lexer->current_tok.data = mbt_str_init();
-                operator_1(lexer);
-                mbt_str_pushc(lexer->current_tok.data, c);
-            }
-        }
-        else if (lexer->Quoting == NO_QUOTE && c == '\n')
-        {
-            //7
-            return rule_seven(lexer, &word);
-        }
-        else if ((lexer->Quoting == NO_QUOTE && c == ' '))
-        {
-            //8
-            if (word)
-            {
-                return rule_eight(lexer);
-            }
-        }
-        else if (word)
-        {
-            mbt_str_pushc(lexer->current_tok.data, c);
-        }
-        else if (lexer->Quoting == NO_QUOTE && c == '#')
-        {
-            //9
-            return rule_nine(lexer);
-        }
-        else
-        {
-            word = 1;
-            begin_word(lexer);
-        }
-    }
+    lexer->word = 0;
+    lexer->ope = 0;
+    return token_reco(lexer);
 }

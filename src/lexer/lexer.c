@@ -31,8 +31,13 @@ struct token lexer_peek(struct lexer *lexer)
 {
     if (!lexer->peek)
     {
+        struct token tok = lexer_next_token(lexer);
         lexer->peek = 1;
-        return lexer_next_token(lexer);
+        if (tok.type == TOKEN_COM)
+        {
+            lexer_pop(lexer);
+        }
+        return tok;
     }
     else
     {
@@ -44,7 +49,14 @@ struct token lexer_pop(struct lexer *lexer)
 {
     if (!lexer->peek)
     {
-        return lexer_next_token(lexer);
+        struct token tok = lexer_next_token(lexer);
+
+        if (tok.type == TOKEN_COM)
+        {
+            lexer_pop(lexer);
+        }
+
+        return tok;
     }
     else
     {
