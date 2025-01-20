@@ -166,7 +166,7 @@ int calcul_len(int nb)
         nb = nb / 10;
         k += 1;
     }
-    return k;
+    return k + 1;
 }
 
 int test_special_var(char *key)

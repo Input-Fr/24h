@@ -21,42 +21,51 @@ static void expand_free(char *prev, char *next, char *var, char *key)
 
 static char *expand_ret(char *prev, char *next, struct hash_map *h)
 {
-    char *result = calloc(1, 1024);
-    size_t len = strlen(prev) + strlen(next) + calcul_len(h->ret) + 2;
-    snprintf(result, len, "%s%d%s", prev, h->ret, next);
+    size_t len = strlen(prev) + strlen(next) + calcul_len(h->ret);
+    char *result = calloc(1, len + 1);
+    snprintf(result, len + 1, "%s%d%s", prev, h->ret, next);
     return result;
 }
 
 static char *expand_argn(char *key, char *prev, char *next, struct hash_map *h)
 {
-    char *result = calloc(1, 1024);
-    size_t len = 0;
+    char *result;// = calloc(1, 1024);
+    size_t len = strlen(prev) + strlen(next);
     if (atoi(key) > h->nb_args)
     {
-        len = strlen(prev) + strlen(next);
-        snprintf(result, len, "%s%s%s", prev, "", next);
+        result = calloc(1, len + 1);
+        snprintf(result, len + 1, "%s%s%s", prev, "", next);
         return result;
     }
     else
     {
-        len = strlen(prev) + strlen(next) + strlen(h->all_args[atoi(key)]);
-        snprintf(result, len, "%s%s%s", prev, h->all_args[atoi(key)], next);
+        //printf("-%s\n",h->all_args[atoi(key)]);
+        len += strlen(h->all_args[atoi(key)]);
+        result = calloc(1, len + 1);
+        snprintf(result, len + 1, "%s%s%s", prev, h->all_args[atoi(key)], next);
         return result;
     }
 }
 
 static char *expand_nb_args(char *prev, char *next, struct hash_map *h)
 {
-    char *result = calloc(1, 1024);
-    size_t len = strlen(prev) + strlen(next) + calcul_len(h->nb_args) + 2;
-    snprintf(result, len, "%s%d%s", prev, h->nb_args, next);
+    size_t len = strlen(prev) + strlen(next) + calcul_len(h->nb_args);
+    char *result = calloc(1, len + 1);
+    snprintf(result, len + 1, "%s%d%s", prev, h->nb_args, next);
     return result;
 }
 
 static char *expand_all_args(char *prev, char *next, struct hash_map *h)
 {
-    char *result = calloc(1, 1024);
-    char *str = calloc(1, 1024);
+    size_t len = strlen(prev) + strlen(next);
+    for (int k = 1; k < h->nb_args + 1; k += 1)
+    {
+        len += strlen(h->all_args[k]);
+        len += 1;  //for the space
+    }
+
+    char *result = calloc(1, len + 1);
+    char *str = calloc(1, len + 1);
     size_t k = 0;
     for (int i = 1; i < h->nb_args + 1; i += 1)
     {
@@ -69,48 +78,45 @@ static char *expand_all_args(char *prev, char *next, struct hash_map *h)
         k += 1;
     }
     str[k - 1] = '\0';
-    size_t len = strlen(prev) + strlen(next) + 1024;
-    snprintf(result, len, "%s%s%s", prev, str, next);
+    snprintf(result, len + 1, "%s%s%s", prev, str, next);
     free(str);
     return result;
 }
 
 static char *expand_processid(char *prev, char *next)
 {
-    char *result = calloc(1, 1024);
     pid_t pid = getpid();
-    size_t len = strlen(prev) + strlen(next) + 7;
+    size_t len = strlen(prev) + strlen(next) + calcul_len(pid);
+    char *result = calloc(1, len + 1);
     snprintf(result, len, "%s%d%s", prev, pid, next);
     return result;
 }
 
 static char *expand_UID(char *prev, char *next)
 {
-    char *result = calloc(1, 1024);
     struct passwd *p;
     uid_t uid;
     p = getpwuid(uid = getuid());
     int vall = (int)p->pw_uid;
-    size_t len = strlen(prev) + strlen(next) + 7;
-    // result = realloc(result, len);
-    snprintf(result, len, "%s%d%s", prev, vall, next);
+    size_t len = strlen(prev) + strlen(next) + calcul_len(vall);
+    char *result = calloc(1, len + 1);
+    snprintf(result, len + 1, "%s%d%s", prev, vall, next);
     return result;
 }
 
 static char *expand_pwd(char *prev, char *next)
 {
-    char *result = calloc(1, 1024);
     char *buffer = malloc(1024 * sizeof(char));
     getcwd(buffer, 1024);
-    size_t len = strlen(prev) + strlen(next) + strlen(buffer) + 1;
-    snprintf(result, len, "%s%s%s", prev, buffer, next);
+    size_t len = strlen(prev) + strlen(next) + strlen(buffer);
+    char *result = calloc(1, len + 1);
+    snprintf(result, len + 1, "%s%s%s", prev, buffer, next);
     free(buffer);
     return result;
 }
 
 static char *expand_random(char *prev, char *next)
 {
-    char *result = calloc(1, 1024);
     srand(time(NULL));
     int nb = rand();
     int a = 1;
@@ -123,6 +129,7 @@ static char *expand_random(char *prev, char *next)
         a = 1;
     }
     size_t len = strlen(prev) + strlen(next) + 5 + a;
+    char *result = calloc(1, len + 1);
     snprintf(result, len, "%s%d%s", prev, nb, next);
     return result;
 }
