@@ -164,10 +164,32 @@ static int test_in(struct lexer *lexer)
     return 0;
 }
 
-// static int test_name(char *name)
-//{
-//     return 1;
-// }
+static int test_name(char *name)
+{
+    size_t i = 0;
+    if (!((name[0] >= 'a' && name[0] <= 'z') ||
+                (name[0] >= 'A' && name[0] <= 'Z') || name[0] == '_'))
+    {
+        return 0;
+    }
+
+    while (name[i] != '\0' && name[i] != '=')
+    {
+        if (!((name[i] >= 'a' && name[i] <= 'z') || (name[i] >= 'A' &&
+                name[i] <= 'Z')
+                || name[i] == '_' || (name[i] >= '0' && name[i] <= '9')))
+        {
+            return 0;
+        }
+        i += 1;
+    }
+
+    if (name[i] == '=')
+    {
+        return 1;
+    }
+    return 0;
+}
 
 static int test_ass(struct lexer *lexer)
 {
@@ -186,8 +208,7 @@ static int test_ass(struct lexer *lexer)
             }
             if (str[i] == '=')
             {
-                // return test_name(str);
-                return 1;
+                return test_name(str);
             }
         }
     }
