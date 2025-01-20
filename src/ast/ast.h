@@ -266,5 +266,10 @@ int test_var(char *str);
 char *expand(struct hash_map *h, char *str);
 char *delete_quote(char *word);
 int test_quote(char *str);
+char *delimite_var(char *prev, char *next, char *word);
+char *delete_dollar(char *word);
+void error_var(char *word);
+int calcul_len(int nb);
+int test_special_var(char *key);
 
 #endif /* !AST_H */
