@@ -172,6 +172,14 @@ struct ast_redirection
 };
 // init of every ast type
 
+struct ast_for
+{
+    struct ast base;
+    struct ast * do_body;
+    struct ast * variable;
+    char ** list;
+    size_t nbr_elt;
+};
 
 // if
 struct ast *ast_if_init(struct ast *condition, struct ast *then_body,
@@ -183,6 +191,8 @@ struct ast *ast_list_init(void);
 struct ast * ast_boucle_init(struct  ast  * condition,
         struct ast * do_body, int run_condition);
 
+// for
+struct ast * ast_for_init(struct ast * do_body, struct ast * variable); 
 // redirection 
 struct ast * ast_redirection_init(int fd, char * word,
         enum REDIRECTION_TYPE redirection_type);

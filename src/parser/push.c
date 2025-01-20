@@ -101,3 +101,8 @@ void pipeline_push(struct ast * ast, struct ast * add)
     pipe->cmd = ADD(pipe->cmd,add,&pipe->nbr_cmd);
 }
 
+void for_push(struct ast * ast, struct ast * add)
+{
+	(void)(ast);
+	(void)(add);
+}

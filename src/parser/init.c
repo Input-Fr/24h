@@ -216,3 +216,25 @@ struct ast * ast_simple_cmd_init(char * word)
     cmd->base.ftable = &ftable; 
     return &cmd->base;
 }	
+
+
+struct ast * ast_for_init(struct ast * do_body,struct ast * variable)
+{
+	static struct ast_for ftable = {
+		.run = &for_run,
+		.free = &for_free,
+		.pretty_print = &for_pretty_print,
+		.push = &for_push,
+	};
+	struct ast_for * boucle = calloc(1,sizeof(struct ast_for));
+	if (!boucle)
+	{
+		return NULL;
+	}
+	boucle->base.type = AST_FOR;
+	boucle->base.ftable = &ftable;
+	boucle->do_body = do_body;
+	boucle->variable = variable;
+	return &boucle->base;
+}
+

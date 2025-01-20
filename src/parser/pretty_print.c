@@ -5,21 +5,89 @@
 #include <stddef.h>
 
 #define PRINT(AST, C) (*(AST)->ftable->pretty_print)((AST), (C))
+#define PRINT_LIST(A,NB,ACT) handle_print_list((A),(NB),(ACT))
+
+
+
+static void add_label_print(const char * label, const char * color,
+		const char * shape)
+{
+
+	if (label || color || shape)
+	{
+	    printf(" [ ");
+	    if (label)
+	    {
+	        printf("label = \"%s\"",label);
+		if (color)
+		{
+		   printf(", ");
+		}
+	    }
+	    if (color)
+	    {
+		printf("color = %s",color);
+	        if (shape)
+		{
+		    printf(", ");
+		}
+	    }
+	    if (shape)
+	    {
+		printf("shape = %s",shape);
+	    }
+	    printf(" ]");
+	}
+}
+
+//create a node
+static void create_node(int * node, const char  * label, const char * color,
+		const char * shape)
+{
+	assert(node);
+	printf("\t%d ", actual);
+	add_label_print(label,color, shape);	
+	printf(";\n");
+}
+
+
+// link two ast with their node
+static void link(int * node1, int * node2,const char * label,const char * color)
+{
+	assert (node1 && node2);
+	printf("\t%d -> %d",*node1, *node2);
+	add_label_print(label,color, NULL);
+	printf(";\n");
+	    
+}
+
+// handle ast with a list of ast in variable
+static int handle_print_list(struct ast ** asts,size_t nbr, int actual)
+{
+    int next_node = actual + 1;
+    for (size_t i = 0; i < list->nbr_cmd; i++)
+    {
+	link(&actual,&next_node,NULL,NULL,NULL);
+        next_node = PRINT(list->cmd[i], t);
+    }
+    return next_node;
+}
+
 // list pretty_print
 int if_pretty_print(struct ast *ast, int actual)
 {
     assert(ast && ast->type == AST_IF);
     struct ast_if *list = (struct ast_if *)ast;
     int cond_int = actual + 1;
-    printf("\t%d [ label = \"IF\"];\n", actual);
-    printf("\t%d -> %d [label = \"condition\"];\n", actual, cond_int);
-    int then_int = PRINT(list->condition, cond_int) + 1;
-    printf("\t%d -> %d [label = \"then\"];\n", actual, then_int);
-    int else_int = PRINT(list->then_body, then_int) + 1;
+    create_node(&actual,"IF",NULL,NULL);
+    link(&actual,&cond_int,"condition",NULL,NULL);
+    int then_int = PRINT(list->condition, cond_int);
+    link(&actual,&then_int,"then",NULL,NULL);
+    int else_int = PRINT(list->then_body, then_int);
     if (list->else_body)
     {
-        printf("\t%d -> %d [label = \"else\"];\n", actual, else_int);
-        int res = PRINT(list->else_body, else_int) + 1;
+	link(&actual,&else_int,"else",NULL,NULL);
+        int res = PRINT(list->else_body, else_int);
         return res;
     }
     return else_int;
@@ -40,14 +108,8 @@ int list_pretty_print(struct ast *ast, int actual)
 {
     assert(ast && ast->type == AST_LIST);
     struct ast_list *list = (struct ast_list *)ast;
-    printf("\t%d [ label = \"LIST\"];\n", actual);
-    size_t t = actual + 1;
-    for (size_t i = 0; i < list->nbr_cmd; i++)
-    {
-        printf("\t%d -> %ld;\n", actual, t);
-        t = PRINT(list->cmd[i], t) + 1;
-    }
-    return t;
+    create_node(&actual,"LIST",NULL,NULL);
+    return PRINT_LIST(list->cnd,list->nbr_cmd,actual);
 }
 
 /*
@@ -70,10 +132,10 @@ static int cmd_pretty_print(struct ast *ast, int actual)
 int simple_cmd_pretty_print(struct ast * ast, int actual)
 {
 	assert(ast && ast->type == AST_SIMPLE_CMD);
+ 	struct ast_simp_cmd * cmd = (struct ast_simp_cmd *)ast;
 	return actual + 1;
 }
 
-// cmd pretty_print
 
 
 // boucle (until and while) print
@@ -83,22 +145,29 @@ int boucle_pretty_print(struct ast * ast, int actual)
     struct ast_boucle * boucle = (struct ast_boucle *)ast;
     if(boucle->run_condition)
     {
-        printf("\t%d [ label = \"UNTIL\"];\n",actual);
+	create_node(&actual,"UNTIL",NULL,NULL);
     }
     else
     {
-        printf("\t%d [ label = \"WHILE\"];\n",actual);
+	create_node(&actual,"WHILE",NULL,NULL);
     }
-    int t = PRINT(boucle->condition,(actual + 1)) + 1;
-    printf("\t%d -> %d [label = \"condition\"];\n",actual, (actual + 1));
-    printf("\t%d -> %d [label = \"do\"];\n",actual, t);
-    return PRINT(boucle->do_body,t) + 1;
+    int next_node = PRINT(boucle->condition,(actual + 1));
+    link(&actual,&(actual + 1),"condition",NULL,NULL);
+    link(&actual,&next_node,"do",NULL,NULL);
+    return PRINT(boucle->do_body,next_node);
 }
 
 int redirection_pretty_print(struct ast * ast, int actual)
 {
-    (void)(ast);
-    return actual + 1;
+    assert(ast && ast->type == AST_REDIRECTION);
+    struct ast_redirection * redir = (struct ast_redirection *) ast;
+    printf("\t%d [ label = \"REDIRECTION\"];\n",actual);
+    if (redir->word)
+    {
+    	printf("\t%d [ label = \"%s\",color=black];\n",(actual + 1),redir->word);
+	printf("\t %s -> %s [label  = \"type\"]",actual, (actual + 1));
+
+    return actual + 1 + (redir->word != NULL);
 }
 
 int element_pretty_print(struct ast * ast, int actual)
@@ -125,11 +194,16 @@ int shell_cmd_pretty_print(struct ast * ast, int actual)
     assert(ast && ast->type == AST_SHELL_CMD);
     struct ast_shell_cmd * cmd = (struct ast_shell_cmd *)ast;
     printf("\t%d [ label = \"SHELL_CMD\"];\n",actual);
-    (void)(cmd);
-    return actual + 1;
+    int j = PRINT_LIST(cmd->redirection,cmd->nbr_redirection,actual);
+    printf("\t%d -> %d ;\n",actual, j);
+    return PRINT(cmd->rule,j);
 }
 
-
+int for_pretty_print(struct ast * ast, int actual)
+{
+	(void)(ast);
+	return actual + 1;
+}
 
 void pretty_print_ast(struct ast *ast)
 {

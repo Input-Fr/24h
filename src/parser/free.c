@@ -131,3 +131,17 @@ void variable_free(struct ast *ast)
     free(variable_ast->val);
     free(ast);
 }
+
+void for_free(struct ast * ast)
+{
+    assert(ast && ast->type == AST_FOR);
+    struct ast_for * boucle = (struct ast_for *)ast;
+    FREE(boucle->variable);
+    FREE(boucle->do_body);
+    for (size_t i = 0; i < boucle->nbr_elt; i++)
+    {
+	free(boucle->list[i]);
+    }
+    free(boucle->list);
+    free(ast);
+}
