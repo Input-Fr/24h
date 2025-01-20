@@ -775,6 +775,8 @@ static int redir_op(struct token tok);
 
 static int isnum(const char *str);
 
+static int valid_fd(int fd);
+
 static struct ast *parse_element(enum parser_status *status,
                                  struct lexer *lexer)
 {
@@ -783,12 +785,12 @@ static struct ast *parse_element(enum parser_status *status,
     {
         char *str = tok.data->str;
         lexer_pop(lexer);
-        if (redir_op(lexer_peek(lexer)))
+        if (redir_op(lexer_peek(lexer)) && isnum(str) && valid_fd(atoi(str)))
         {
             struct ast *ast_redir = parse_redirection(status, lexer);
             if (*status == PARSER_OK)
             {
-                // ((struct ast_redirection *)ast_redir)->n = atoi(str);
+                ((struct ast_redirection *)ast_redir)->n = atoi(str);
                 free(str);
                 return ast_element_init(REDIRECTION, NULL, ast_redir);
             }
@@ -874,7 +876,6 @@ static struct ast *parse_prefix(enum parser_status *status, struct lexer *lexer)
 
 static enum REDIRECTION_TYPE strop(struct token op);
 
-static int valid_fd(int fd);
 
 static struct ast *parse_redirection(enum parser_status *status,
                                      struct lexer *lexer)
