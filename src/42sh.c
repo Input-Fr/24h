@@ -10,6 +10,8 @@
 #include "lexer/lexer.h"
 #include "parser/parser.h"
 
+void print_lex(struct lexer *lexer);
+
 static FILE *gere_usage(int argc, char *argv[])
 {
     if (argc == 1)
@@ -19,6 +21,14 @@ static FILE *gere_usage(int argc, char *argv[])
     else
     {
         int begin = 1;
+        if (!strcmp(argv[1], "-l"))
+        {
+            if (argc < 3)
+            {
+                return NULL;
+            }
+            begin += 1;
+        }
         if (!strcmp(argv[1], "-p"))
         {
             if (argc < 3)
@@ -66,6 +76,13 @@ int main(int argc, char *argv[])
     // init lexer
     struct lexer *lexer = lexer_new();
     lexer->file = value;
+    
+    if (argc > 1 && !strcmp(argv[1], "-l"))
+    {
+          print_lex(lexer);
+          return 0;
+    }
+
     int ret_code = 0;
     enum parser_status status;
     struct ast *ast;
@@ -106,6 +123,114 @@ int main(int argc, char *argv[])
     hash_map_free(h);
 
     return ret_code;
+}
+
+
+
+
+
+static void print(char *string, enum token_type type)
+{
+    if (type == TOKEN_WORD)
+        printf("wd: %s\n", string);
+    else if (type == TOKEN_ASSIGNMENT_WORD)
+        printf("aw: %s\n", string);
+    else if (type == TOKEN_COM)
+        printf("co: ...\n");
+    else if (type == TOKEN_IF)
+        printf("rw: if\n");
+    else if (type == TOKEN_THEN)
+        printf("rw: then\n");
+    else if (type == TOKEN_ELIF)
+        printf("rw: elif\n");
+    else if (type == TOKEN_ELSE)
+        printf("rw: else\n");
+    else if (type == TOKEN_FI)
+        printf("rw: fi\n");
+    else if (type == TOKEN_DO)
+        printf("rw: do\n");
+    else if (type == TOKEN_DONE)
+        printf("rw: done\n");
+    else if (type == TOKEN_CASE)
+        printf("rw: case\n");
+    else if (type == TOKEN_ESAC)
+        printf("rw: esac\n");
+    else if (type == TOKEN_WHILE)
+        printf("rw: while\n");
+    else if (type == TOKEN_UNTIL)
+        printf("rw: until\n");
+    else if (type == TOKEN_FOR)
+        printf("rw: for\n");
+    else if (type == TOKEN_SEMI)
+        printf("se: ;\n");
+    else if (type == TOKEN_PIPE)
+        printf("rw: |\n");
+    else if (type == TOKEN_NEWLINE)
+        printf("nl: newline\n");
+    else if (type == TOKEN_AND)
+        printf("op: &\n");
+    else if (type == TOKEN_AND_IF)
+        printf("op: &&\n");
+    else if (type == TOKEN_OR_IF)
+        printf("op: ||\n");
+    else if (type == TOKEN_DSEMI)
+        printf("op: ;;\n");
+    else if (type == TOKEN_LESS)
+        printf("op: <\n");
+    else if (type == TOKEN_GREAT)
+        printf("op: >\n");
+    else if (type == TOKEN_DLESS)
+        printf("op: <<\n");
+    else if (type == TOKEN_DGREAT)
+        printf("op: >>\n");
+    else if (type == TOKEN_LESSAND)
+        printf("op: <&\n");
+    else if (type == TOKEN_GREATAND)
+        printf("op: >&\n");
+    else if (type == TOKEN_LESSGREAT)
+        printf("op: <>\n");
+    else if (type == TOKEN_DLESSDASH)
+        printf("op: <<-\n");
+    else if (type == TOKEN_CLOBBER)
+        printf("op: >|\n");
+    else if (type == TOKEN_LBRACE)
+        printf("rw: {\n");
+    else if (type == TOKEN_RBRACE)
+        printf("rw: }\n");
+    else if (type == TOKEN_BANG)
+        printf("rw: !\n");
+    else if (type == TOKEN_IN)
+        printf("rw: in\n");
+    else
+        printf("?:\n");
+}
+
+void print_lex(struct lexer *lexer)
+{
+    int i = 0;
+    while (1)
+    {
+        struct token tok = lexer_pop(lexer);
+
+        enum token_type type = tok.type;
+        char *string = "";
+        if (tok.data != NULL)
+        {
+            string = tok.data->str;
+        }
+        if (type == TOKEN_EOF)
+        {
+            printf("EOF\n");
+            break;
+        }
+        print(string, type);
+        if (type == TOKEN_WORD)
+        {
+            free(string);
+        }
+        i += 1;
+    }
+    lexer_free(lexer);
 }
 
 /*

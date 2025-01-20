@@ -91,6 +91,8 @@ struct lexer
     int peek;
     enum quote Quoting;
     FILE *file;
+    int word;
+    int ope;
 };
 
 /**
