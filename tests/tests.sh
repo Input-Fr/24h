@@ -2,7 +2,6 @@
 #!/bin/bash
 
 a=0
-
 b=0
 
 run_test()
@@ -20,14 +19,13 @@ run_test()
     local bin_path_status=$?
 
     if diff -q tests/ex.txt tests/get.txt > /dev/null; then
-        a=$((a+1))
         if [ $bash_status -eq $bin_path_status ]; then
-            echo "$args : passed"
+            echo -e "\e[1m$args: \e[0m\e[1;32mpassed\e[0m"
+
         else
             echo "exit status :"
             echo "expected : $bash_status, get : $bin_path_status."
         fi
-        echo "OK"
         a=$((a+1))
     else
         echo ""
@@ -54,53 +52,52 @@ run_file()
     local bin_path_status=$?
 
     if diff -q tests/ex.txt tests/get.txt > /dev/null && [ $bash_status -eq $bin_path_status ] ; then
-        echo "$file : passed"
+        echo -e "\e[1m$file: \e[0m\e[1;32mpassed\e[0m"
+
         a=$((a+1))
     else
-        echo "'$file': error"
         if ! diff -q tests/ex.txt tests/get.txt > /dev/null ; then
-            echo "get :"
+            echo -e "\e[1m$file: \e[0m\e[1;31merror\e[0m"
+            cat $file
+            echo ""
+            echo -e "\e[1;36m *** get: ***\e[0m"
             cat tests/get.txt
-            echo "expected :"
+            echo ""
+            echo -e "\e[1;36m *** expected: *** \e[0m"
             cat tests/ex.txt
             echo ""
         fi
 
         if [ ! $bash_status -eq $bin_path_status ] ; then
-            echo "exit status :"
-            echo "expected : $bash_status, get : $bin_path_status."
+            echo -e "\e[1m$file : \e[0m\e[1;31mwrong exit status\e[0m"
+            cat $file
+            echo -e "\e[1;36mget:\e[0m : \e[1m$bin_path_status\e[0m"
+            echo -e "\e[1;36mexpected:\e[0m : \e[1m$bash_status\e[0m"
+            echo ""
         fi
     fi
 
     b=$((b+1))
 }
 
-
+echo -e "\e[1;33m ---- tests string ----\e[0m"
+echo ""
 run_test "echo hello"
 run_test "echo hello;"
 run_test "echo hello : "
-# run_test "echo #hello"
+run_test "echo #hello"
 run_test "echo if true; then echo world"
 run_test "if true; then echo 'if'; fi"
 run_test "if true; then echo oui; else echo oui; fi"
 run_test "if false; then echo oui; else echo oui; fi"
 run_test "if false; then echo 'if'; fi"
-run_test "if true; then echo a///ad/fag/a//fd/a oui else echo oui; fi"
-run_test "if false
-true
-then
-echo a
-echo b; echo c
-fi"
+#run_test "if true; then echo a///ad/fag/a//fd/a oui else echo oui; fi"
 
-run_file "script.sh"
-
-if [ -f "tests/script.sh" ]; then
-    run_file "tests/script.sh"
-else
-    echo "No file specified"
-    exit 1
-fi
+echo ""
+echo ""
+echo -e "\e[1;33m ---- tests folder tests_basic ----\e[0m"
+echo ""
+echo ""
 
 for test_file in tests/tests_basic/*; do
     if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
@@ -108,21 +105,62 @@ for test_file in tests/tests_basic/*; do
     fi
 done
 
+echo ""
+echo ""
+echo -e "\e[1;33m ------ tests folder tests_var ------\e[0m"
+echo ""
+echo ""
 for test_file in tests/tests_var/*; do
     if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
         run_file "$test_file"
     fi
 done
+
+
+echo ""
+echo ""
+echo -e "\e[1;33m ------ tests folder tests_facile ------\e[0m"
+echo ""
+echo ""
 for test_file in tests/tests_facile/*; do
     if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
         run_file "$test_file"
     fi
 done
 
+echo ""
+echo ""
+echo -e "\e[1;33m ------ tests folder tests_debug ------\e[0m"
+echo ""
+echo ""
+for test_file in tests/tests_debug/*; do
+    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
+        run_file "$test_file"
+    fi
+done
+
+echo ""
+echo ""
+echo -e "\e[1;33m ------ tests folder current_debug ------\e[0m"
+echo ""
+echo ""
+for test_file in tests/current_debug/*; do
+    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
+        run_file "$test_file"
+    fi
+done
+
+
+
+
 
 
 b=$((b*10))
 a=$((a*1000))
+
+result=$(echo "$a / $b" | bc)
+echo""
+echo -e "\e[1;32m~~~~~~~~ RESULT =  $result % ~~~~~~~~ \e[0m"
 
 if [ "$COVERAGE" != "yes" ]; then
     echo "$a / $b" | bc > "$OUTPUT_FILE"
