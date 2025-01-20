@@ -59,5 +59,5 @@ int main(int argc, char *argv[])
     // start of the process of lexing
     //lexer_file(value);
     */
-    return 0;
+    RETURN 0;
 }
