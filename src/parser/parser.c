@@ -258,16 +258,39 @@ static struct ast *parse_command(enum parser_status *status,
 }
 
 /*
-shell_command =
-rule_if
-| rule_while
-| rule_until
-| rule_for ;
+shell_command = '{' compound_list '}'
+                | rule_if
+                | rule_while
+                | rule_until
+                | rule_for ;
 
 */
 static struct ast *parse_shell_command(enum parser_status *status,
                                        struct lexer *lexer)
 {
+    struct token tok = lexer_peek(lexer);
+    if (tok.type == TOKEN_LBRACE)
+    {
+        lexer_pop(lexer);
+        struct ast *ast_compound = parse_compound_list(status, lexer);
+        if (*status == PARSER_OK)
+        {
+            tok = lexer_pop(lexer);
+            if (tok.type == TOKEN_RBRACE)
+            {
+                return ast_compound;
+            }
+            else
+            {
+                *status = PARSER_UNEXPECTED_TOKEN;
+                return NULL;
+            }
+        }
+        else
+        {
+            return NULL;
+        }
+    }
     struct ast *ast_rule = parse_rule_if(status, lexer);
     if (*status != PARSER_OK)
     {
