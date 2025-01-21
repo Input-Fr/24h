@@ -13,8 +13,9 @@
 
 int test_quote(char *str) // test if a word is quoted
 {
-    if ((str[0] == '\'' && str[strlen(str) - 1] == '\'')
-        || (str[0] == '"' && str[strlen(str) - 1] == '"'))
+    if (strlen(str) > 1 && 
+        ((str[0] == '\'' && str[strlen(str) - 1] == '\'')
+        || (str[0] == '"' && str[strlen(str) - 1] == '"')))
     {
         return 1;
     }

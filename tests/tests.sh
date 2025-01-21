@@ -1,15 +1,10 @@
 #!/bin/sh
-#!/bin/bash
 
 a=0
 b=0
 
 run_test()
 {
-    #if [ "$COVERAGE" == "yes" ]; then
-    #    echo yes
-    #fi
-
     local args=$1
 
     bash --posix -c "$args" > tests/ex.txt 2>/dev/null

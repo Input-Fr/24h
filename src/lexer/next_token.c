@@ -6,12 +6,9 @@
 #include "lexer.h"
 
 static struct token token_reco(struct lexer *lexer);
+static struct token continue_word(struct lexer *lexer);
+static struct token begin_word(struct lexer *lexer);
 
-void single_quote_error(struct lexer *lexer)
-{
-    char *word = lexer->current_tok.data->str;
-    printf("%s\n",word);
-}
 
 static struct token end_of_file(struct lexer *lexer)
 {
@@ -21,7 +18,6 @@ static struct token end_of_file(struct lexer *lexer)
         if (lexer->Quoting == SINGLE_QUOTE ||
                 lexer->Quoting == DOUBLE_QUOTE)
         {
-            //fprintf(stdout, "expect another quote\n");
             exit(2);
         }
         ungetc(EOF, lexer->file);
@@ -52,51 +48,97 @@ static struct token operator(struct lexer *lexer)
     return lexer->current_tok;
 }
 
+static void single_quote(struct lexer *lexer)
+{
+    char c = lexer->input;
+    if (lexer->Quoting == NO_QUOTE && c == '\'')
+    {
+        lexer->word = 1;
+        lexer->current_tok.type = TOKEN_WORD;
+        lexer->current_tok.data = mbt_str_init();
+        mbt_str_pushc(lexer->current_tok.data, '\'');
+        lexer->Quoting = SINGLE_QUOTE;
+    }
+    else if (lexer->Quoting == SINGLE_QUOTE && c == '\'')
+    {
+        mbt_str_pushc(lexer->current_tok.data, '\'');
+        lexer->Quoting = NO_QUOTE;
+    }
+}
+
+static void double_quote(struct lexer *lexer)
+{
+    char c = lexer->input;
+    if (lexer->Quoting == NO_QUOTE && c == '"')
+    {
+        lexer->word = 1;
+        lexer->current_tok.type = TOKEN_WORD;
+        lexer->current_tok.data = mbt_str_init();
+        mbt_str_pushc(lexer->current_tok.data, '"');
+        lexer->Quoting = DOUBLE_QUOTE;
+    }
+    else if (lexer->Quoting == DOUBLE_QUOTE && c == '"')
+    {
+        lexer->Quoting = NO_QUOTE;
+        mbt_str_pushc(lexer->current_tok.data, '"');
+    }
+}
+
+static void backslash_quote(struct lexer *lexer)
+{
+    char c = lexer->input;
+    lexer->input = lexer_file(lexer->file);
+    char next_c = lexer->input;
+    if (lexer->Quoting == NO_QUOTE && c == '\\')
+    {
+        if (next_c != '\n')
+        {
+            if (lexer->word)
+            {
+                mbt_str_pushc(lexer->current_tok.data, next_c);
+            }
+            else
+            {
+                lexer->word = 1;
+                lexer->current_tok.data = mbt_str_init();
+                mbt_str_pushc(lexer->current_tok.data, next_c);
+            }
+        }
+    }
+    else if (lexer->Quoting == DOUBLE_QUOTE)
+    {
+        if (next_c == '$' || next_c == '`' || next_c == '"' || next_c == '\\')
+        {
+            mbt_str_pushc(lexer->current_tok.data, next_c);
+        }
+        else if (next_c != '\n')
+        {
+            mbt_str_pushc(lexer->current_tok.data, '\\');
+            mbt_str_pushc(lexer->current_tok.data, next_c);
+        }
+    }
+    else
+    {
+        mbt_str_pushc(lexer->current_tok.data, '\\');
+        mbt_str_pushc(lexer->current_tok.data, next_c);
+    }
+}
+
 static struct token quote(struct lexer *lexer)
 {
     // --4
-    lexer->word = 1;
     char c = lexer->input;
-    if (c == '\'') //(&& lexer->input[index] == ' ' ||
-                   // lexer->input[index] == ';')
+    if (c == '\'') 
     {
-        if (lexer->Quoting == NO_QUOTE && c == '\'')
-        {
-            lexer->current_tok.type = TOKEN_WORD;
-            lexer->current_tok.data = mbt_str_init();
-            mbt_str_pushc(lexer->current_tok.data, '\'');
-            lexer->Quoting = SINGLE_QUOTE;
-        }
-        else if (lexer->Quoting == SINGLE_QUOTE && c == '\'')
-        {
-            mbt_str_pushc(lexer->current_tok.data, '\'');
-            lexer->Quoting = NO_QUOTE;
-        }
+        single_quote(lexer);
     }
-
-    if (c == '"') //(&& lexer->input[index] == ' ' ||
-                  // lexer->input[index] == ';')
+    else if (c == '"') 
     {
-        if (lexer->Quoting == NO_QUOTE && c == '"')
-        {
-            lexer->current_tok.type = TOKEN_WORD;
-            lexer->current_tok.data = mbt_str_init();
-            mbt_str_pushc(lexer->current_tok.data, '"');
-            lexer->Quoting = DOUBLE_QUOTE;
-        }
-        else if (lexer->Quoting == DOUBLE_QUOTE && c == '"')
-        {
-            lexer->Quoting = NO_QUOTE;
-            mbt_str_pushc(lexer->current_tok.data, '"');
-        }
+        double_quote(lexer);
     }
-
-    if (c == '\\')
+    else if (c == '\\')
     {
-        if (lexer->Quoting == NO_QUOTE && c == '\\')
-        {
-            lexer->Quoting = BACKSLASH_QUOTE;
-        }
+        backslash_quote(lexer);
     }
 
     return token_reco(lexer);
@@ -181,6 +223,7 @@ static struct token begin_ope(struct lexer *lexer)
 static struct token new_line(struct lexer *lexer)
 {
     // --7
+
     if (lexer->word)
     {
         ungetc('\n', lexer->file);
@@ -242,10 +285,6 @@ static struct token begin_word(struct lexer *lexer)
     lexer->current_tok.data = mbt_str_init();
     mbt_str_pushc(lexer->current_tok.data, lexer->input);
     lexer->current_tok.type = TOKEN_WORD;
-    if (lexer->Quoting == BACKSLASH_QUOTE)
-    {
-        lexer->Quoting = NO_QUOTE;
-    }
     return token_reco(lexer);
 }
 
@@ -253,6 +292,7 @@ static struct token token_reco(struct lexer *lexer)
 {
     lexer->input = lexer_file(lexer->file);
     char c = lexer->input;
+    //printf("c : %c\n",c);
     if (c == EOF || c == '\0')
     {
         return end_of_file(lexer);   // 1
@@ -266,7 +306,7 @@ static struct token token_reco(struct lexer *lexer)
     {
         return operator(lexer);      // 3
     }
-    else if ((c == '\\') || c == '\'' || c == '"')     //cas \n
+    else if ((c == '\\') || c == '\'' || c == '"')
     {
         return quote(lexer);         // 4
     }
@@ -278,11 +318,12 @@ static struct token token_reco(struct lexer *lexer)
     {
         return begin_ope(lexer);     // 6
     }
-    else if (lexer->Quoting == NO_QUOTE && c == '\n')
+    else if (lexer->Quoting != SINGLE_QUOTE && lexer->Quoting != DOUBLE_QUOTE
+            && c == '\n')
     {
         return new_line(lexer);      // 7
     }
-    else if ((lexer->Quoting == NO_QUOTE && c == ' '))
+    else if ((lexer->Quoting == NO_QUOTE && (c == ' ' || c == '\t')))
     {
         return blank(lexer);         // 8
     }

@@ -79,7 +79,6 @@ struct token
 enum quote
 {
     NO_QUOTE,
-    BACKSLASH_QUOTE,
     SINGLE_QUOTE,
     DOUBLE_QUOTE
 };

@@ -221,6 +221,8 @@ static int test_ass(struct lexer *lexer)
 
 static enum token_type reserved_word_1(struct lexer *lexer)
 {
+    //if (lexer->current_tok.data != NULL)
+    //{
     if (test_if(lexer))
         return TOKEN_IF;
     else if (test_fi(lexer))
@@ -239,6 +241,8 @@ static enum token_type reserved_word_1(struct lexer *lexer)
         return TOKEN_CASE;
     else
         return NO_TOKEN;
+    //}
+    //return TOKEN_WORD;
 }
 
 static int token_rw(struct lexer *lexer)
@@ -257,6 +261,8 @@ static int token_rw(struct lexer *lexer)
 
 enum token_type reserved_word(struct lexer *lexer)
 {
+    //if (lexer->current_tok.data != NULL)
+    //{
     if (test_ass(lexer))
         return TOKEN_ASSIGNMENT_WORD;
     else if (token_rw(lexer))
@@ -279,4 +285,6 @@ enum token_type reserved_word(struct lexer *lexer)
         return TOKEN_IN;
     else
         return TOKEN_WORD;
+    //}
+    //return TOKEN_WORD;
 }
