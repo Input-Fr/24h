@@ -1,6 +1,6 @@
 
 if echo tata; then
-	echo toto;
+    echo toto;
 else
-	echo GOOD;
+    echo GOOD;
 fi

@@ -37,6 +37,16 @@ static void restore(void);
 static int handle_redirection(int fd, enum REDIRECTION_TYPE redir_op,
                               char *word);
 
+static int isnum(const char *str)
+{
+    char *endptr;
+    if (*str == 0) // nan
+        return 0;
+
+    strtol(str, &endptr, 10);
+    return *endptr == 0;
+}
+
 static void printWbackslash(char *carg)
 {
     size_t idx = 0;
@@ -239,6 +249,16 @@ int list_run(struct ast *ast, struct hash_map *h)
     return !(i >= list->nbr_cmd);
 }
 
+static void exit_builtin(char *opt)
+{
+    if (opt && isnum(opt))
+    {
+        int n = atoi(opt);
+        exit(n);
+    }
+    exit(0);
+}
+
 // to run the command in simple command
 static int cmd_run(char **words, struct hash_map *h)
 {
@@ -265,6 +285,10 @@ static int cmd_run(char **words, struct hash_map *h)
         {
             return 1;
         }
+        else if (!strcmp(words[0], "exit"))
+        {
+            exit(0);
+        }
         else
         {
             pid_t pid = fork();
@@ -273,7 +297,7 @@ static int cmd_run(char **words, struct hash_map *h)
                 int status_code = execvp(words[0], words);
                 if (status_code == -1)
                 {
-                    exit(2);
+                    exit(127);
                 }
             }
             int wstatus;
