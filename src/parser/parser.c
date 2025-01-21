@@ -168,6 +168,7 @@ static struct ast *parse_and_or(enum parser_status *status, struct lexer *lexer)
     struct token tok = lexer_peek(lexer);
     while (tok.type == TOKEN_AND_IF || tok.type == TOKEN_OR_IF)
     {
+        struct token op = tok;
         lexer_pop(lexer);
         tok = lexer_peek(lexer);
         while (tok.type == TOKEN_NEWLINE)
@@ -180,7 +181,7 @@ static struct ast *parse_and_or(enum parser_status *status, struct lexer *lexer)
         {
             return NULL;
         }
-        ast_and_or = push_and_or(ast_and_or, tok, ast_pipe);
+        ast_and_or = push_and_or(ast_and_or, op, ast_pipe);
         tok = lexer_peek(lexer);
     }
     return ast_and_or;

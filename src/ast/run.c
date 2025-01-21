@@ -132,34 +132,55 @@ static void print_expanded(struct hash_map *h, char *str)
     free(string);
 }
 
+static size_t set_args(bool *newline, bool *backslash, char *args[], size_t nb_args)
+{
+    size_t i = 0;
+    while (i < nb_args && args[i][0] == '-')
+    {
+        size_t j = 1;
+        while (args[i][j])
+        {
+            if (args[i][j] == 'n')
+            {
+                *newline = false;
+            }
+            else if (args[i][j] == 'e')
+            {
+                *backslash = true;
+            }
+            else if (args[i][j] == 'E')
+            {
+                *backslash = false;
+            }
+            else
+            {
+                // pas une option valide, juste afficher
+                break;
+            }
+            j++;
+        }
+        if (!args[i][j])
+        {
+            i++;
+            if (!strcmp(args[i-1], "-"))
+            {
+                break;
+            }
+        }
+        else
+        {
+            break;
+        }
+    }
+    return i;
+}
+
 // args est de la forme ["arg1", "arg2", "arg3"]
 static void echo_builtin(char *args[], size_t nb_args, struct hash_map *h)
 {
     bool newline = true;
     bool backslash = false;
-    size_t i = 0;
-    while (i < nb_args && args[i][0] == '-')
-    {
-        if (!strcmp(args[i], "-n"))
-        {
-            newline = false;
-        }
-        else if (!strcmp(args[i], "-e"))
-        {
-            backslash = true;
-        }
-        else if (!strcmp(args[i], "-E"))
-        {
-            backslash = false;
-        }
-        else
-        {
-            // pas une option juste afficher
-            break;
-        }
-        i++;
-    }
-
+    size_t i = set_args(&newline, &backslash, args, nb_args);
     // echo les arguments
     while (i < nb_args)
     {
@@ -299,13 +320,13 @@ int and_or_run(struct ast *ast, struct hash_map *h)
     {
         if (and_or_ast->c.op->op == AND_OP)
         {
-            return RUN(and_or_ast->c.op->left, h)
-                && RUN(and_or_ast->c.op->right, h);
+            return !RUN(and_or_ast->c.op->left, h)
+                && !RUN(and_or_ast->c.op->right, h);
         }
         else
         {
-            return RUN(and_or_ast->c.op->left, h)
-                || RUN(and_or_ast->c.op->right, h);
+            return !RUN(and_or_ast->c.op->left, h)
+                || !RUN(and_or_ast->c.op->right, h);
         }
     }
 }
