@@ -7,11 +7,23 @@
 
 static struct token token_reco(struct lexer *lexer);
 
+void single_quote_error(struct lexer *lexer)
+{
+    char *word = lexer->current_tok.data->str;
+    printf("%s\n",word);
+}
+
 static struct token end_of_file(struct lexer *lexer)
 {
     // --1
     if (lexer->word || lexer->ope)
     {
+        if (lexer->Quoting == SINGLE_QUOTE ||
+                lexer->Quoting == DOUBLE_QUOTE)
+        {
+            //fprintf(stdout, "expect another quote\n");
+            exit(2);
+        }
         ungetc(EOF, lexer->file);
         if (lexer->current_tok.type == TOKEN_WORD)
         {
@@ -274,7 +286,7 @@ static struct token token_reco(struct lexer *lexer)
     {
         return blank(lexer);         // 8
     }
-    else if (lexer->word)           
+    else if (lexer->word)
     {
         return continue_word(lexer); // 9
     }

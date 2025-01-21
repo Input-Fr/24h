@@ -168,6 +168,7 @@ static struct ast *parse_and_or(enum parser_status *status, struct lexer *lexer)
     struct token tok = lexer_peek(lexer);
     while (tok.type == TOKEN_AND_IF || tok.type == TOKEN_OR_IF)
     {
+        struct token op = tok;
         lexer_pop(lexer);
         tok = lexer_peek(lexer);
         while (tok.type == TOKEN_NEWLINE)
@@ -180,7 +181,7 @@ static struct ast *parse_and_or(enum parser_status *status, struct lexer *lexer)
         {
             return NULL;
         }
-        ast_and_or = push_and_or(ast_and_or, tok, ast_pipe);
+        ast_and_or = push_and_or(ast_and_or, op, ast_pipe);
         tok = lexer_peek(lexer);
     }
     return ast_and_or;
@@ -257,16 +258,39 @@ static struct ast *parse_command(enum parser_status *status,
 }
 
 /*
-shell_command =
-rule_if
-| rule_while
-| rule_until
-| rule_for ;
+shell_command = '{' compound_list '}'
+                | rule_if
+                | rule_while
+                | rule_until
+                | rule_for ;
 
 */
 static struct ast *parse_shell_command(enum parser_status *status,
                                        struct lexer *lexer)
 {
+    struct token tok = lexer_peek(lexer);
+    if (tok.type == TOKEN_LBRACE)
+    {
+        lexer_pop(lexer);
+        struct ast *ast_compound = parse_compound_list(status, lexer);
+        if (*status == PARSER_OK)
+        {
+            tok = lexer_pop(lexer);
+            if (tok.type == TOKEN_RBRACE)
+            {
+                return ast_compound;
+            }
+            else
+            {
+                *status = PARSER_UNEXPECTED_TOKEN;
+                return NULL;
+            }
+        }
+        else
+        {
+            return NULL;
+        }
+    }
     struct ast *ast_rule = parse_rule_if(status, lexer);
     if (*status != PARSER_OK)
     {
@@ -775,6 +799,8 @@ static int redir_op(struct token tok);
 
 static int isnum(const char *str);
 
+static int valid_fd(int fd);
+
 static struct ast *parse_element(enum parser_status *status,
                                  struct lexer *lexer)
 {
@@ -783,12 +809,12 @@ static struct ast *parse_element(enum parser_status *status,
     {
         char *str = tok.data->str;
         lexer_pop(lexer);
-        if (redir_op(lexer_peek(lexer)))
+        if (redir_op(lexer_peek(lexer)) && isnum(str) && valid_fd(atoi(str)))
         {
             struct ast *ast_redir = parse_redirection(status, lexer);
             if (*status == PARSER_OK)
             {
-                // ((struct ast_redirection *)ast_redir)->n = atoi(str);
+                ((struct ast_redirection *)ast_redir)->n = atoi(str);
                 free(str);
                 return ast_element_init(REDIRECTION, NULL, ast_redir);
             }
@@ -874,7 +900,6 @@ static struct ast *parse_prefix(enum parser_status *status, struct lexer *lexer)
 
 static enum REDIRECTION_TYPE strop(struct token op);
 
-static int valid_fd(int fd);
 
 static struct ast *parse_redirection(enum parser_status *status,
                                      struct lexer *lexer)

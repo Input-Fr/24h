@@ -100,6 +100,15 @@ char *delete_dollar(char *word)
     return new;
 }
 
+static void error_var_brackets(char *var)
+{
+    if (strlen(var) > 1 && var[0] == '$' 
+            && var[1] == '{' && var[strlen(var)] != '}')
+    {
+        exit(2);
+    }
+}
+
 char *delimite_var(char *prev, char *next, char *word)
 {
     char *tmp = word;
@@ -145,6 +154,7 @@ char *delimite_var(char *prev, char *next, char *word)
 
     word = tmp;
     // free(word);
+    error_var_brackets(word);
     return new;
 }
 
