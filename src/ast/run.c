@@ -105,7 +105,7 @@ static int is_word(struct ast *ast)
 static char **create_words(char *word, struct ast **asts, size_t *nbr_element)
 {
     char **words = malloc(sizeof(char *));
-    words[0] = word;
+    words[0] = word; // expand
     int size = 1;
     for (size_t i = 0; i < *nbr_element; i++)
     {
@@ -120,7 +120,7 @@ static char **create_words(char *word, struct ast **asts, size_t *nbr_element)
                 exit(2);
             }
             words = test;
-            words[(size - 1)] = elt->elt.word;
+            words[(size - 1)] = elt->elt.word; // expand
         }
     }
 
@@ -287,7 +287,7 @@ static int cmd_run(char **words, struct hash_map *h)
         }
         else if (!strcmp(words[0], "exit"))
         {
-            exit(0);
+            exit_builtin(words[1]);
         }
         else
         {
