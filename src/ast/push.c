@@ -44,6 +44,30 @@ void boucle_push(struct ast *ast, struct ast *add)
     return;
 }
 
+void for_push(struct ast * ast,struct ast *add)
+{
+	UNUSED(ast);
+	UNUSED(add);
+	return;
+}
+
+/*void for_push_Word(struct ast * ast,char * word)
+{
+    assert(ast && ast->AST_FOR);
+    
+    asts = realloc(ast, sizeof(struct ast *) * (*nbr_elt + 1));
+    if (asts == NULL)
+    {
+        exit(2);
+    }
+    else
+    {
+        asts[*nbr_elt] = add;
+        *nbr_elt += 1;
+        return asts;
+    }	
+}
+*/
 void redirection_push(struct ast *ast, struct ast *add)
 {
     UNUSED(ast);

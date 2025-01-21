@@ -215,7 +215,7 @@ struct ast *ast_simple_cmd_init(char *word)
 
 struct ast * ast_for_init(struct ast * do_body,struct ast * variable)
 {
-	static struct ast_for ftable = {
+	static struct ast_ftable ftable = {
 		.run = &for_run,
 		.free = &for_free,
 		.pretty_print = &for_pretty_print,

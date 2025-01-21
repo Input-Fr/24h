@@ -101,74 +101,74 @@ struct ast_if
 
 struct ast_list
 {
-    struct ast base;
-    size_t nbr_cmd; // number of command
-    struct ast **cmd; // the list of command
+struct ast base;
+size_t nbr_cmd; // number of and_or
+struct ast **cmd; // the list of and_or
 };
 
 struct operation
 {
-    enum op op;
-    struct ast *left;
-    struct ast *right;
+enum op op;
+struct ast *left;
+struct ast *right;
 };
 
 union content
 {
-    struct ast *pipeline;
-    struct operation *op;
+struct ast *pipeline;
+struct operation *op;
 };
 
 struct ast_and_or
 {
-    struct ast base;
-    enum and_or_type t;
-    union content c;
+struct ast base;
+enum and_or_type t;
+union content c;
 };
 
 struct ast_pipeline
 {
-    struct ast base;
-    int negation;
-    struct ast **cmd;
-    size_t nbr_cmd;
+struct ast base;
+int negation;
+struct ast **cmd;
+size_t nbr_cmd;
 };
 
 struct ast_boucle
 {
-    struct ast base;
-    struct ast *condition;
-    struct ast *do_body;
-    int run_condition;
+struct ast base;
+struct ast *condition;
+struct ast *do_body;
+int run_condition;
 };
 
 // element
 
 enum ELEMENT_TYPE
 {
-    WORD,
-    REDIRECTION,
+WORD,
+REDIRECTION,
 };
 
 union element
 {
-    char *word;
-    struct ast *redirection;
+char *word;
+struct ast *redirection;
 };
 
 struct ast_element
 {
-    struct ast base;
-    enum ELEMENT_TYPE type;
-    union element elt;
+struct ast base;
+enum ELEMENT_TYPE type;
+union element elt;
 };
 
 struct ast_redirection
 {
-    struct ast base;
-    int n;
-    char *word;
-    enum REDIRECTION_TYPE redir_op;
+struct ast base;
+int n;
+char *word;
+enum REDIRECTION_TYPE redir_op;
 };
 // init of every ast type
 
@@ -233,6 +233,7 @@ void boucle_free(struct ast *ast);
 int boucle_pretty_print(struct ast *ast, int actual);
 void boucle_push(struct ast *ast, struct ast *add);
 
+
 // redirection
 int redirection_run(struct ast *ast, struct hash_map *h);
 void redirection_free(struct ast *ast);
@@ -269,8 +270,16 @@ void pipeline_free(struct ast *ast);
 int pipeline_pretty_print(struct ast *ast, int actual);
 void pipeline_push(struct ast *ast, struct ast *add);
 
+// for
+int for_run(struct ast * ast, struct hash_map *h);
+void for_free(struct ast * ast);
+int for_pretty_print(struct ast * ast,int actual);
+void for_push(struct ast * ast, struct ast * add);
 // pretty_print the entire_ast
 void pretty_print_ast(struct ast *ast);
+
+
+
 
 // extand.c
 
