@@ -11,6 +11,7 @@
 #include <unistd.h>
 
 #include "ast.h"
+#include "cd.h"
 #include "hash_map/hash_map.h"
 
 #define RUN(AST, HASH_TABLE) (*(AST)->ftable->run)((AST), (HASH_TABLE))
@@ -294,6 +295,12 @@ static int cmd_run(char **words, struct hash_map *h)
         else if (!strcmp(words[0], "exit"))
         {
             exit_builtin(words[1]);
+        }
+        else if (!strcmp(words[0], "cd"))
+        {
+            if (words[1])
+                return cmd_cd(words[1]);
+            return cmd_cd("");
         }
         else
         {

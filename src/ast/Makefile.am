@@ -2,7 +2,7 @@
 lib_LIBRARIES = libast.a
 
 # source files for libparser
-libast_a_SOURCES = ast.h build_graphivz.h pretty_print.c pretty_print2.c run.c  run2.c build_graphivz.c  free.c free2.c init.c expand.c push.c expand_function.c
+libast_a_SOURCES = ast.h build_graphivz.h cd.h pretty_print.c pretty_print2.c run.c cd.c run2.c build_graphivz.c  free.c free2.c init.c expand.c push.c expand_function.c
 
 # flags needed for the libparser
 libast_a_CPPFLAGS = -I$(top_srcdir)/src
