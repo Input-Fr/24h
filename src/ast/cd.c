@@ -120,11 +120,11 @@ static void set_curpath_to_dirop(char *curpath, char *arg)
     }
 
 }
-static int hyphen_minus(void)
+static int nocomment(char *pwd, char *home_val)
 {
-    char *old = getenv("HOME");
-    int ret = cmd_cd(old);
-    printf("%s\n", old);
+    setenv("OLDPWD", pwd, 1);
+    int ret = cmd_cd(home_val);
+    printf("%s\n", home_val);
     return ret;
 }
 
@@ -136,7 +136,7 @@ int cmd_cd(char *arg) // following SCL algorithm
     char *pwd = getenv("PWD");
     if (!strcmp("-", arg))
     {
-        return hyphen_minus();
+        return cmd_cd(getenv("OLDPWD"));
     }
     int allocated = 0;
     int step7 = 0;
@@ -153,7 +153,7 @@ int cmd_cd(char *arg) // following SCL algorithm
     }
     if ((arg == NULL || !strcmp(arg, "")) && home_val != NULL) // 2
     {
-        cmd_cd(home_val);
+        nocomment(pwd, home_val);
     }
     if (arg && arg[0] == '/') // 3
     {
@@ -204,7 +204,7 @@ int cmd_cd(char *arg) // following SCL algorithm
         }
     }
     // --------------
-    setenv("OLDPWD", curpath, 1);
+    setenv("OLDPWD", pwd, 1);
     int ret = !chdir(curpath);
     clean(allocated, pwd, curpath);
     return ret;
