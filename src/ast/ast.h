@@ -278,9 +278,6 @@ void for_push(struct ast * ast, struct ast * add);
 // pretty_print the entire_ast
 void pretty_print_ast(struct ast *ast);
 
-
-
-
 // extand.c
 
 int test_var(char *str);
