@@ -11,6 +11,7 @@
 #include <unistd.h>
 
 #include "ast.h"
+#include "lexer/lexer.h"
 #include "hash_map/hash_map.h"
 
 #define RUN(AST, HASH_TABLE) (*(AST)->ftable->run)((AST), (HASH_TABLE))
@@ -259,6 +260,65 @@ static void exit_builtin(char *opt)
     exit(0);
 }
 
+
+static int unset_builtin(char *args[], size_t nb_args, struct hash_map *h)
+{
+    if (!nb_args)
+    {
+        return 0;
+    }
+    size_t i = 0;
+    bool var = false;
+    bool fonc = false;
+    while (args[i][0] == '-')
+    {   
+        char first = args[i][1];
+        for (size_t j = 1; args[i][j] != '\0'; j+=1)  //cas -vvvvfvvvv
+        {
+            if (strlen(args[i]) > 0 && args[i][j] != 'v' && args[i][j] != 'f')
+            {
+                exit(2);
+            }
+            if (first != args[i][j])
+            {
+                exit(1);
+            }
+        }
+        if ((first == 'f' && var) || (first == 'v' && fonc)) //cas -f -f -f -f -v -f
+            exit(1);
+
+        if (strlen(args[i]) > 0 && args[i][1] != 'v' && args[i][1] != 'f')
+            exit(2);
+        if (args[i][1] != 'f')
+        {
+            var = false;
+            fonc = true;
+        }
+        if (args[i][1] != 'v')
+        {
+            var = true;
+            fonc = false;
+        }
+
+        i += 1;
+    }
+
+    if (!var && !fonc)
+    {
+        var = true;
+    }
+
+    for (; i < nb_args; i += 1)
+    {
+        //if (!test_name(args[i]))
+        //    exit(1);
+        hash_map_remove(h,args[i]);
+        //free(hash_map_get(h, args[i]));
+        //free(args[i]);
+    }
+    return 0;
+}
+
 // to run the command in simple command
 static int cmd_run(char **words, struct hash_map *h)
 {
@@ -268,13 +328,13 @@ static int cmd_run(char **words, struct hash_map *h)
     }
     else
     {
+        int idx = 1;
+        while (words[idx])
+        {
+            idx++;
+        }
         if (!strcmp(words[0], "echo"))
         {
-            int idx = 1;
-            while (words[idx])
-            {
-                idx++;
-            }
             echo_builtin(words + 1, idx - 1, h);
         }
         else if (!strcmp(words[0], "true"))
@@ -288,6 +348,10 @@ static int cmd_run(char **words, struct hash_map *h)
         else if (!strcmp(words[0], "exit"))
         {
             exit_builtin(words[1]);
+        }
+        else if (!strcmp(words[0], "unset"))
+        {
+            return unset_builtin(words + 1, idx - 1, h);
         }
         else
         {

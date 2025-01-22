@@ -164,8 +164,10 @@ static int test_in(struct lexer *lexer)
     return 0;
 }
 
-static int test_name(char *name)
+int test_name(char *name)
 {
+    //printf("%s\n",name);
+    //printf("%c\n",name[0]);
     size_t i = 0;
     if (!((name[0] >= 'a' && name[0] <= 'z') ||
                 (name[0] >= 'A' && name[0] <= 'Z') || name[0] == '_'))
@@ -190,8 +192,8 @@ static int test_name(char *name)
     {
         return 1;
     }
-    exit(2);
-    return 0;
+    //exit(2);
+    return 1;
 }
 
 static int test_ass(struct lexer *lexer)

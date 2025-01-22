@@ -160,5 +160,6 @@ void lexer_file_back(FILE *hd);
 void operator_1(struct lexer *lexer);
 int test_operator_1(struct lexer *lexer);
 int test_operator(struct lexer *lexer);
+int test_name(char *name);
 
 #endif /* !LEXER_H */
