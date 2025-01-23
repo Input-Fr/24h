@@ -6,7 +6,7 @@
 #include "build_graphivz.h"
 
 #define PRINT(AST, C) (*(AST)->ftable->pretty_print)((AST), (C))
-#define PRINT_LIST(A,NB,ACT) handle_print_list((A),(NB),(ACT))
+#define PRINT_LIST(A, NB, ACT) handle_print_list((A), (NB), (ACT))
 
 /*
 // handle ast with a list of ast in variable
@@ -21,21 +21,17 @@ static int handle_print_list(struct ast ** asts,size_t nbr, int actual)
     return next_node;
 }
 */
-int and_or_pretty_print(struct ast *ast, int actual)
-{
-    (void)ast;
+int and_or_pretty_print(struct ast *ast, int actual) {
+  (void)ast;
 
-    return actual + 1;
+  return actual + 1;
 }
-int pipeline_pretty_print(struct ast *ast, int actual)
-{
-    (void)ast;
-    return actual + 1;
+int pipeline_pretty_print(struct ast *ast, int actual) {
+  (void)ast;
+  return actual + 1;
 }
 
-int for_pretty_print(struct ast * ast, int actual)
-{
-        (void)(ast);
-        return actual + 1;
+int for_pretty_print(struct ast *ast, int actual) {
+  (void)(ast);
+  return actual + 1;
 }
-
