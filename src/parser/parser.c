@@ -841,6 +841,7 @@ static struct ast *parse_element(enum parser_status *status,
 
 
 // ASSIGNMENT WORDS
+
 static struct ast *parse_var(enum parser_status *status, struct lexer *lexer)
 {
     struct token tok = lexer_peek(lexer);

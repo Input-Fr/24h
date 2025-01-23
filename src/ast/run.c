@@ -12,6 +12,7 @@
 
 #include "ast.h"
 #include "lexer/lexer.h"
+#include "cd.h"
 #include "hash_map/hash_map.h"
 #include "parser/parser.h"
 
@@ -21,7 +22,7 @@
     handle_list_ast((ASTS), (&ELT), HASH_TABLE) // évalue une liste d'ast
 
 // crée la liste d'élément pour l'ast élément
-#define MAKE_WORD(WORD, ASTS, NBR_ELT) create_words((WORD), (ASTS), &(NBR_ELT))
+#define MAKE_WORD(WORD, ASTS, NBR_ELT, H) create_words((WORD), (ASTS), &(NBR_ELT), H)
 
 // FONCTION ANNEXE REDIR
 struct s_redirection
@@ -37,7 +38,7 @@ struct s_redirection *s_redir = NULL;
 static void restore(void);
 
 static int handle_redirection(int fd, enum REDIRECTION_TYPE redir_op,
-                              char *word);
+                              char *word, struct hash_map *h);
 
 static int isnum(const char *str)
 {
@@ -107,10 +108,10 @@ static int is_word(struct ast *ast)
     return ((struct ast_element *)ast)->type == WORD;
 }
 
-static char **create_words(char *word, struct ast **asts, size_t *nbr_element)
+static char **create_words(char *word, struct ast **asts, size_t *nbr_element, struct hash_map *h)
 {
     char **words = malloc(sizeof(char *));
-    words[0] = word; // expand
+    words[0] = word; // already expanded
     int size = 1;
     for (size_t i = 0; i < *nbr_element; i++)
     {
@@ -125,6 +126,12 @@ static char **create_words(char *word, struct ast **asts, size_t *nbr_element)
                 exit(2);
             }
             words = test;
+            char *save = expand(h, elt->elt.word);
+            if (strcmp(save, "")) // if not empty
+            {
+                free(elt->elt.word);
+                elt->elt.word = save;
+            }
             words[(size - 1)] = elt->elt.word; // expand
         }
     }
@@ -415,6 +422,12 @@ static int cmd_run(char **words, struct hash_map *h)
         {
             return export_builtin(words + 1, idx - 1, h);
         }
+        else if (!strcmp(words[0], "cd"))
+        {
+            if (words[1])
+                return cmd_cd(words[1]);
+            return cmd_cd("");
+        }
         else
         {
             pid_t pid = fork();
@@ -497,10 +510,9 @@ int boucle_run(struct ast *ast, struct hash_map *h)
 // redirection ast eval
 int redirection_run(struct ast *ast, struct hash_map *h)
 {
-    (void)h;
     assert(ast && ast->type == AST_REDIRECTION);
     struct ast_redirection *redi = (struct ast_redirection *)ast;
-    int ret = handle_redirection(redi->n, redi->redir_op, redi->word);
+    int ret = handle_redirection(redi->n, redi->redir_op, redi->word, h);
     return ret;
 }
 
@@ -678,7 +690,7 @@ static void set_vars(int *fd, int *flags, enum REDIRECTION_TYPE redir_op)
 }
 
 static int handle_redirection(int fd, enum REDIRECTION_TYPE redir_op,
-                              char *word)
+                              char *word, struct hash_map *h)
 {
     int flags = -1;
     int new_fd = -1;
@@ -715,8 +727,17 @@ static int handle_redirection(int fd, enum REDIRECTION_TYPE redir_op,
     {
         return 1;
     }
-
+    // expand
+    char *expanded = expand(h, word);
+    if (strcmp(expanded, "")) // if not empty
+    {
+        word = expanded;
+    }
     new_fd = open(word, flags, 0644);
+    if (strcmp(expanded, "")) // if not empty
+    {
+        free(expanded);
+    }
     if (new_fd == -1)
     {
         return 1; // error while opening
@@ -757,7 +778,13 @@ int simple_cmd_run(struct ast *ast, struct hash_map *h)
     j = RUN_LIST(cmd->element, cmd->nbr_element, h);
     if (cmd->word)
     {
-        char **words = MAKE_WORD(cmd->word, cmd->element, cmd->nbr_element);
+        char *expanded = expand(h, cmd->word);
+        if (strcmp(expanded, "")) // if not empty
+        {
+            free(cmd->word);
+            cmd->word = expanded;
+        }
+        char **words = MAKE_WORD(cmd->word, cmd->element, cmd->nbr_element, h);
         j = cmd_run(words, h);
         free_words(words);
     }
