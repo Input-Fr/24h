@@ -11,79 +11,106 @@
 #include "lexer/lexer.h"
 #include "parser/parser.h"
 
-static FILE *gere_usage(int argc, char *argv[]) {
-  if (argc == 1) {
-    return stdin;
-  } else {
-    int begin = 1;
-    if (!strcmp(argv[1], "-p")) {
-      if (argc < 3) {
-        return NULL;
-      }
-      begin += 1;
-    } else if (!strcmp(argv[1], "-h")) {
-      if (argc < 3) {
-        return NULL;
-      }
-      begin += 1;
+static FILE *gere_usage(int argc, char *argv[])
+{
+    if (argc == 1)
+    {
+        return stdin;
     }
-    int second = begin + 1;
-    if (!strcmp(argv[begin], "-c")) {
-      if (argc <= second) {
-        return NULL;
-      }
-      return fmemopen(argv[second], (strlen(argv[second])), "r");
-    } else {
-      return fopen(argv[begin], "r");
+    else
+    {
+        int begin = 1;
+        if (!strcmp(argv[1], "-p"))
+        {
+            if (argc < 3)
+            {
+                return NULL;
+            }
+            begin += 1;
+        }
+        else if (!strcmp(argv[1], "-h"))
+        {
+            if (argc < 3)
+            {
+                return NULL;
+            }
+            begin += 1;
+        }
+        int second = begin + 1;
+        if (!strcmp(argv[begin], "-c"))
+        {
+            if (argc <= second)
+            {
+                return NULL;
+            }
+            return fmemopen(argv[second], (strlen(argv[second])), "r");
+        }
+        else
+        {
+            return fopen(argv[begin], "r");
+        }
     }
-  }
 }
 
-char lexer_file(FILE *hd) { return fgetc(hd); }
+char lexer_file(FILE *hd)
+{
+    return fgetc(hd);
+}
 
-int main(int argc, char *argv[]) {
-  FILE *value = gere_usage(argc, argv);
-  if (!value) {
-    return -1;
-  }
-  // init lexer
-  struct lexer *lexer = lexer_new();
-  lexer->file = value;
-
-  int ret_code = 0;
-  enum parser_status status;
-  struct ast *ast;
-  struct hash_map *h = hash_map_init(7);
-  char *bufferpwd = malloc(1024 * sizeof(char));
-  while (lexer->current_tok.type != TOKEN_EOF) {
-    ast = parse(&status, lexer);
-    if (!ast) {
-      if (status == PARSER_OK && lexer->current_tok.type != TOKEN_EOF) {
-        continue;
-      }
-      if (status == PARSER_OK) {
-        exit(ret_code);
-      } else {
-        errx(2, "Wrong grammar");
-      }
+int main(int argc, char *argv[])
+{
+    FILE *value = gere_usage(argc, argv);
+    if (!value)
+    {
+        return -1;
     }
-    if (argc > 1 && !strcmp(argv[1], "-p")) {
-      pretty_print_ast(ast);
-    } else {
-      h->ret = ret_code;
-      h->nb_args = argc - 1;
-      h->all_args = argv;
-      h->old_pwd = getcwd(bufferpwd, 1024);
-      ret_code = (*ast->ftable->run)(ast, h);
+    // init lexer
+    struct lexer *lexer = lexer_new();
+    lexer->file = value;
+
+    int ret_code = 0;
+    enum parser_status status;
+    struct ast *ast;
+    struct hash_map *h = hash_map_init(7);
+    char *bufferpwd = malloc(1024 * sizeof(char));
+    while (lexer->current_tok.type != TOKEN_EOF)
+    {
+        ast = parse(&status, lexer);
+        if (!ast)
+        {
+            if (status == PARSER_OK && lexer->current_tok.type != TOKEN_EOF)
+            {
+                continue;
+            }
+            if (status == PARSER_OK)
+            {
+                exit(ret_code);
+            }
+            else
+            {
+                errx(2, "Wrong grammar");
+            }
+        }
+        if (argc > 1 && !strcmp(argv[1], "-p"))
+        {
+            pretty_print_ast(ast);
+        }
+        else
+        {
+            h->ret = ret_code;
+            h->nb_args = argc - 1;
+            h->all_args = argv;
+            h->old_pwd = getcwd(bufferpwd, 1024);
+            ret_code = (*ast->ftable->run)(ast, h);
+        }
+        (*ast->ftable->free)(ast);
     }
-    (*ast->ftable->free)(ast);
-  }
 
-  lexer_free(lexer);
-  hash_map_free(h);
-  free(bufferpwd);
+    lexer_free(lexer);
+    hash_map_free(h);
+    free(bufferpwd);
 
-  return ret_code;
+    return ret_code;
 }
 
 /*

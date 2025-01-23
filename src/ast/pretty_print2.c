@@ -21,17 +21,20 @@ static int handle_print_list(struct ast ** asts,size_t nbr, int actual)
     return next_node;
 }
 */
-int and_or_pretty_print(struct ast *ast, int actual) {
-  (void)ast;
+int and_or_pretty_print(struct ast *ast, int actual)
+{
+    (void)ast;
 
-  return actual + 1;
+    return actual + 1;
 }
-int pipeline_pretty_print(struct ast *ast, int actual) {
-  (void)ast;
-  return actual + 1;
+int pipeline_pretty_print(struct ast *ast, int actual)
+{
+    (void)ast;
+    return actual + 1;
 }
 
-int for_pretty_print(struct ast *ast, int actual) {
-  (void)(ast);
-  return actual + 1;
+int for_pretty_print(struct ast *ast, int actual)
+{
+    (void)(ast);
+    return actual + 1;
 }
