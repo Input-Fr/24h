@@ -18,6 +18,7 @@ enum AST_TYPE
     AST_REDIRECTION,
     AST_OPERATOR, // and// pr
     AST_VARIABLE,
+    AST_FUNCTION,
     AST_ELEMENT,
 };
 
@@ -181,6 +182,20 @@ struct ast_for
     size_t nbr_elt;
 };
 
+
+struct ast_function
+{
+	struct ast base;
+	char * fname;
+	struct ast * shell_command;
+	size_t nbr_redirection;
+	struct ast ** redirection;
+};
+
+
+// function
+struct ast * ast_function_init(char * fname,struct ast * shell_command);
+
 // if
 struct ast *ast_if_init(struct ast *condition, struct ast *then_body,
                         struct ast *else_body);
@@ -275,8 +290,21 @@ int for_run(struct ast * ast, struct hash_map *h);
 void for_free(struct ast * ast);
 int for_pretty_print(struct ast * ast,int actual);
 void for_push(struct ast * ast, struct ast * add);
+void for_push_Word(struct ast *ast, char * add);
+
+
+// function 
+int function_run(struct ast * ast,struct hash_map *h);
+void function_free(struct ast * ast);
+void function_push(struct ast * ast, struct ast * add);
+
 // pretty_print the entire_ast
 void pretty_print_ast(struct ast *ast);
+
+
+
+//function to expeand all the list of a char
+char ** expand_all(char ** words,size_t nbr, struct hash_map * h);
 
 // extand.c
 

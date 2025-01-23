@@ -22,6 +22,8 @@
 // crée la liste d'élément pour l'ast élément
 #define MAKE_WORD(WORD, ASTS, NBR_ELT, H) create_words((WORD), (ASTS), &(NBR_ELT), H)
 
+static int egal(char * word,const char * second);
+
 // FONCTION ANNEXE REDIR
 struct s_redirection
 {
@@ -121,13 +123,26 @@ static char **create_words(char *word, struct ast **asts, size_t *nbr_element, s
                 exit(2);
             }
             words = test;
-            char *save = expand(h, elt->elt.word);
-            if (strcmp(save, "")) // if not empty
+	    char * save = malloc(strlen(elt->elt.word) + 1);
+	    if (!save)
+	    {
+		   exit(2);
+	    }
+	    strcpy(save,elt->elt.word);  
+            char *expands = expand(h,save);
+            /*if (!egal(save, "")) // if not empty
             {
                 free(elt->elt.word);
                 elt->elt.word = save;
-            }
-            words[(size - 1)] = elt->elt.word; // expand
+            }*/
+	    if (egal(expands,"") && !test_var(save))
+	    {
+		words[(size - 1)] = save; // expand
+	   }
+	   else
+	   {
+		words[(size - 1)] = expands; // expand
+	   }
         }
     }
 
@@ -264,65 +279,6 @@ static void exit_builtin(char *opt)
         exit(n);
     }
     exit(0);
-}
-
-// to run the command in simple command
-static int cmd_run(char **words, struct hash_map *h)
-{
-    if (!words)
-    {
-        return 2;
-    }
-    else
-    {
-        if (!strcmp(words[0], "echo"))
-        {
-            int idx = 1;
-            while (words[idx])
-            {
-                idx++;
-            }
-            echo_builtin(words + 1, idx - 1, h);
-        }
-        else if (!strcmp(words[0], "true"))
-        {
-            return 0;
-        }
-        else if (!strcmp(words[0], "false"))
-        {
-            return 1;
-        }
-        else if (!strcmp(words[0], "exit"))
-        {
-            exit_builtin(words[1]);
-        }
-        else if (!strcmp(words[0], "cd"))
-        {
-            if (words[1])
-                return cmd_cd(words[1]);
-            return cmd_cd("");
-        }
-        else
-        {
-            pid_t pid = fork();
-            if (pid == 0)
-            {
-                int status_code = execvp(words[0], words);
-                if (status_code == -1)
-                {
-                    exit(127);
-                }
-            }
-            int wstatus;
-            waitpid(pid, &wstatus, 0);
-            int return_value = WEXITSTATUS(wstatus);
-            if (return_value == 2)
-            {
-                errx(2, "Terminated Incorrectly\n");
-            }
-        }
-        return 0;
-    }
 }
 
 // if ast eval
@@ -629,7 +585,6 @@ static int handle_redirection(int fd, enum REDIRECTION_TYPE redir_op,
 
 static void free_words(char **words)
 {
-    /*
     if (words)
     {
 
@@ -639,30 +594,206 @@ static void free_words(char **words)
         }
 
     }
-    */
     free(words);
 }
+
+
+static int handle_executable_builtin(char ** words)
+{
+	pid_t pid = fork();
+	if (pid == 0)
+	{
+		int status_code = execvp(words[0], words);
+		if (status_code == -1)
+		{
+			exit(127);
+		}
+	}
+	int wstatus;
+	waitpid(pid, &wstatus, 0);
+	int return_value = WEXITSTATUS(wstatus);
+	if (return_value == 2)
+	{
+		errx(2, "Terminated Incorrectly\n");
+	}
+	return 0;
+}
+static int handle_special_builtin (char ** words, struct hash_map *h)
+{
+	if (!words)
+	{
+		return 2;
+	}
+
+        if (!strcmp(words[0], "echo"))
+        {
+            int idx = 1;
+            while (words[idx])
+            {
+                idx++;
+            }
+            echo_builtin(words + 1, idx - 1, h);
+        }
+        else if (!strcmp(words[0], "true"))
+        {
+            return 0;
+        }
+        else if (!strcmp(words[0], "false"))
+        {
+            return 1;
+        }
+        else if (!strcmp(words[0], "exit"))
+        {
+            exit_builtin(words[1]);
+        }
+        else if (!strcmp(words[0], "cd"))
+        {
+            if (words[1])
+                return cmd_cd(words[1]);
+            return cmd_cd("");
+	}
+	return 0;
+}
+
+
+static char * unspecified_behaviour[] = 
+{
+	"alloc", "autoload", "bind","bindkey","builtin","bye","caller","cap",
+	"chdir","clone","comparguments","compcall","compctl","compdescribe",
+	"compfiles","compgen","compgroups","complete","compquote","comptags",
+	"comptry","compvalues","declare","dirs","disable","disown","dosh",
+	"echotc","help","history","hist","let","local","login","map","mapfile",
+	"popd","print","pushd","readarray","savehistory","source","shopt","stop",
+	"stop","suspend","typeset","whence",
+};
+
+
+static char * type_ulimit[] = 
+{
+	"alias","bg","cd","command","false","fc","fg","getopts","hash","jobs",
+	"kill","newgrp","pwd","read","true","umask","unalias","wait"
+};
+
+static int egal(char * word,const char * second)
+{
+	return !strcmp(word,second);
+}
+
+
+static int is_special_builtin(char ** words) 
+{
+		
+	int test = egal(words[0],"echo") || egal(words[0],"true");
+	int test2 = egal(words[0],"false") || egal(words[0],"exit");
+	if (test || test2)
+	{
+		return test || test2;
+	}
+	return egal(words[0],"cd");
+}
+
+static int is_unspecified_behaviour(char * word)
+{
+	short i = 0;
+	while( i < 50 && !egal(word,unspecified_behaviour[i]))
+	{
+		i += 1;
+	}
+	return i < 50;
+}
+
+static int is_type_or_ulimit(char * word)
+{
+	short i = 0;
+	while (i < 18 && !egal(word,type_ulimit[i]))
+	{
+		i += 1;
+	}
+	return i < 18;
+}
+
+static int cmd_run(char **words, struct hash_map *h)
+{
+    if (!words)
+    {
+        return 2;
+    }
+    if (is_special_builtin(words)) // fist rule
+    {
+	    return handle_special_builtin(words,h);
+    }
+    else if (is_unspecified_behaviour(words[0])) // second rule 
+    {
+	    exit(1);
+    }
+    else if (is_type_or_ulimit(words[0]))
+    {
+	return handle_executable_builtin(words);
+    }	
+    return handle_executable_builtin(words);
+}
+
+static short contain_shash(char * word)
+{
+	size_t i = 0;
+	if (egal(word,""))
+	{	
+		return 0;
+	}
+	size_t size = strlen(word);
+	while(i <= size && word[i] != '/')
+	{
+		i += 1;
+	}
+	return i <= size;
+}
+
 
 int simple_cmd_run(struct ast *ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_SIMPLE_CMD);
     struct ast_simp_cmd *cmd = (struct ast_simp_cmd *)ast;
-    int j = RUN_LIST(cmd->prefix, cmd->nbr_prefix, h);
-    j = RUN_LIST(cmd->element, cmd->nbr_element, h);
+    int result = RUN_LIST(cmd->prefix, cmd->nbr_prefix, h);
+    result = RUN_LIST(cmd->element, cmd->nbr_element, h);
     if (cmd->word)
     {
+	
         char *expanded = expand(h, cmd->word);
-        if (strcmp(expanded, "")) // if not empty
+	char ** words = NULL;
+	if (egal(expanded,""))
+	{
+		if (test_var(cmd->word))
+		{
+			return 1;
+		}
+		char * save = malloc(strlen(cmd->word) + 1);
+		strcpy(save,cmd->word);
+		words = MAKE_WORD(save, cmd->element, cmd->nbr_element, h);
+	}
+	else
+	{
+		words = MAKE_WORD(expanded, cmd->element, cmd->nbr_element, h);
+	}
+	if (contain_shash(words[0]))
+	{
+	
+	}	// check if the command contain / 
+	/*
+        if (!egal(expanded, "")) // check if the expended is not empty
         {
             free(cmd->word);
             cmd->word = expanded;
-        }
+       
         char **words = MAKE_WORD(cmd->word, cmd->element, cmd->nbr_element, h);
-        j = cmd_run(words, h);
-        free_words(words);
+        */
+	else
+	{
+        	result = cmd_run(words, h);
+	}
+	free_words(words);
     }
     restore();
-    return j;
+    return result;
 }
 
 // FIN ANNEXE -------------
