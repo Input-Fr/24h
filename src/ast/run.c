@@ -839,11 +839,11 @@ static int is_special_builtin(char ** words)
 static int is_unspecified_behaviour(char * word)
 {
 	short i = 0;
-	while( i < 50 && !egal(word,unspecified_behaviour[i]))
+	while( i < 48 && !egal(word,unspecified_behaviour[i]))
 	{
 		i += 1;
 	}
-	return i < 50;
+	return i < 48;
 }
 
 static int is_type_or_ulimit(char * word)
@@ -868,7 +868,7 @@ static int cmd_run(char **words, struct hash_map *h)
     }
     else if (is_unspecified_behaviour(words[0])) // second rule 
     {
-	    exit(1);
+	    return 1;
     }
     else if (is_type_or_ulimit(words[0]))
     {
@@ -877,6 +877,7 @@ static int cmd_run(char **words, struct hash_map *h)
     return handle_executable_builtin(words);
 }
 
+/*
 static short contain_shash(char * word)
 {
 	size_t i = 0;
@@ -891,7 +892,7 @@ static short contain_shash(char * word)
 	}
 	return i <= size;
 }
-
+*/
 
 int simple_cmd_run(struct ast *ast, struct hash_map *h)
 {
@@ -909,6 +910,7 @@ int simple_cmd_run(struct ast *ast, struct hash_map *h)
 		if (test_var(cmd->word))
 		{
 			free(expanded);
+			restore();
 			return 1;
 		}
 		char * save = malloc(strlen(cmd->word) + 1);
@@ -919,10 +921,6 @@ int simple_cmd_run(struct ast *ast, struct hash_map *h)
 	{
 		words = MAKE_WORD(expanded, cmd->element, cmd->nbr_element, h);
 	}
-	if (contain_shash(words[0]))
-	{
-	
-	}	// check if the command contain / 
 	/*
         if (!egal(expanded, "")) // check if the expended is not empty
         {
@@ -931,10 +929,7 @@ int simple_cmd_run(struct ast *ast, struct hash_map *h)
        
         char **words = MAKE_WORD(cmd->word, cmd->element, cmd->nbr_element, h);
         */
-	else
-	{
-        	result = cmd_run(words, h);
-	}
+       	result = cmd_run(words, h);
 	free_words(words);
     }
     restore();
