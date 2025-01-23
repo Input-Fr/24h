@@ -120,11 +120,9 @@ static void set_curpath_to_dirop(char *curpath, char *arg)
     }
 
 }
-static int nocomment(char *pwd, char *home_val)
+static int nocomment(char *home_val)
 {
-    setenv("OLDPWD", pwd, 1);
     int ret = cmd_cd(home_val);
-    printf("%s\n", home_val);
     return ret;
 }
 
@@ -136,7 +134,10 @@ int cmd_cd(char *arg) // following SCL algorithm
     char *pwd = getenv("PWD");
     if (!strcmp("-", arg))
     {
-        return cmd_cd(getenv("OLDPWD"));
+        char *oldchap = getenv("OLDPWD");
+        int ret = cmd_cd(oldchap);
+        printf("%s\n", oldchap);
+        return ret;
     }
     int allocated = 0;
     int step7 = 0;
@@ -149,11 +150,13 @@ int cmd_cd(char *arg) // following SCL algorithm
     char *curpath = calloc(PMAX, 1);
     if ((arg == NULL || !strcmp(arg, "")) && home_val == NULL) // 1
     {
+        clean(allocated, pwd, curpath);
         return 1;
     }
     if ((arg == NULL || !strcmp(arg, "")) && home_val != NULL) // 2
     {
-        nocomment(pwd, home_val);
+        clean(allocated, pwd, curpath);
+        return nocomment(home_val);
     }
     if (arg && arg[0] == '/') // 3
     {
