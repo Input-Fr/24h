@@ -152,15 +152,15 @@ static char **create_words(char *word, struct ast **asts, size_t *nbr_element, s
             }*/
             if (egal(expands,"") && !test_var(save))
             {
-                words[(size - 1)] = save; // expand
+                words[(size - 1)] = save;
            }
            else
            {
-                words[(size - 1)] = expands; // expand
+                words[(size - 1)] = expands;
+		free(save);
            }
         }
     }
-
     size += 1;
     char **test = realloc(words, size * sizeof(char *));
     if (!test)
@@ -280,11 +280,17 @@ int list_run(struct ast *ast, struct hash_map *h)
     assert(ast && ast->type == AST_LIST);
     struct ast_list *list = (struct ast_list *)ast;
     size_t i = 0;
-    while (i < list->nbr_cmd && !RUN(list->cmd[i], h))
+    int res = 0;
+    while (i < list->nbr_cmd && !(res = RUN(list->cmd[i], h)))
     {
         i += 1;
     }
-    return !(i >= list->nbr_cmd);
+    if (i >= list->nbr_cmd)
+    {
+	    return 0;
+    }
+    return res;
+
 }
 
 static void exit_builtin(char *opt)
@@ -732,9 +738,9 @@ static int handle_executable_builtin(char ** words)
     int wstatus;
     waitpid(pid, &wstatus, 0);
     int return_value = WEXITSTATUS(wstatus);
-    if (return_value == 2)
+    if (return_value == 127)
     {
-        errx(2, "Terminated Incorrectly\n");
+        errx(127, "Terminated Incorrectly\n");
     }
     return 0;
 }
@@ -913,7 +919,7 @@ int simple_cmd_run(struct ast *ast, struct hash_map *h)
 		{
 			free(expanded);
 			restore();
-			return 1;
+			return 2;
 		}
 		char * save = malloc(strlen(cmd->word) + 1);
 		strcpy(save,cmd->word);
