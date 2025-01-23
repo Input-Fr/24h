@@ -128,26 +128,26 @@ static char **create_words(char *word, struct ast **asts, size_t *nbr_element, s
                 exit(2);
             }
             words = test;
-	    char * save = malloc(strlen(elt->elt.word) + 1);
-	    if (!save)
-	    {
-		   exit(2);
-	    }
-	    strcpy(save,elt->elt.word);  
+            char * save = malloc(strlen(elt->elt.word) + 1);
+            if (!save)
+            {
+                exit(2);
+            }
+            strcpy(save,elt->elt.word);  
             char *expands = expand(h,save);
             /*if (!egal(save, "")) // if not empty
+              {
+              free(elt->elt.word);
+              elt->elt.word = save;
+              }*/
+            if (egal(expands,"") && !test_var(save))
             {
-                free(elt->elt.word);
-                elt->elt.word = save;
-            }*/
-	    if (egal(expands,"") && !test_var(save))
-	    {
-		words[(size - 1)] = save; // expand
-	   }
-	   else
-	   {
-		words[(size - 1)] = expands; // expand
-	   }
+                words[(size - 1)] = save; // expand
+            }
+            else
+            {
+                words[(size - 1)] = expands; // expand
+            }
         }
     }
 
@@ -718,23 +718,23 @@ static void free_words(char **words)
 
 static int handle_executable_builtin(char ** words)
 {
-	pid_t pid = fork();
-	if (pid == 0)
-	{
-		int status_code = execvp(words[0], words);
-		if (status_code == -1)
-		{
-			exit(127);
-		}
-	}
-	int wstatus;
-	waitpid(pid, &wstatus, 0);
-	int return_value = WEXITSTATUS(wstatus);
-	if (return_value == 2)
-	{
-		errx(2, "Terminated Incorrectly\n");
-	}
-	return 0;
+    pid_t pid = fork();
+    if (pid == 0)
+    {
+        int status_code = execvp(words[0], words);
+        if (status_code == -1)
+        {
+            exit(127);
+        }
+    }
+    int wstatus;
+    waitpid(pid, &wstatus, 0);
+    int return_value = WEXITSTATUS(wstatus);
+    if (return_value == 2)
+    {
+        errx(2, "Terminated Incorrectly\n");
+    }
+    return 0;
 }
 static int handle_special_builtin (char ** words, struct hash_map *h)
 {

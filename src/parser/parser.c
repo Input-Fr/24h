@@ -805,9 +805,9 @@ static struct ast *parse_element(enum parser_status *status,
                                  struct lexer *lexer)
 {
     struct token tok = lexer_peek(lexer);
-    if (tok.type == TOKEN_WORD)
+    if (tok.type == TOKEN_WORD || tok.type == TOKEN_ASSIGNMENT_WORD || tok.type == TOKEN_IF)
     {
-        char *str = tok.data->str;
+        char *str = tok.data->str ? tok.data->str : strdup("if");
         lexer_pop(lexer);
         if (redir_op(lexer_peek(lexer)) && isnum(str) && valid_fd(atoi(str)))
         {

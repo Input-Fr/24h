@@ -102,74 +102,74 @@ struct ast_if
 
 struct ast_list
 {
-struct ast base;
-size_t nbr_cmd; // number of and_or
-struct ast **cmd; // the list of and_or
+    struct ast base;
+    size_t nbr_cmd; // number of and_or
+    struct ast **cmd; // the list of and_or
 };
 
 struct operation
 {
-enum op op;
-struct ast *left;
-struct ast *right;
+    enum op op;
+    struct ast *left;
+    struct ast *right;
 };
 
 union content
 {
-struct ast *pipeline;
-struct operation *op;
+    struct ast *pipeline;
+    struct operation *op;
 };
 
 struct ast_and_or
 {
-struct ast base;
-enum and_or_type t;
-union content c;
+    struct ast base;
+    enum and_or_type t;
+    union content c;
 };
 
 struct ast_pipeline
 {
-struct ast base;
-int negation;
-struct ast **cmd;
-size_t nbr_cmd;
+    struct ast base;
+    int negation;
+    struct ast **cmd;
+    size_t nbr_cmd;
 };
 
 struct ast_boucle
 {
-struct ast base;
-struct ast *condition;
-struct ast *do_body;
-int run_condition;
+    struct ast base;
+    struct ast *condition;
+    struct ast *do_body;
+    int run_condition;
 };
 
 // element
 
 enum ELEMENT_TYPE
 {
-WORD,
-REDIRECTION,
+    WORD,
+    REDIRECTION,
 };
 
 union element
 {
-char *word;
-struct ast *redirection;
+    char *word;
+    struct ast *redirection;
 };
 
 struct ast_element
 {
-struct ast base;
-enum ELEMENT_TYPE type;
-union element elt;
+    struct ast base;
+    enum ELEMENT_TYPE type;
+    union element elt;
 };
 
 struct ast_redirection
 {
-struct ast base;
-int n;
-char *word;
-enum REDIRECTION_TYPE redir_op;
+    struct ast base;
+    int n;
+    char *word;
+    enum REDIRECTION_TYPE redir_op;
 };
 // init of every ast type
 
@@ -317,5 +317,6 @@ char *delete_dollar(char *word);
 void error_var(char *word);
 int calcul_len(int nb);
 int test_special_var(char *key);
+void separator_equal(char *name, char *val, char *as);
 
 #endif /* !AST_H */

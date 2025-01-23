@@ -204,6 +204,17 @@ for test_file in tests/current_debug/*; do
     fi
 done
 
+echo ""
+echo ""
+echo -e "\e[1;33m ------ tests folder command_block ------\e[0m"
+echo ""
+echo ""
+for test_file in tests/command_block/*; do
+    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
+        run_file "$test_file"
+    fi
+done
+
 
 
 
