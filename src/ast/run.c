@@ -24,8 +24,6 @@
 // crée la liste d'élément pour l'ast élément
 #define MAKE_WORD(WORD, ASTS, NBR_ELT, H) create_words((WORD), (ASTS), &(NBR_ELT), H)
 
-static int egal(char * word,const char * second);
-
 // FONCTION ANNEXE REDIR
 struct s_redirection
 {
@@ -33,6 +31,8 @@ struct s_redirection
     int saved_fd;
     struct s_redirection *next;
 };
+
+static int egal(char * word,const char * second);
 
 // liste globale des fd sauvegardés
 struct s_redirection *s_redir = NULL;
@@ -110,6 +110,16 @@ static int is_word(struct ast *ast)
     return ((struct ast_element *)ast)->type == WORD;
 }
 
+//static void print_expanded(struct hash_map *h, char *str)
+//{
+//    char *string = expand(h, str);
+//    if (string != NULL)
+//    {
+//        printf("%s", string);
+//    }
+//    free(string);
+//}
+
 static char **create_words(char *word, struct ast **asts, size_t *nbr_element, struct hash_map *h)
 {
     char **words = malloc(sizeof(char *));
@@ -131,23 +141,23 @@ static char **create_words(char *word, struct ast **asts, size_t *nbr_element, s
             char * save = malloc(strlen(elt->elt.word) + 1);
             if (!save)
             {
-                exit(2);
+                   exit(2);
             }
-            strcpy(save,elt->elt.word);  
+            strcpy(save,elt->elt.word);
             char *expands = expand(h,save);
             /*if (!egal(save, "")) // if not empty
-              {
-              free(elt->elt.word);
-              elt->elt.word = save;
-              }*/
+            {
+                free(elt->elt.word);
+                elt->elt.word = save;
+            }*/
             if (egal(expands,"") && !test_var(save))
             {
                 words[(size - 1)] = save; // expand
-            }
-            else
-            {
+           }
+           else
+           {
                 words[(size - 1)] = expands; // expand
-            }
+           }
         }
     }
 
@@ -160,16 +170,6 @@ static char **create_words(char *word, struct ast **asts, size_t *nbr_element, s
     words = test;
     words[(size - 1)] = NULL;
     return words;
-}
-
-static void print_expanded(struct hash_map *h, char *str)
-{
-    char *string = expand(h, str);
-    if (string != NULL)
-    {
-        printf("%s", string);
-    }
-    free(string);
 }
 
 static size_t set_args(bool *newline, bool *backslash, char *args[], size_t nb_args)
@@ -250,7 +250,8 @@ static void echo_builtin(char *args[], size_t nb_args, struct hash_map *h)
             char *str = args[i];
             if (test_var(str) || test_quote(str))
             {
-                print_expanded(h, str);
+                //print_expanded(h, str);
+                printf("%s", str);
             }
             else
             {
@@ -295,6 +296,7 @@ static void exit_builtin(char *opt)
     }
     exit(0);
 }
+
 
 static int unset_builtin(char *args[], size_t nb_args, struct hash_map *h)
 {
@@ -821,6 +823,7 @@ static char * type_ulimit[] =
 	"kill","newgrp","pwd","read","true","umask","unalias","wait"
 };
 
+
 static int egal(char * word,const char * second)
 {
 	return !strcmp(word,second);
@@ -902,7 +905,6 @@ int simple_cmd_run(struct ast *ast, struct hash_map *h)
     result = RUN_LIST(cmd->element, cmd->nbr_element, h);
     if (cmd->word)
     {
-	
         char *expanded = expand(h, cmd->word);
 	char ** words = NULL;
 	if (egal(expanded,""))
@@ -926,7 +928,7 @@ int simple_cmd_run(struct ast *ast, struct hash_map *h)
         {
             free(cmd->word);
             cmd->word = expanded;
-       
+        }
         char **words = MAKE_WORD(cmd->word, cmd->element, cmd->nbr_element, h);
         */
        	result = cmd_run(words, h);
@@ -937,3 +939,4 @@ int simple_cmd_run(struct ast *ast, struct hash_map *h)
 }
 
 // FIN ANNEXE -------------
+
