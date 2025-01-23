@@ -16,8 +16,8 @@ struct hash_map
     struct pair_list **data;
     int ret; //$?
     int nb_args; //$#
-    // char *arg; //$1 $2 ...
     char **all_args;
+    char *old_pwd;
     size_t size;
 };
 

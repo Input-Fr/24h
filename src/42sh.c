@@ -3,6 +3,8 @@
 #include <err.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pwd.h>
+#include <unistd.h>
 
 #include "ast/ast.h"
 #include "hash_map/hash_map.h"
@@ -86,6 +88,7 @@ int main(int argc, char *argv[])
     enum parser_status status;
     struct ast *ast;
     struct hash_map *h = hash_map_init(7);
+    char *bufferpwd = malloc(1024 * sizeof(char));
     while (lexer->current_tok.type != TOKEN_EOF)
     {
         ast = parse(&status, lexer);
@@ -113,6 +116,7 @@ int main(int argc, char *argv[])
             h->ret = ret_code;
             h->nb_args = argc - 1;
             h->all_args = argv;
+            h->old_pwd = getcwd(bufferpwd, 1024);
             ret_code = (*ast->ftable->run)(ast, h);
         }
         (*ast->ftable->free)(ast);
@@ -120,13 +124,10 @@ int main(int argc, char *argv[])
 
     lexer_free(lexer);
     hash_map_free(h);
+    free(bufferpwd);
 
     return ret_code;
 }
-
-
-
-
 
 static void print(char *string, enum token_type type)
 {

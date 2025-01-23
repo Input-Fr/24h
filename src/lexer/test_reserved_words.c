@@ -164,13 +164,12 @@ static int test_in(struct lexer *lexer)
     return 0;
 }
 
-static int test_name(char *name)
+int test_name(char *name)
 {
     size_t i = 0;
     if (!((name[0] >= 'a' && name[0] <= 'z') ||
                 (name[0] >= 'A' && name[0] <= 'Z') || name[0] == '_'))
     {
-        exit(2);
         return 0;
     }
 
@@ -180,8 +179,7 @@ static int test_name(char *name)
                 name[i] <= 'Z')
                 || name[i] == '_' || (name[i] >= '0' && name[i] <= '9')))
         {
-            exit(2);
-            //return 0;
+            return 0;
         }
         i += 1;
     }
@@ -190,11 +188,10 @@ static int test_name(char *name)
     {
         return 1;
     }
-    exit(2);
-    return 0;
+    return 1;
 }
 
-static int test_ass(struct lexer *lexer)
+int test_ass(struct lexer *lexer)
 {
     struct token tok = lexer->current_tok;
     char *str = tok.data->str;
@@ -212,7 +209,11 @@ static int test_ass(struct lexer *lexer)
 
             if (str[i] == '=')
             {
-                return test_name(str);
+                if (!test_name(str))
+                {
+                    exit(127);
+                }
+                return 1;
             }
         }
     }
@@ -221,8 +222,6 @@ static int test_ass(struct lexer *lexer)
 
 static enum token_type reserved_word_1(struct lexer *lexer)
 {
-    //if (lexer->current_tok.data != NULL)
-    //{
     if (test_if(lexer))
         return TOKEN_IF;
     else if (test_fi(lexer))
@@ -241,8 +240,6 @@ static enum token_type reserved_word_1(struct lexer *lexer)
         return TOKEN_CASE;
     else
         return NO_TOKEN;
-    //}
-    //return TOKEN_WORD;
 }
 
 static int token_rw(struct lexer *lexer)
@@ -261,11 +258,9 @@ static int token_rw(struct lexer *lexer)
 
 enum token_type reserved_word(struct lexer *lexer)
 {
-    //if (lexer->current_tok.data != NULL)
-    //{
     if (test_ass(lexer))
         return TOKEN_ASSIGNMENT_WORD;
-    else if (token_rw(lexer))
+    if (token_rw(lexer))
         return reserved_word_1(lexer);
     else if (test_esac(lexer))
         return TOKEN_ESAC;
@@ -285,6 +280,4 @@ enum token_type reserved_word(struct lexer *lexer)
         return TOKEN_IN;
     else
         return TOKEN_WORD;
-    //}
-    //return TOKEN_WORD;
 }

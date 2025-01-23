@@ -11,8 +11,10 @@
 #include <unistd.h>
 
 #include "ast.h"
+#include "lexer/lexer.h"
 #include "cd.h"
 #include "hash_map/hash_map.h"
+#include "parser/parser.h"
 
 #define RUN(AST, HASH_TABLE) (*(AST)->ftable->run)((AST), (HASH_TABLE))
 
@@ -73,7 +75,10 @@ static void printWbackslash(char *carg)
             else // connais pas
             {
                 printf("\\");
-                printf("%c", carg[idx]);
+                if (carg[idx] != '\0')
+                {
+                    printf("%c", carg[idx]);
+                }
             }
         }
         else
@@ -160,7 +165,10 @@ static char **create_words(char *word, struct ast **asts, size_t *nbr_element, s
 static void print_expanded(struct hash_map *h, char *str)
 {
     char *string = expand(h, str);
-    printf("%s", string);
+    if (string != NULL)
+    {
+        printf("%s", string);
+    }
     free(string);
 }
 
@@ -216,6 +224,13 @@ static void echo_builtin(char *args[], size_t nb_args, struct hash_map *h)
     // echo les arguments
     while (i < nb_args)
     {
+        //char *string = expand(h, args[i]);
+        //if (string == NULL)
+        //{
+        //    i+=1;
+        //}
+        //free(string);
+
         if (backslash)
         {
             char *cur_arg = args[i];
@@ -279,6 +294,108 @@ static void exit_builtin(char *opt)
         exit(n);
     }
     exit(0);
+}
+
+static int unset_builtin(char *args[], size_t nb_args, struct hash_map *h)
+{
+    if (!nb_args)
+    {
+        return 0;
+    }
+    size_t i = 0;
+    bool var = false;
+    bool fonc = false;
+    while (args[i][0] == '-')
+    {   
+        char first = args[i][1];
+        for (size_t j = 1; args[i][j] != '\0'; j+=1)  //cas -vvvvfvvvv
+        {
+            if (strlen(args[i]) > 0 && args[i][j] != 'v' && args[i][j] != 'f')
+            {
+                exit(2);
+            }
+            if (first != args[i][j])
+            {
+                exit(1);
+            }
+        }
+        if ((first == 'f' && var) || (first == 'v' && fonc)) //cas -f -f -f -f -v -f
+            exit(1);
+
+        if (strlen(args[i]) > 0 && args[i][1] != 'v' && args[i][1] != 'f')
+            exit(2);
+        if (args[i][1] != 'f')
+        {
+            var = false;
+            fonc = true;
+        }
+        if (args[i][1] != 'v')
+        {
+            var = true;
+            fonc = false;
+        }
+
+        i += 1;
+    }
+
+    if (!var && !fonc)
+    {
+        var = true;
+    }
+
+    for (; i < nb_args; i += 1)
+    {
+        //if (!test_name(args[i]))
+        //    exit(1);
+        hash_map_remove(h,args[i]);
+        //free(hash_map_get(h, args[i]));
+        //free(args[i]);
+    }
+    return 0;
+}
+
+static int test_ifvalexist(char *word)
+{
+    for (size_t i = 0; word[i] != '\0'; i += 1)
+    {
+        if (word[i] == '=')
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static int export_builtin(char *args[], size_t nb_args, struct hash_map *h)
+{
+    if (nb_args == 0)
+    {
+        return 0;
+    }
+    for (size_t i = 0; i < nb_args; i+=1)
+    {
+        char *word = args[i];
+        if (word[0] == '-' && word[1] != 'p')
+        {
+            exit(2);
+        }
+        if (!test_name(word))
+        {
+            exit(1);
+        }
+        else
+        {
+            if (test_ifvalexist(word))
+            {
+                char *name = calloc(1, strlen(word));
+                char *val = calloc(1, strlen(word));
+                separator_equal(name, val, word);
+                hash_map_remove(h, name);
+                hash_map_insert(h, name, val);
+            }
+        }
+    }
+    return 0;
 }
 
 // if ast eval
@@ -376,6 +493,7 @@ int variable_run(struct ast *ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_VARIABLE);
     struct ast_variable *variable_ast = (struct ast_variable *)ast;
+    hash_map_remove(h, variable_ast->name);
     hash_map_insert(h, variable_ast->name, variable_ast->val);
     return 1;
 }
@@ -620,18 +738,19 @@ static int handle_executable_builtin(char ** words)
 }
 static int handle_special_builtin (char ** words, struct hash_map *h)
 {
-	if (!words)
-	{
-		return 2;
-	}
-
+    if (!words)
+    {
+        return 2;
+    }
+    else
+    {
+        int idx = 1;
+        while (words[idx])
+        {
+            idx++;
+        }
         if (!strcmp(words[0], "echo"))
         {
-            int idx = 1;
-            while (words[idx])
-            {
-                idx++;
-            }
             echo_builtin(words + 1, idx - 1, h);
         }
         else if (!strcmp(words[0], "true"))
@@ -646,13 +765,41 @@ static int handle_special_builtin (char ** words, struct hash_map *h)
         {
             exit_builtin(words[1]);
         }
+        else if (!strcmp(words[0], "unset"))
+        {
+            return unset_builtin(words + 1, idx - 1, h);
+        }
+        else if (!strcmp(words[0], "export"))
+        {
+            return export_builtin(words + 1, idx - 1, h);
+        }
         else if (!strcmp(words[0], "cd"))
         {
             if (words[1])
                 return cmd_cd(words[1]);
             return cmd_cd("");
-	}
-	return 0;
+        }
+        else
+        {
+            pid_t pid = fork();
+            if (pid == 0)
+            {
+                int status_code = execvp(words[0], words);
+                if (status_code == -1)
+                {
+                    exit(127);
+                }
+            }
+            int wstatus;
+            waitpid(pid, &wstatus, 0);
+            int return_value = WEXITSTATUS(wstatus);
+            if (return_value == 2)
+            {
+                errx(2, "Terminated Incorrectly\n");
+            }
+        }
+        return 0;
+    }
 }
 
 
@@ -685,11 +832,8 @@ static int is_special_builtin(char ** words)
 		
 	int test = egal(words[0],"echo") || egal(words[0],"true");
 	int test2 = egal(words[0],"false") || egal(words[0],"exit");
-	if (test || test2)
-	{
-		return test || test2;
-	}
-	return egal(words[0],"cd");
+	int test3 = egal(words[0],"cd") || egal(words[0],"unset");
+	return egal(words[0],"export") || test || test2 || test3;
 }
 
 static int is_unspecified_behaviour(char * word)

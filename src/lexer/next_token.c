@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "lexer.h"
 
@@ -89,12 +90,14 @@ static void backslash_quote(struct lexer *lexer)
     char c = lexer->input;
     lexer->input = lexer_file(lexer->file);
     char next_c = lexer->input;
+
     if (lexer->Quoting == NO_QUOTE && c == '\\')
     {
         if (next_c != '\n')
         {
             if (lexer->word)
             {
+                //printf("c : %c\n",next_c);
                 mbt_str_pushc(lexer->current_tok.data, next_c);
             }
             else
@@ -136,7 +139,7 @@ static struct token quote(struct lexer *lexer)
     {
         double_quote(lexer);
     }
-    else if (c == '\\')
+    else if (c == '\\' && lexer->Quoting != SINGLE_QUOTE)
     {
         backslash_quote(lexer);
     }
@@ -146,6 +149,7 @@ static struct token quote(struct lexer *lexer)
 
 static struct token var(struct lexer *lexer)
 {
+    //printf("-----------------------here");
     //--5
     if (!(lexer->word))
     {
@@ -156,47 +160,29 @@ static struct token var(struct lexer *lexer)
     char c = lexer->input;
     mbt_str_pushc(lexer->current_tok.data, c);
     c = lexer_file(lexer->file);
-    mbt_str_pushc(lexer->current_tok.data, c);
-    size_t count = 0;
     if (c == '{')
     {
-        while (1)
+        mbt_str_pushc(lexer->current_tok.data, c);
+        while (c != '}')
         {
             c = lexer_file(lexer->file);
             mbt_str_pushc(lexer->current_tok.data, c);
-            if (c == '{')
-            {
-                count += 1;
-            }
-            if (c == '}' && count == 0)
-            {
-                break;
-            }
-            else if (c == '}')
-            {
-                count -= 1;
-            }
         }
     }
-    if (c == '(')
+    else
     {
-        while (1)
-        {
-            c = lexer_file(lexer->file);
-            mbt_str_pushc(lexer->current_tok.data, c);
-            if (c == '(')
-            {
-                count += 1;
-            }
-            if (c == ')' && count == 0)
-            {
-                break;
-            }
-            else if (c == ')')
-            {
-                count -= 1;
-            }
-        }
+        //mbt_str_pushc(lexer->current_tok.data, '{');
+        //mbt_str_pushc(lexer->current_tok.data, c);
+
+        //while ((!(isalpha(c))) && c != '?' && c != '#' 
+        //        && c != '$' && c != '@' && c != '*' && c != '{')
+        //{
+        //    c = lexer_file(lexer->file);
+        //    mbt_str_pushc(lexer->current_tok.data, c);
+        //}
+
+        //mbt_str_pushc(lexer->current_tok.data, '}');
+        ungetc(c,lexer->file);
     }
     return token_reco(lexer);
 }
@@ -306,7 +292,9 @@ static struct token token_reco(struct lexer *lexer)
     {
         return operator(lexer);      // 3
     }
-    else if ((c == '\\') || c == '\'' || c == '"')
+    else if ((c == '\\' && lexer->Quoting != SINGLE_QUOTE) 
+            || (c == '\'' && lexer->Quoting != DOUBLE_QUOTE) 
+            || (c == '"' && lexer->Quoting != SINGLE_QUOTE))
     {
         return quote(lexer);         // 4
     }
@@ -318,8 +306,7 @@ static struct token token_reco(struct lexer *lexer)
     {
         return begin_ope(lexer);     // 6
     }
-    else if (lexer->Quoting != SINGLE_QUOTE && lexer->Quoting != DOUBLE_QUOTE
-            && c == '\n')
+    else if (lexer->Quoting == NO_QUOTE && c == '\n')
     {
         return new_line(lexer);      // 7
     }

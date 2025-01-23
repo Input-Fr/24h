@@ -104,6 +104,9 @@ bool hash_map_remove(struct hash_map *hash_map, char *key)
             {
                 hash_map->data[k] = NULL;
             }
+            free(p->key);
+            free(p->value);
+
             free(p);
             return true;
         }
@@ -117,6 +120,9 @@ bool hash_map_remove(struct hash_map *hash_map, char *key)
         if (p != NULL)
         {
             pre->next = p->next;
+            free(p->key);
+            free(p->value);
+
             free(p);
             return true;
         }

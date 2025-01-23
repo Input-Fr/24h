@@ -137,7 +137,11 @@ static char *expand_random(char *prev, char *next)
 static char *expand_special_var(char *key, char *prev, char *next,
                                 struct hash_map *h)
 {
-    if (strcmp(key, "?") == 0) //$?
+    if (strcmp(key, "@") == 0) //$@
+    {
+        return expand_all_args(prev, next, h);
+    }
+    else if (strcmp(key, "?") == 0) //$?
     {
         return expand_ret(prev, next, h);
     }
@@ -188,6 +192,7 @@ static char *expand_normal_var(char *key, char *prev, char *next,
 static char *_expand(struct hash_map *h, char *str)
 {
     char *word = str;
+
     int a = 0;
     if (word[0] == '"')
     {
@@ -199,8 +204,7 @@ static char *_expand(struct hash_map *h, char *str)
     char *var = delimite_var(prev, next, word); // divide the word in 3 words
     char *key = delete_dollar(var); //${name} -> name
     char *result = "";
-
-    if (test_special_var(key)) //$$, $*, $?, $1, $#, $RANDOM, $UID, $PWD
+    if (test_special_var(key)) // $@, $$, $*, $?, $1, $#, $RANDOM, $UID, $PWD
     {
         result = expand_special_var(key, prev, next, h);
     }
@@ -220,7 +224,7 @@ static char *_expand(struct hash_map *h, char *str)
 char *expand(struct hash_map *h, char *str)
 {
     if (test_var(str))
-    {
+    {   
         return _expand(h, str);
     }
     else if (test_quote(str))
