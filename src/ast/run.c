@@ -908,6 +908,7 @@ int simple_cmd_run(struct ast *ast, struct hash_map *h)
 	{
 		if (test_var(cmd->word))
 		{
+			free(expanded);
 			return 1;
 		}
 		char * save = malloc(strlen(cmd->word) + 1);
