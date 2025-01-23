@@ -29,7 +29,7 @@ static char *expand_ret(char *prev, char *next, struct hash_map *h)
 
 static char *expand_argn(char *key, char *prev, char *next, struct hash_map *h)
 {
-    char *result; // = calloc(1, 1024);
+    char *result;
     size_t len = strlen(prev) + strlen(next);
     if (atoi(key) > h->nb_args)
     {
@@ -39,7 +39,6 @@ static char *expand_argn(char *key, char *prev, char *next, struct hash_map *h)
     }
     else
     {
-        // printf("-%s\n",h->all_args[atoi(key)]);
         len += strlen(h->all_args[atoi(key)]);
         result = calloc(1, len + 1);
         snprintf(result, len + 1, "%s%s%s", prev, h->all_args[atoi(key)], next);
