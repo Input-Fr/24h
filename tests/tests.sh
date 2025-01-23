@@ -53,13 +53,13 @@ run_file()
     else
         if ! diff -q tests/ex.txt tests/get.txt > /dev/null ; then
             echo -e "\e[1m$file: \e[0m\e[1;31merror\e[0m"
-            cat $file
+            cat $file 
             echo ""
             echo -e "\e[1;36m *** get: ***\e[0m"
-            cat tests/get.txt
+            cat tests/get.txt -e
             echo ""
             echo -e "\e[1;36m *** expected: *** \e[0m"
-            cat tests/ex.txt
+            cat tests/ex.txt -e
             echo ""
         fi
 
@@ -193,6 +193,19 @@ for test_file in tests/builtins/*; do
 done
 
 
+#echo ""
+#echo ""
+#echo -e "\e[1;33m ------ tests folder current_debug ------\e[0m"
+#echo ""
+#echo ""
+#for test_file in tests/current_debug/*; do
+#    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
+#        run_file "$test_file"
+#    fi
+#done
+
+echo
+echo -e "\e[1;33m------------------------------------\e[0m"
 echo ""
 echo ""
 echo -e "\e[1;33m ------ tests folder current_debug ------\e[0m"
@@ -220,16 +233,24 @@ done
 
 
 
+nb=$a
 b=$((b*10))
 a=$((a*1000))
 
 result=$(echo "$a / $b" | bc)
 echo""
-echo -e "\e[1;32m~~~~~~~~ RESULT =  $result % ~~~~~~~~ \e[0m"
-
+echo""
+echo""
+echo -e "\e[1;35m~~~~~~~~~~~~~ RESULT ~~~~~~~~~~~~\e[0m"
+echo -e "\e[1;35m|                               |\e[0m"
+echo -e "|\e[1;32m         $nb tests passed       \e[0m|"
+echo -e "|\e[1;32m         $result% tests passed      \e[0m|"
+echo -e "\e[1;35m|                               |\e[0m"
+echo -e "\e[1;35m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\e[0m"
 
 
 if [ "$COVERAGE" != "yes" ]; then
     echo "$a / $b" | bc > "$OUTPUT_FILE"
 fi
+
 

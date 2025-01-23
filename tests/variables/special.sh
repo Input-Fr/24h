@@ -1,0 +1,15 @@
+echo $?
+echo $#
+echo $@
+echo $$
+echo $RANDOM
+echo $*
+echo test$UID
+echo test${UID}
+echo test${UID}test
+echo $UID?test
+echo $OLDPWD
+echo $PWD
+echo $1
+echo $3
+echo $6
