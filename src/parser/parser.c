@@ -1,7 +1,5 @@
 #define _POSIX_C_SOURCE 200809L
 
-#include "parser.h"
-
 #include <ctype.h>
 #include <dirent.h>
 #include <errno.h>
@@ -13,6 +11,7 @@
 
 #include "../ast/ast.h"
 #include "../lexer/lexer.h"
+#include "parser.h"
 
 #define PATH_MAX 4096
 static struct ast *parse_list(enum parser_status *status, struct lexer *lexer);
@@ -801,63 +800,6 @@ static int isnum(const char *str);
 
 static int valid_fd(int fd);
 
-static int is_reserved_words(struct lexer *lexer)
-{
-    struct token tok = lexer->current_tok;
-    if (tok.type == TOKEN_IF || tok.type == TOKEN_FI || tok.type == TOKEN_ELIF
-        || tok.type == TOKEN_ELSE || tok.type == TOKEN_THEN
-        || tok.type == TOKEN_DO || tok.type == TOKEN_DONE
-        || tok.type == TOKEN_CASE || tok.type == TOKEN_ESAC
-        || tok.type == TOKEN_ESAC || tok.type == TOKEN_WHILE
-        || tok.type == TOKEN_UNTIL || tok.type == TOKEN_FOR
-        || tok.type == TOKEN_DO || tok.type == TOKEN_LBRACE
-        || tok.type == TOKEN_RBRACE || tok.type == TOKEN_BANG
-        || tok.type == TOKEN_IN)
-        return 1;
-    else
-        return 0;
-}
-
-static char *reserved_words(struct lexer *lexer)
-{
-    struct token tok = lexer_peek(lexer);
-    if (tok.type == TOKEN_IF)
-        return "if";
-    else if (tok.type == TOKEN_FI)
-        return "fi";
-    else if (tok.type == TOKEN_ELIF)
-        return "elif";
-    else if (tok.type == TOKEN_ELSE)
-        return "else";
-    else if (tok.type == TOKEN_THEN)
-        return "then";
-    else if (tok.type == TOKEN_DO)
-        return "do";
-    else if (tok.type == TOKEN_DONE)
-        return "done";
-    else if (tok.type == TOKEN_CASE)
-        return "case";
-    else if (tok.type == TOKEN_ESAC)
-        return "esac";
-    else if (tok.type == TOKEN_WHILE)
-        return "while";
-    else if (tok.type == TOKEN_UNTIL)
-        return "until";
-    else if (tok.type == TOKEN_FOR)
-        return "for";
-    else if (tok.type == TOKEN_DO)
-        return "do";
-    else if (tok.type == TOKEN_LBRACE)
-        return "}";
-    else if (tok.type == TOKEN_RBRACE)
-        return "{";
-    else if (tok.type == TOKEN_BANG)
-        return "!";
-    else if (tok.type == TOKEN_IN)
-        return "in";
-    else
-        return "";
-}
 
 static struct ast *parse_element(enum parser_status *status,
                                  struct lexer *lexer)
@@ -866,10 +808,9 @@ static struct ast *parse_element(enum parser_status *status,
     if (tok.type == TOKEN_WORD || tok.type == TOKEN_ASSIGNMENT_WORD
         || is_reserved_words(lexer))
     {
-        char *rw = "";
-        if (is_reserved_words(lexer))
-            rw = reserved_words(lexer);
-        char *str = tok.data->str ? tok.data->str : strdup(rw);
+        char *str = tok.data->str;
+        if (tok.data == NULL && is_reserved_words(lexer)) //if reserved words
+            str = strdup(reserved_words_to_char(lexer));   //malloc
         lexer_pop(lexer);
         if (redir_op(lexer_peek(lexer)) && isnum(str) && valid_fd(atoi(str)))
         {

@@ -134,5 +134,7 @@ enum parser_status
 };
 
 struct ast *parse(enum parser_status *status, struct lexer *lexer);
+char *reserved_words_to_char(struct lexer *lexer);
+int is_reserved_words(struct lexer *lexer);
 
 #endif /* ! PARSER_H */

@@ -3,23 +3,7 @@
 #include <stdlib.h>
 
 #include "lexer.h"
-
-static int is_reserved_words(struct lexer *lexer)
-{
-    struct token tok = lexer->current_tok;
-    if (tok.type == TOKEN_IF || tok.type == TOKEN_FI || tok.type == TOKEN_ELIF
-        || tok.type == TOKEN_ELSE || tok.type == TOKEN_THEN
-        || tok.type == TOKEN_DO || tok.type == TOKEN_DONE
-        || tok.type == TOKEN_CASE || tok.type == TOKEN_ESAC
-        || tok.type == TOKEN_ESAC || tok.type == TOKEN_WHILE
-        || tok.type == TOKEN_UNTIL || tok.type == TOKEN_FOR
-        || tok.type == TOKEN_DO || tok.type == TOKEN_LBRACE
-        || tok.type == TOKEN_RBRACE || tok.type == TOKEN_BANG
-        || tok.type == TOKEN_IN)
-        return 1;
-    else
-        return 0;
-}
+#include "parser/parser.h"
 
 void clear_current_tok(struct lexer *lexer)
 {
