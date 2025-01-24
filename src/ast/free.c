@@ -126,7 +126,6 @@ void for_free(struct ast *ast)
 {
     assert(ast && ast->type == AST_FOR);
     struct ast_for *boucle = (struct ast_for *)ast;
-    FREE(boucle->variable);
     FREE(boucle->do_body);
     for (size_t i = 0; i < boucle->nbr_elt; i++)
     {

@@ -44,8 +44,6 @@ int for_run(struct ast *ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_FOR);
     struct ast_for *boucle = (struct ast_for *)ast;
-    assert(boucle->variable && boucle->variable->type == AST_VARIABLE);
-    struct ast_variable *var = (struct ast_variable *)boucle->variable;
     int res = 0;
     if (boucle->nbr_elt)
     {
@@ -56,12 +54,12 @@ int for_run(struct ast *ast, struct hash_map *h)
         }
         for (size_t i = 0; i < boucle->nbr_elt; i++)
         {
-            var->val = exp[i];
-            RUN(&var->base, h);
+	    hash_map_insert(h, boucle->variable, exp[i]);
             RUN(boucle->do_body, h);
         }
         free(exp);
     }
+    hash_map_remove(h, boucle->variable);
     return res;
 }
 

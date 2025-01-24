@@ -177,7 +177,7 @@ struct ast_for
 {
     struct ast base;
     struct ast * do_body;
-    struct ast * variable;
+    char  * variable;
     char ** list;
     size_t nbr_elt;
 };
@@ -207,7 +207,7 @@ struct ast *ast_boucle_init(struct ast *condition, struct ast *do_body,
                             int run_condition);
 
 // for
-struct ast * ast_for_init(struct ast * do_body, struct ast * variable); 
+struct ast * ast_for_init(char * variable); 
 
 // redirection
 struct ast *ast_redirection_init(int fd, char *word,

@@ -46,8 +46,9 @@ void boucle_push(struct ast *ast, struct ast *add)
 
 void for_push(struct ast *ast, struct ast *add)
 {
-    UNUSED(ast);
-    UNUSED(add);
+    assert(ast && ast->type == AST_FOR);
+    struct ast_for * boucle = (struct ast_for *)ast;
+    boucle->do_body = add;
     return;
 }
 

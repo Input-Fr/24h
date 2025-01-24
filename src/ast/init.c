@@ -212,7 +212,7 @@ struct ast *ast_simple_cmd_init(char *word)
     return &cmd->base;
 }
 
-struct ast *ast_for_init(struct ast *do_body, struct ast *variable)
+struct ast *ast_for_init(char * variable)
 {
     static struct ast_ftable ftable = {
         .run = &for_run,
@@ -227,7 +227,6 @@ struct ast *ast_for_init(struct ast *do_body, struct ast *variable)
     }
     boucle->base.type = AST_FOR;
     boucle->base.ftable = &ftable;
-    boucle->do_body = do_body;
     boucle->variable = variable;
     return &boucle->base;
 }
