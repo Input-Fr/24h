@@ -451,13 +451,22 @@ int and_or_run(struct ast *ast, struct hash_map *h)
     }
 }
 
+static int check_condition (int check,int cdt)
+{
+	if (cdt)
+	{
+		return check;	
+	}
+	return !check;
+}
+
 // boucle (until and while) ast eval
 int boucle_run(struct ast *ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_BOUCLE);
     struct ast_boucle *boucle = (struct ast_boucle *)ast;
     int res = 0;
-    while (RUN(boucle->condition, h) == boucle->run_condition)
+    while (check_condition(RUN(boucle->condition, h), boucle->run_condition))
     {
         res = RUN(boucle->do_body, h);
     }
