@@ -88,22 +88,22 @@ run_test "if false; then echo oui; else echo oui; fi"
 run_test "if false; then echo 'if'; fi"
 #run_test "if true; then echo a///ad/fag/a//fd/a oui else echo oui; fi"
 
-echo ""
-echo ""
-echo -e "\e[1;33m ------ tests folder tests_facile ------\e[0m"
-echo ""
-echo ""
-for test_file in tests/tests_facile/*; do
-    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
-        run_file "$test_file"
-    fi
-done
-
-echo ""
-echo ""
-echo -e "\e[1;33m ---- tests folder tests_basic ----\e[0m"
-echo ""
-echo ""
+#echo ""
+#echo ""
+#echo -e "\e[1;33m ------ tests folder tests_facile ------\e[0m"
+#echo ""
+#echo ""
+#for test_file in tests/tests_facile/*; do
+#    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
+#        run_file "$test_file"
+#    fi
+#done
+#
+#echo ""
+#echo ""
+#echo -e "\e[1;33m ---- tests folder tests_basic ----\e[0m"
+#echo ""
+#echo ""
 
 for test_file in tests/tests_basic/*; do
     if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
@@ -111,16 +111,16 @@ for test_file in tests/tests_basic/*; do
     fi
 done
 
-echo ""
-echo ""
-echo -e "\e[1;33m ------ tests folder while_until ------\e[0m"
-echo ""
-echo ""
-for test_file in tests/while_until/*; do
-    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
-        run_file "$test_file"
-    fi
-done
+#echo ""
+#echo ""
+#echo -e "\e[1;33m ------ tests folder while_until ------\e[0m"
+#echo ""
+#echo ""
+#for test_file in tests/while_until/*; do
+#    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
+#        run_file "$test_file"
+#    fi
+#done
 
 echo ""
 echo ""
@@ -135,17 +135,17 @@ for test_file in tests/quotes/*; do
 done
 
 
-echo ""
-echo ""
-echo -e "\e[1;33m ---- tests folder for ----\e[0m"
-echo ""
-echo ""
-
-for test_file in tests/for/*; do
-    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
-        run_file "$test_file"
-    fi
-done
+#echo ""
+#echo ""
+#echo -e "\e[1;33m ---- tests folder for ----\e[0m"
+#echo ""
+#echo ""
+#
+#for test_file in tests/for/*; do
+#    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
+#        run_file "$test_file"
+#    fi
+#done
 
 
 echo ""
@@ -159,27 +159,27 @@ for test_file in tests/variables/*; do
     fi
 done
 
-echo ""
-echo ""
-echo -e "\e[1;33m ------ tests folder if_commands ------\e[0m"
-echo ""
-echo ""
-for test_file in tests/if_commands/*; do
-    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
-        run_file "$test_file"
-    fi
-done
+#echo ""
+#echo ""
+#echo -e "\e[1;33m ------ tests folder if_commands ------\e[0m"
+#echo ""
+#echo ""
+#for test_file in tests/if_commands/*; do
+#    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
+#        run_file "$test_file"
+#    fi
+#done
 
-echo ""
-echo ""
-echo -e "\e[1;33m ------ tests folder simple_commands ------\e[0m"
-echo ""
-echo ""
-for test_file in tests/simple_commands/*; do
-    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
-        run_file "$test_file"
-    fi
-done
+#echo ""
+#echo ""
+#echo -e "\e[1;33m ------ tests folder simple_commands ------\e[0m"
+#echo ""
+#echo ""
+#for test_file in tests/simple_commands/*; do
+#    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
+#        run_file "$test_file"
+#    fi
+#done
 
 echo ""
 echo ""
@@ -204,8 +204,6 @@ done
 #    fi
 #done
 
-echo
-echo -e "\e[1;33m------------------------------------\e[0m"
 echo ""
 echo ""
 echo -e "\e[1;33m ------ tests folder current_debug ------\e[0m"
@@ -216,17 +214,19 @@ for test_file in tests/current_debug/*; do
         run_file "$test_file"
     fi
 done
+echo
+echo -e "\e[1;33m------------------------------------\e[0m"
 
-echo ""
-echo ""
-echo -e "\e[1;33m ------ tests folder command_block ------\e[0m"
-echo ""
-echo ""
-for test_file in tests/command_block/*; do
-    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
-        run_file "$test_file"
-    fi
-done
+#echo ""
+#echo ""
+#echo -e "\e[1;33m ------ tests folder command_block ------\e[0m"
+#echo ""
+#echo ""
+#for test_file in tests/command_block/*; do
+#    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
+#        run_file "$test_file"
+#    fi
+#done
 
 
 

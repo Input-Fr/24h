@@ -31,19 +31,26 @@ void separator_equal(char *name, char *val, char *as)
     val[j] = '\0';
 }
 
-int test_quote(char *str) // test if a word is quoted
+int test_quote(char * str)
 {
-    if (strlen(str) > 1
-        && ((str[0] == '\'' && str[strlen(str) - 1] == '\'')
-            || (str[0] == '"' && str[strlen(str) - 1] == '"')))
+    for (size_t i = 0; str[i] != '\0'; i += 1)
     {
-        return 1;
+        if (str[i] == '"' || str[i] == '\'' || str[i] == '\\')
+            return 1;
     }
-    else
-    {
-        return 0;
-    }
+    return 0;
 }
+
+int test_back(char * str)
+{
+    for (size_t i = 0; str[i] != '\0'; i += 1)
+    {
+        if (str[i] == '\\')
+            return 1;
+    }
+    return 0;
+}
+
 
 int test_var(char *str) // test if a variable is in a word
 {
@@ -54,8 +61,14 @@ int test_var(char *str) // test if a variable is in a word
     size_t i = 0;
     while (str[i] != '\0')
     {
-        if (str[i] == '$')
+        if (str[0] == '$' || (i > 0 && str[i - 1] != '\\' && str[i] == '$'))
         {
+
+            if (str[i + 1] != '\0' && str[i + 1] != '{')
+            {
+                return 1;
+            }
+
             if (str[i + 1] == '\0'
                 || ((!isalnum(str[i + 1])) && str[i + 1] != '?'
                     && str[i + 1] != '#' && str[i + 1] != '$'
@@ -98,10 +111,6 @@ int test_var(char *str) // test if a variable is in a word
                 {
                     return 0;
                 }
-            }
-            if (str[i + 1] != '\0' && str[i + 1] != ' ')
-            {
-                return 1;
             }
         }
         i += 1;
@@ -208,14 +217,63 @@ char *delimite_var(char *prev, char *next, char *word)
     return new;
 }
 
-char *delete_quote(char *word)
+static void delete_back(char *word)
 {
-    word += 1;
-    char *new = calloc(1, strlen(word) + 1);
-    new = strcpy(new, word);
-    new[strlen(word) - 1] = '\0';
-    word -= 1;
-    return new;
+    char *tmp = calloc(1, strlen(word) * 2);
+    strcpy(tmp, word);
+    char *copy = word;// = calloc(1, strlen(word) + 1);
+
+    for (size_t i = 0; word[i] != '\0'; i += 1)
+    {
+        if (word[i] == '\\')
+        {
+            tmp[i] = '\0';
+            char *tmp2 = calloc(1, strlen(word) * 2);
+            snprintf(tmp2, strlen(word) + 1, "%s%s", tmp, copy + 1);
+            strcpy(tmp, tmp2);
+            free(tmp2);
+        }
+        copy+=1;
+    }
+    
+    strcpy(word, tmp);
+    free(tmp);
+}
+
+static void delete_c(char *word, size_t *j)
+{
+    char *copy = calloc(1, strlen(word) * 2);
+    char *tmp = copy;
+    strcpy(copy, word);
+    for (size_t i = 0; i != *j; i += 1)
+    {
+        copy+=1;
+    }
+
+    word[*j] = '\0';
+    char *tmp2 = calloc(1, strlen(word) * 2);
+    snprintf(tmp2, strlen(word) + 10, "%s%s", word, copy + 1);
+    strcpy(word, tmp2);
+    free(tmp2);
+    free(tmp);
+}
+
+char *delete_quote(char *str)
+{
+    while (test_back(str))
+    {
+        delete_back(str);
+    }
+
+    if (!test_quote(str))
+    {
+        return str;
+    }
+
+    size_t i = 10;
+    delete_c(str, &i);
+    
+    return str;
 }
 
 int calcul_len(int nb)

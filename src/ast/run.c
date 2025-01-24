@@ -111,16 +111,6 @@ static int is_word(struct ast *ast)
     return ((struct ast_element *)ast)->type == WORD;
 }
 
-// static void print_expanded(struct hash_map *h, char *str)
-//{
-//     char *string = expand(h, str);
-//     if (string != NULL)
-//     {
-//         printf("%s", string);
-//     }
-//     free(string);
-// }
-
 static char **create_words(char *word, struct ast **asts, size_t *nbr_element,
                            struct hash_map *h)
 {
@@ -227,13 +217,6 @@ static void echo_builtin(char *args[], size_t nb_args, struct hash_map *h)
     // echo les arguments
     while (i < nb_args)
     {
-        // char *string = expand(h, args[i]);
-        // if (string == NULL)
-        //{
-        //     i+=1;
-        // }
-        // free(string);
-
         if (backslash)
         {
             char *cur_arg = args[i];
@@ -251,15 +234,7 @@ static void echo_builtin(char *args[], size_t nb_args, struct hash_map *h)
         else
         {
             char *str = args[i];
-            if (test_var(str) || test_quote(str))
-            {
-                // print_expanded(h, str);
-                printf("%s", str);
-            }
-            else
-            {
-                printf("%s", str);
-            }
+            printf("%s", str);
         }
         if (i < nb_args - 1) // on sépare tout les argument d'un espace
         {

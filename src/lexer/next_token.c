@@ -86,6 +86,17 @@ static void double_quote(struct lexer *lexer)
 static void backslash_quote(struct lexer *lexer)
 {
     char c = lexer->input;
+    if (lexer->word)
+    {
+        mbt_str_pushc(lexer->current_tok.data, c);
+    }
+    else
+    {
+        lexer->word = 1;
+        lexer->current_tok.data = mbt_str_init();
+        mbt_str_pushc(lexer->current_tok.data, c);
+    }
+
     lexer->input = lexer_file(lexer->file);
     char next_c = lexer->input;
 
@@ -93,17 +104,7 @@ static void backslash_quote(struct lexer *lexer)
     {
         if (next_c != '\n')
         {
-            if (lexer->word)
-            {
-                // printf("c : %c\n",next_c);
-                mbt_str_pushc(lexer->current_tok.data, next_c);
-            }
-            else
-            {
-                lexer->word = 1;
-                lexer->current_tok.data = mbt_str_init();
-                mbt_str_pushc(lexer->current_tok.data, next_c);
-            }
+            mbt_str_pushc(lexer->current_tok.data, next_c);
         }
     }
     else if (lexer->Quoting == DOUBLE_QUOTE)
@@ -147,7 +148,6 @@ static struct token quote(struct lexer *lexer)
 
 static struct token var(struct lexer *lexer)
 {
-    // printf("-----------------------here");
     //--5
     if (!(lexer->word))
     {

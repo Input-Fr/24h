@@ -181,9 +181,9 @@ static char *expand_special_var(char *key, char *prev, char *next,
 static char *expand_normal_var(char *key, char *prev, char *next,
                                struct hash_map *h)
 {
-    char *result = calloc(1, 1024);
     char *val = hash_map_get(h, key); // get the value of the variable
     size_t len = strlen(prev) + strlen(val) + strlen(next) + 1;
+    char *result = calloc(1, len + 1);
     snprintf(result, len, "%s%s%s", prev, val, next); // concat
     return result;
 }
@@ -191,13 +191,6 @@ static char *expand_normal_var(char *key, char *prev, char *next,
 static char *_expand(struct hash_map *h, char *str)
 {
     char *word = str;
-
-    int a = 0;
-    if (word[0] == '"')
-    {
-        word = delete_quote(str);
-        a = 1;
-    }
     char *prev = calloc(1, strlen(word) + 1); // word before the variable
     char *next = calloc(1, strlen(word) + 1); // word after the variable
     char *var = delimite_var(prev, next, word); // divide the word in 3 words
@@ -213,22 +206,31 @@ static char *_expand(struct hash_map *h, char *str)
     }
 
     expand_free(prev, next, var, key);
-    if (a)
-        free(word);
     return result;
 }
 
 // a faire : $OLDPWD $@ et $IFS
 
+
+
 char *expand(struct hash_map *h, char *str)
 {
+    char *res = "";
+    char *tmp;
     if (test_var(str))
     {
-        return _expand(h, str);
+        res = _expand(h, str);
     }
-    else if (test_quote(str))
+    else
     {
-        return delete_quote(str);
+        tmp = calloc(1, strlen(str) * 2);
+        strcpy(tmp, str);
+        res = tmp;
     }
-    return "";
+
+
+    if (test_quote(res))
+        res = delete_quote(res);
+
+    return res;
 }

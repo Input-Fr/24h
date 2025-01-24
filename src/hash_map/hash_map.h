@@ -4,15 +4,37 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+
+union retouir
+{
+    char *variable_value,
+    struct ast *function_value,
+};
+
+enum type
+{
+    variable,
+    function,
+};
+
 struct pair_list
 {
+    union retouir val;
+    enum type;
     char *key;
-    char *value;
+    struct pair_list *next;
+};
+
+struct pair_function
+{
+    char *key;
+    struc
     struct pair_list *next;
 };
 
 struct hash_map
 {
+    struct pair_function **fucntion;
     struct pair_list **data;
     int ret; //$?
     int nb_args; //$#
@@ -20,6 +42,7 @@ struct hash_map
     char *old_pwd;
     size_t size;
 };
+
 
 size_t hash(char *str);
 struct hash_map *hash_map_init(size_t size);
