@@ -7,10 +7,10 @@ run_test()
 {
     local args=$1
 
-    bash --posix -c "$args" > tests/ex.txt 2>/dev/null
+    bash --posix -c "$args" > tests/ex.txt # 2>/dev/null
     local bash_status=$?
 
-    "$BIN_PATH" -c "$args" > tests/get.txt 2>/dev/null
+    "$BIN_PATH" -c "$args" > tests/get.txt #2>/dev/null
     local bin_path_status=$?
 
     if diff -q tests/ex.txt tests/get.txt > /dev/null; then

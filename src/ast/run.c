@@ -426,13 +426,22 @@ int and_or_run(struct ast *ast, struct hash_map *h)
     }
 }
 
+static int check_condition (int check,int cdt)
+{
+	if (cdt)
+	{
+		return check;	
+	}
+	return !check;
+}
+
 // boucle (until and while) ast eval
 int boucle_run(struct ast *ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_BOUCLE);
     struct ast_boucle *boucle = (struct ast_boucle *)ast;
     int res = 0;
-    while (RUN(boucle->condition, h) == boucle->run_condition)
+    while (check_condition(RUN(boucle->condition, h), boucle->run_condition))
     {
         res = RUN(boucle->do_body, h);
     }
@@ -762,26 +771,7 @@ static int handle_special_builtin(char **words, struct hash_map *h)
                 return cmd_cd(words[1]);
             return cmd_cd("");
         }
-        else
-        {
-            pid_t pid = fork();
-            if (pid == 0)
-            {
-                int status_code = execvp(words[0], words);
-                if (status_code == -1)
-                {
-                    exit(127);
-                }
-            }
-            int wstatus;
-            waitpid(pid, &wstatus, 0);
-            int return_value = WEXITSTATUS(wstatus);
-            if (return_value == 2)
-            {
-                errx(2, "Terminated Incorrectly\n");
-            }
-        }
-        return 0;
+	return 0;
     }
 }
 
