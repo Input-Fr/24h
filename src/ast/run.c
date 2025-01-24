@@ -787,26 +787,7 @@ static int handle_special_builtin(char **words, struct hash_map *h)
                 return cmd_cd(words[1]);
             return cmd_cd("");
         }
-        else
-        {
-            pid_t pid = fork();
-            if (pid == 0)
-            {
-                int status_code = execvp(words[0], words);
-                if (status_code == -1)
-                {
-                    exit(127);
-                }
-            }
-            int wstatus;
-            waitpid(pid, &wstatus, 0);
-            int return_value = WEXITSTATUS(wstatus);
-            if (return_value == 2)
-            {
-                errx(2, "Terminated Incorrectly\n");
-            }
-        }
-        return 0;
+	return 0;
     }
 }
 
