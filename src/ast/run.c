@@ -271,19 +271,26 @@ static int unset_builtin(char *args[], size_t nb_args, struct hash_map *h)
         {
             if (strlen(args[i]) > 0 && args[i][j] != 'v' && args[i][j] != 'f')
             {
+                fprintf(stderr,"wrong option");
                 exit(2);
             }
             if (first != args[i][j])
             {
+                fprintf(stderr,"wrong option");
                 exit(1);
             }
         }
-        if ((first == 'f' && var) || (first == 'v' && fonc)) // cas -f -f -f -f
-                                                             // -v -f
+        if ((first == 'f' && var) || (first == 'v' && fonc)) // cas -f -v -f
+        {
+            fprintf(stderr,"wrong option");
             exit(1);
+        }
 
         if (strlen(args[i]) > 0 && args[i][1] != 'v' && args[i][1] != 'f')
+        {
+            fprintf(stderr,"wrong option");
             exit(2);
+        }
         if (args[i][1] != 'f')
         {
             var = false;
@@ -305,11 +312,7 @@ static int unset_builtin(char *args[], size_t nb_args, struct hash_map *h)
 
     for (; i < nb_args; i += 1)
     {
-        // if (!test_name(args[i]))
-        //     exit(1);
         hash_map_remove(h, args[i]);
-        // free(hash_map_get(h, args[i]));
-        // free(args[i]);
     }
     return 0;
 }
@@ -337,10 +340,12 @@ static int export_builtin(char *args[], size_t nb_args, struct hash_map *h)
         char *word = args[i];
         if (word[0] == '-' && word[1] != 'p')
         {
+            fprintf(stderr,"error option");
             exit(2);
         }
         if (!test_name(word))
         {
+            fprintf(stderr,"error name");
             exit(1);
         }
         else
