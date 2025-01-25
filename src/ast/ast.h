@@ -176,25 +176,23 @@ struct ast_redirection
 struct ast_for
 {
     struct ast base;
-    struct ast * do_body;
-    char  * variable;
-    char ** list;
+    struct ast *do_body;
+    char *variable;
+    char **list;
     size_t nbr_elt;
 };
 
-
 struct ast_function
 {
-	struct ast base;
-	char * fname;
-	struct ast * shell_command;
-	size_t nbr_redirection;
-	struct ast ** redirection;
+    struct ast base;
+    char *fname;
+    struct ast *shell_command;
+    size_t nbr_redirection;
+    struct ast **redirection;
 };
 
-
 // function
-struct ast * ast_function_init(char * fname,struct ast * shell_command);
+struct ast *ast_function_init(char *fname, struct ast *shell_command);
 
 // if
 struct ast *ast_if_init(struct ast *condition, struct ast *then_body,
@@ -207,7 +205,7 @@ struct ast *ast_boucle_init(struct ast *condition, struct ast *do_body,
                             int run_condition);
 
 // for
-struct ast * ast_for_init(char * variable); 
+struct ast *ast_for_init(char *variable);
 
 // redirection
 struct ast *ast_redirection_init(int fd, char *word,
@@ -248,7 +246,6 @@ void boucle_free(struct ast *ast);
 int boucle_pretty_print(struct ast *ast, int actual);
 void boucle_push(struct ast *ast, struct ast *add);
 
-
 // redirection
 int redirection_run(struct ast *ast, struct hash_map *h);
 void redirection_free(struct ast *ast);
@@ -286,31 +283,28 @@ int pipeline_pretty_print(struct ast *ast, int actual);
 void pipeline_push(struct ast *ast, struct ast *add);
 
 // for
-int for_run(struct ast * ast, struct hash_map *h);
-void for_free(struct ast * ast);
-int for_pretty_print(struct ast * ast,int actual);
-void for_push(struct ast * ast, struct ast * add);
-void for_push_Word(struct ast *ast, char * add);
+int for_run(struct ast *ast, struct hash_map *h);
+void for_free(struct ast *ast);
+int for_pretty_print(struct ast *ast, int actual);
+void for_push(struct ast *ast, struct ast *add);
+void for_push_Word(struct ast *ast, char *add);
 
-
-// function 
-int function_run(struct ast * ast,struct hash_map *h);
-void function_free(struct ast * ast);
-void function_push(struct ast * ast, struct ast * add);
+// function
+int function_run(struct ast *ast, struct hash_map *h);
+void function_free(struct ast *ast);
+void function_push(struct ast *ast, struct ast *add);
 
 // pretty_print the entire_ast
 void pretty_print_ast(struct ast *ast);
 
-
-
-//function to expeand all the list of a char
-char ** expand_all(char ** words,size_t nbr, struct hash_map * h);
+// function to expeand all the list of a char
+char **expand_all(char **words, size_t nbr, struct hash_map *h);
 
 // extand.c
 
 int test_var(char *str);
 char *expand(struct hash_map *h, char *str);
-char * delete_quote(char *word);
+char *delete_quote(char *word);
 int test_quote(char *str);
 int test_back(char *str);
 char *delimite_var(char *prev, char *next, char *word);

@@ -3,10 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <err.h>
 
-#include "lexer.h"
 #include "../parser/parser.h"
+#include "lexer.h"
 
 static struct token token_reco(struct lexer *lexer);
 static struct token continue_word(struct lexer *lexer);

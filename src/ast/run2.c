@@ -35,10 +35,10 @@ char **expand_all(char **word, size_t nbr, struct hash_map *h)
         }
         else
         {
-            char * save = malloc(strlen(word[i]) + 1);
+            char *save = malloc(strlen(word[i]) + 1);
             if (!save)
             {
-                for(size_t j = 0; j < i; i++)
+                for (size_t j = 0; j < i; i++)
                 {
                     free(new_word[i]);
                 }
@@ -47,7 +47,7 @@ char **expand_all(char **word, size_t nbr, struct hash_map *h)
             }
             else
             {
-                strcpy(save,word[i]);
+                strcpy(save, word[i]);
                 new_word[i] = save;
             }
         }
@@ -64,14 +64,13 @@ int for_run(struct ast *ast, struct hash_map *h)
     {
         for (size_t i = 0; i < boucle->nbr_elt; i++)
         {
-            char *extended = expand(h,boucle->list[i]);
-	        hash_map_insert(h, boucle->variable, extended);
+            char *extended = expand(h, boucle->list[i]);
+            hash_map_insert(h, boucle->variable, extended);
             RUN(boucle->do_body, h);
-            if (i < boucle->nbr_elt-1)
+            if (i < boucle->nbr_elt - 1)
                 free(extended);
-
         }
-	    hash_map_remove(h, boucle->variable);
+        hash_map_remove(h, boucle->variable);
     }
     return res;
 }

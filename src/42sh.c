@@ -1,9 +1,9 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include <err.h>
+#include <pwd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <pwd.h>
 #include <unistd.h>
 
 #include "ast/ast.h"
@@ -77,11 +77,11 @@ int main(int argc, char *argv[])
     // init lexer
     struct lexer *lexer = lexer_new();
     lexer->file = value;
-    
+
     if (argc > 1 && !strcmp(argv[1], "-l"))
     {
-          print_lex(lexer);
-          return 0;
+        print_lex(lexer);
+        return 0;
     }
 
     int ret_code = 0;
@@ -307,4 +307,3 @@ int main(int argc, char *argv[])
     return 0;
 }
 */
-

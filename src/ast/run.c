@@ -130,7 +130,7 @@ static char **create_words(char *word, struct ast **asts, size_t *nbr_element,
                 exit(2);
             }
             words = test;
-            char *expands = expand(h,elt->elt.word);
+            char *expands = expand(h, elt->elt.word);
             words[(size - 1)] = expands;
         }
     }
@@ -392,13 +392,13 @@ int and_or_run(struct ast *ast, struct hash_map *h)
     }
 }
 
-static int check_condition (int check,int cdt)
+static int check_condition(int check, int cdt)
 {
-	if (cdt)
-	{
-		return check;	
-	}
-	return !check;
+    if (cdt)
+    {
+        return check;
+    }
+    return !check;
 }
 
 // boucle (until and while) ast eval
@@ -737,7 +737,7 @@ static int handle_special_builtin(char **words, struct hash_map *h)
                 return cmd_cd(words[1]);
             return cmd_cd("");
         }
-	return 0;
+        return 0;
     }
 }
 

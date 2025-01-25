@@ -1,6 +1,6 @@
-#include "parser.h"
 #include "../ast/ast.h"
 #include "../lexer/lexer.h"
+#include "parser.h"
 
 int is_reserved_words(struct lexer *lexer)
 {

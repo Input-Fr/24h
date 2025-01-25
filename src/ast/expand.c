@@ -116,7 +116,7 @@ static char *expand_pwd(char *prev, char *next)
 
 static char *expand_oldpwd(char *prev, char *next)
 {
-    char * str = getenv("OLDPWD");
+    char *str = getenv("OLDPWD");
     size_t len = strlen(prev) + strlen(next) + strlen(str);
     char *result = calloc(1, len + 1);
     snprintf(result, len + 1, "%s%s%s", prev, str, next);
@@ -145,7 +145,7 @@ static char *expand_random(char *prev, char *next)
 
 static char *expand_ifs(char *prev, char *next)
 {
-    char * str = getenv("IFS");
+    char *str = getenv("IFS");
     size_t len = strlen(prev) + strlen(next) + strlen(str);
     char *result = calloc(1, len + 1);
     snprintf(result, len + 1, "%s%s%s", prev, str, next);
