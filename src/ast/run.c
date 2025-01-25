@@ -328,11 +328,11 @@ static int export_builtin(char *args[], size_t nb_args, struct hash_map *h)
         char *word = args[i];
         if (word[0] == '-' && word[1] != 'p')
         {
-            errx(2, "wrong option");
+            return 2;
         }
         if (!test_name(word))
         {
-            errx(1, "wrong option");
+            return 1;
         }
         else
         {
@@ -381,13 +381,13 @@ int and_or_run(struct ast *ast, struct hash_map *h)
     {
         if (and_or_ast->c.op->op == AND_OP)
         {
-            return !RUN(and_or_ast->c.op->left, h)
-                && !RUN(and_or_ast->c.op->right, h);
+            return RUN(and_or_ast->c.op->left, h)
+                && RUN(and_or_ast->c.op->right, h);
         }
         else
         {
-            return !RUN(and_or_ast->c.op->left, h)
-                || !RUN(and_or_ast->c.op->right, h);
+            return RUN(and_or_ast->c.op->left, h)
+                || RUN(and_or_ast->c.op->right, h);
         }
     }
 }
@@ -689,7 +689,7 @@ static int handle_executable_builtin(char **words)
     int return_value = WEXITSTATUS(wstatus);
     if (return_value == 127)
     {
-        errx(127, "Terminated Incorrectly\n");
+        return 127;
     }
     return 0;
 }
