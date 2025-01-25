@@ -11,8 +11,7 @@ void clear_current_tok(struct lexer *lexer)
     {
         if (lexer->current_tok.type != TOKEN_WORD
             && lexer->current_tok.type != TOKEN_ASSIGNMENT_WORD
-            && lexer->current_tok.data->str != NULL
-            && !is_reserved_words(lexer))
+            && lexer->current_tok.data->str != NULL)
         {
             free(lexer->current_tok.data->str);
         }
