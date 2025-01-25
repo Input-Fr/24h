@@ -130,32 +130,8 @@ static char **create_words(char *word, struct ast **asts, size_t *nbr_element,
                 exit(2);
             }
             words = test;
-            char *save = malloc(strlen(elt->elt.word) + 1);
-            if (!save)
-            {
-                exit(2);
-            }
-            strcpy(save, elt->elt.word);
-            char *expands = expand(h, save);
-            /*if (!egal(save, "")) // if not empty
-            {
-                free(elt->elt.word);
-                elt->elt.word = save;
-            }*/
-            
-            //words[(size - 1)] = expands;    --> mederic
-            //free(save);
-
-            if (egal(expands, "") && !test_var(save))
-            {
-                free(expands);
-                words[(size - 1)] = save;
-            }
-            else
-            {
-                words[(size - 1)] = expands;
-                free(save);
-            }
+            char *expands = expand(h,elt->elt.word);
+            words[(size - 1)] = expands;
         }
     }
     size += 1;
@@ -847,23 +823,6 @@ static int cmd_run(char **words, struct hash_map *h)
     return handle_executable_builtin(words);
 }
 
-/*
-static short contain_shash(char * word)
-{
-        size_t i = 0;
-        if (egal(word,""))
-        {
-                return 0;
-        }
-        size_t size = strlen(word);
-        while(i <= size && word[i] != '/')
-        {
-                i += 1;
-        }
-        return i <= size;
-}
-*/
-
 int simple_cmd_run(struct ast *ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_SIMPLE_CMD);
@@ -873,32 +832,9 @@ int simple_cmd_run(struct ast *ast, struct hash_map *h)
     if (cmd->word)
     {
         char *expanded = expand(h, cmd->word);
-        char **words = NULL;
-        if (egal(expanded, ""))
-        {
-            if (test_var(cmd->word))
-            {
-                free(expanded);
-                restore();
-                return 2;
-            }
-            char *save = malloc(strlen(cmd->word) + 1);
-            strcpy(save, cmd->word);
-            words = MAKE_WORD(save, cmd->element, cmd->nbr_element, h);
-        }
-        else
-        {
-            words = MAKE_WORD(expanded, cmd->element, cmd->nbr_element, h);
-        }
-        /*
-        if (!egal(expanded, "")) // check if the expended is not empty
-        {
-            free(cmd->word);
-            cmd->word = expanded;
-        }
-        char **words = MAKE_WORD(cmd->word, cmd->element, cmd->nbr_element, h);
-        */
-        result = cmd_run(words, h);
+	char **words = NULL;
+	words = MAKE_WORD(expanded, cmd->element, cmd->nbr_element, h);
+	result = cmd_run(words, h);
         free_words(words);
     }
     restore();

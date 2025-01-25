@@ -47,19 +47,13 @@ int for_run(struct ast *ast, struct hash_map *h)
     int res = 0;
     if (boucle->nbr_elt)
     {
-        char **exp = expand_all(boucle->list, boucle->nbr_elt, h);
-        if (!exp)
-        {
-            exit(2);
-        }
         for (size_t i = 0; i < boucle->nbr_elt; i++)
         {
-	    hash_map_insert(h, boucle->variable, exp[i]);
+	    hash_map_insert(h, boucle->variable, expand(h,boucle->list[i]));
             RUN(boucle->do_body, h);
         }
-        free(exp);
+	hash_map_remove(h, boucle->variable);
     }
-    hash_map_remove(h, boucle->variable);
     return res;
 }
 
