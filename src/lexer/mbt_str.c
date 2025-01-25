@@ -14,6 +14,7 @@ void clear_current_tok(struct lexer *lexer)
             && lexer->current_tok.data->str != NULL)
         {
             free(lexer->current_tok.data->str);
+            lexer->current_tok.data->str = NULL;
         }
         mbt_str_free(lexer->current_tok.data);
         lexer->current_tok.data = NULL;
