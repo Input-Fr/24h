@@ -172,14 +172,15 @@ done
 
 echo ""
 echo ""
-echo -e "\e[1;33m ------ tests folder current_debug ------\e[0m"
+echo -e "\e[1;33m ------ tests folder operators ------\e[0m"
 echo ""
 echo ""
-for test_file in tests/current_debug/*; do
+for test_file in tests/operators/*; do
     if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
         run_file "$test_file"
     fi
 done
+
 
 echo ""
 echo ""
@@ -191,8 +192,6 @@ for test_file in tests/current_debug/*; do
         run_file "$test_file"
     fi
 done
-echo
-echo -e "\e[1;33m------------------------------------\e[0m"
 
 echo ""
 echo ""

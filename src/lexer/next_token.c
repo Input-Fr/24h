@@ -18,6 +18,7 @@ static struct token end_of_file(struct lexer *lexer)
     {
         if (lexer->Quoting == SINGLE_QUOTE || lexer->Quoting == DOUBLE_QUOTE)
         {
+            fprintf(stderr,"missing quote");
             exit(2);
         }
         ungetc(EOF, lexer->file);

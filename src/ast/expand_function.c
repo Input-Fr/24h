@@ -41,16 +41,6 @@ int test_quote(char * str)
     return 0;
 }
 
-//int test_back(char * str)
-//{
-//    for (size_t i = 0; str[i] != '\0'; i += 1)
-//    {
-//        if (str[i] == '\\')
-//            return 1;
-//    }
-//    return 0;
-//}
-
 
 static int is_special_var(char *str, size_t *i)
 {
@@ -64,7 +54,10 @@ static int is_special_var(char *str, size_t *i)
             if (str[*i+2] != '\0' && str[*i+2]== '}')
                 return 1;
             else
+            {
+                fprintf(stderr,"invalid variable");
                 exit(1);                 // Exit if not a valid format like ${12}
+            }
         }
     }
     else if (str[*i] != '\0' &&
@@ -104,6 +97,7 @@ int test_var(char *str) // test if a variable is in a word
                     if ((!isalnum(str[i])) && str[i] != '}' 
                             && str[i] != '{' && str[i] != '_')
                     {
+                        fprintf(stderr,"invalid variable");
                         exit(1);
                     }
                     i += 1;
@@ -159,15 +153,6 @@ char *delete_dollar(char *word)
     return new;
 }
 
-// static void error_var_brackets(char *var)
-//{
-//     if (strlen(var) > 1 && var[0] == '$'
-//             && var[1] == '{' && var[strlen(var) - 1] != '}')
-//     {
-//         exit(2);
-//     }
-// }
-
 char *delimite_var(char *prev, char *next, char *word)
 {
     char *tmp = word;
@@ -192,7 +177,8 @@ char *delimite_var(char *prev, char *next, char *word)
         acol = 1;
         word += 1;
     }
-    if (isdigit(*word) || *word == '@' || *word == '*' || *word == '?' || *word == '$' || *word == '#')
+    if (isdigit(*word) || *word == '@' || *word == '*' 
+            || *word == '?' || *word == '$' || *word == '#')
     {
         acol += 1;
     }

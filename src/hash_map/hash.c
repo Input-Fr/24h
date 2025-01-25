@@ -11,11 +11,6 @@ struct hash_map *hash_map_init(size_t size)
     struct hash_map *ha;
     ha = malloc(sizeof(struct hash_map));
 
-    if (ha == NULL)
-    {
-        return NULL;
-    }
-
     ha->size = size;
     size_t s = 0;
 
