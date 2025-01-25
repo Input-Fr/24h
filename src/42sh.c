@@ -1,15 +1,17 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include <err.h>
-#include <pwd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pwd.h>
 #include <unistd.h>
 
 #include "ast/ast.h"
 #include "hash_map/hash_map.h"
 #include "lexer/lexer.h"
 #include "parser/parser.h"
+
+void print_lex(struct lexer *lexer);
 
 static FILE *gere_usage(int argc, char *argv[])
 {
@@ -20,6 +22,14 @@ static FILE *gere_usage(int argc, char *argv[])
     else
     {
         int begin = 1;
+        if (!strcmp(argv[1], "-l"))
+        {
+            if (argc < 3)
+            {
+                return NULL;
+            }
+            begin += 1;
+        }
         if (!strcmp(argv[1], "-p"))
         {
             if (argc < 3)
@@ -67,6 +77,12 @@ int main(int argc, char *argv[])
     // init lexer
     struct lexer *lexer = lexer_new();
     lexer->file = value;
+    
+    if (argc > 1 && !strcmp(argv[1], "-l"))
+    {
+          print_lex(lexer);
+          return 0;
+    }
 
     int ret_code = 0;
     enum parser_status status;
@@ -113,7 +129,6 @@ int main(int argc, char *argv[])
     return ret_code;
 }
 
-/*
 static void print(char *string, enum token_type type)
 {
     if (type == TOKEN_WORD)
@@ -218,6 +233,7 @@ void print_lex(struct lexer *lexer)
     lexer_free(lexer);
 }
 
+/*
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -291,3 +307,4 @@ int main(int argc, char *argv[])
     return 0;
 }
 */
+

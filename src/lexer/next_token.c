@@ -33,7 +33,7 @@ static struct token end_of_file(struct lexer *lexer)
     }
 }
 
-static struct token next_quote(struct lexer *lexer)
+static struct token next_ope(struct lexer *lexer)
 {
     // --2
     mbt_str_pushc(lexer->current_tok.data, lexer->input);
@@ -52,9 +52,12 @@ static void single_quote(struct lexer *lexer)
     char c = lexer->input;
     if (lexer->Quoting == NO_QUOTE && c == '\'')
     {
-        lexer->word = 1;
         lexer->current_tok.type = TOKEN_WORD;
-        lexer->current_tok.data = mbt_str_init();
+        if (!lexer->word)
+        {
+            lexer->word = 1;
+            lexer->current_tok.data = mbt_str_init();
+        }
         mbt_str_pushc(lexer->current_tok.data, '\'');
         lexer->Quoting = SINGLE_QUOTE;
     }
@@ -70,9 +73,12 @@ static void double_quote(struct lexer *lexer)
     char c = lexer->input;
     if (lexer->Quoting == NO_QUOTE && c == '"')
     {
-        lexer->word = 1;
+        if (!lexer->word)
+        {
+            lexer->word = 1;
+            lexer->current_tok.data = mbt_str_init();
+        }
         lexer->current_tok.type = TOKEN_WORD;
-        lexer->current_tok.data = mbt_str_init();
         mbt_str_pushc(lexer->current_tok.data, '"');
         lexer->Quoting = DOUBLE_QUOTE;
     }
@@ -86,42 +92,20 @@ static void double_quote(struct lexer *lexer)
 static void backslash_quote(struct lexer *lexer)
 {
     char c = lexer->input;
-    if (lexer->word)
-    {
-        mbt_str_pushc(lexer->current_tok.data, c);
-    }
-    else
-    {
-        lexer->word = 1;
-        lexer->current_tok.data = mbt_str_init();
-        mbt_str_pushc(lexer->current_tok.data, c);
-    }
-
     lexer->input = lexer_file(lexer->file);
     char next_c = lexer->input;
-
-    if (lexer->Quoting == NO_QUOTE && c == '\\')
+    if (next_c != '\n')
     {
-        if (next_c != '\n')
+        if (lexer->word)
         {
-            mbt_str_pushc(lexer->current_tok.data, next_c);
+            mbt_str_pushc(lexer->current_tok.data, c);
         }
-    }
-    else if (lexer->Quoting == DOUBLE_QUOTE)
-    {
-        if (next_c == '$' || next_c == '`' || next_c == '"' || next_c == '\\')
+        else
         {
-            mbt_str_pushc(lexer->current_tok.data, next_c);
+            lexer->word = 1;
+            lexer->current_tok.data = mbt_str_init();
+            mbt_str_pushc(lexer->current_tok.data, c);
         }
-        else if (next_c != '\n')
-        {
-            mbt_str_pushc(lexer->current_tok.data, '\\');
-            mbt_str_pushc(lexer->current_tok.data, next_c);
-        }
-    }
-    else
-    {
-        mbt_str_pushc(lexer->current_tok.data, '\\');
         mbt_str_pushc(lexer->current_tok.data, next_c);
     }
 }
@@ -169,17 +153,6 @@ static struct token var(struct lexer *lexer)
     }
     else
     {
-        // mbt_str_pushc(lexer->current_tok.data, '{');
-        // mbt_str_pushc(lexer->current_tok.data, c);
-
-        // while ((!(isalpha(c))) && c != '?' && c != '#'
-        //         && c != '$' && c != '@' && c != '*' && c != '{')
-        //{
-        //     c = lexer_file(lexer->file);
-        //     mbt_str_pushc(lexer->current_tok.data, c);
-        // }
-
-        // mbt_str_pushc(lexer->current_tok.data, '}');
         ungetc(c, lexer->file);
     }
     return token_reco(lexer);
@@ -283,7 +256,7 @@ static struct token token_reco(struct lexer *lexer)
     }
     else if ((lexer->Quoting == NO_QUOTE && lexer->ope && test_operator(lexer)))
     {
-        return next_quote(lexer); // 2
+        return next_ope(lexer); // 2
     }
     else if (lexer->ope && !test_operator(lexer))
     {

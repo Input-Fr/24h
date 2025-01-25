@@ -808,6 +808,8 @@ static struct ast *parse_element(enum parser_status *status,
     if (tok.type == TOKEN_WORD || tok.type == TOKEN_ASSIGNMENT_WORD
         || is_reserved_words(lexer))
     {
+        //if (tok.type == TOKEN_ASSIGNMENT_WORD && !test_name(tok.data->str))
+        //    exit(127);
         char *str = tok.data->str;
         if (tok.data == NULL && is_reserved_words(lexer)) //if reserved words
             str = strdup(reserved_words_to_char(lexer));   //malloc

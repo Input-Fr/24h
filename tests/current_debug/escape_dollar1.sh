@@ -1,0 +1,1 @@
+echo "alors\$aa\bkonjour"

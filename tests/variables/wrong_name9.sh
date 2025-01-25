@@ -1,4 +1,4 @@
-echo ?$0a?
-echo ?$12a?
-echo +$12a+
+echo ?$9a?
+echo ?$92a?
+echo +$92a+
 echo +++/$aa12a+

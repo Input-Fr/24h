@@ -142,8 +142,13 @@ static char **create_words(char *word, struct ast **asts, size_t *nbr_element,
                 free(elt->elt.word);
                 elt->elt.word = save;
             }*/
+            
+            //words[(size - 1)] = expands;    --> mederic
+            //free(save);
+
             if (egal(expands, "") && !test_var(save))
             {
+                free(expands);
                 words[(size - 1)] = save;
             }
             else
@@ -211,29 +216,23 @@ static size_t set_args(bool *newline, bool *backslash, char *args[],
 // args est de la forme ["arg1", "arg2", "arg3"]
 static void echo_builtin(char *args[], size_t nb_args, struct hash_map *h)
 {
+    if (h == NULL)
+    {
+        return;
+    }
     bool newline = true;
     bool backslash = false;
     size_t i = set_args(&newline, &backslash, args, nb_args);
     // echo les arguments
     while (i < nb_args)
     {
+        char *str = args[i];
         if (backslash)
         {
-            char *cur_arg = args[i];
-            if (test_var(cur_arg) || test_quote(cur_arg))
-            {
-                char *string = expand(h, cur_arg);
-                printWbackslash(string);
-                free(string);
-            }
-            else
-            {
-                printWbackslash(cur_arg);
-            }
+            printWbackslash(str);
         }
         else
         {
-            char *str = args[i];
             printf("%s", str);
         }
         if (i < nb_args - 1) // on sépare tout les argument d'un espace

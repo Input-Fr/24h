@@ -41,76 +41,77 @@ int test_quote(char * str)
     return 0;
 }
 
-int test_back(char * str)
+//int test_back(char * str)
+//{
+//    for (size_t i = 0; str[i] != '\0'; i += 1)
+//    {
+//        if (str[i] == '\\')
+//            return 1;
+//    }
+//    return 0;
+//}
+
+
+static int is_special_var(char *str, size_t *i)
 {
-    for (size_t i = 0; str[i] != '\0'; i += 1)
+    if (str[*i] != '\0' && str[*i] == '{')
     {
-        if (str[i] == '\\')
-            return 1;
+        // check if ${?} ${*} ...
+        if (str[*i + 1] != '\0' && 
+            (str[*i + 1] == '#' || str[*i + 1] == '$' || str[*i + 1] == '@' ||
+            str[*i + 1] == '*' || str[*i + 1] == '?' || isdigit(str[*i + 1])))
+        {
+            if (str[*i+2] != '\0' && str[*i+2]== '}')
+                return 1;
+            else
+                exit(1);                 // Exit if not a valid format like ${12}
+        }
+    }
+    else if (str[*i] != '\0' &&
+            (str[*i] == '#' || str[*i] == '$' || str[*i] == '@' ||
+            str[*i] == '*' || str[*i] == '?' || isdigit(str[*i])))
+    {
+        return 1;
     }
     return 0;
 }
 
-
 int test_var(char *str) // test if a variable is in a word
 {
-    if (str[0] == '\'' && str[strlen(str) - 1] == '\'')
-    {
-        return 0;
-    }
     size_t i = 0;
-    while (str[i] != '\0')
+    size_t quote = 0;
+    while (i < strlen(str) && str[i] != '\0')
     {
-        if (str[0] == '$' || (i > 0 && str[i - 1] != '\\' && str[i] == '$'))
+        if (str[i] == '\'' && !quote)
+            quote = 1;
+        else if (str[i] == '\'' && quote)
+            quote = 0;
+        if (((str[0] == '$' || (i > 0 && str[i - 1] != '\\' && str[i] == '$')) && !quote))
         {
-
-            if (str[i + 1] != '\0' && str[i + 1] != '{')
-            {
+            i+=1;
+            char c = str[i];
+            if (is_special_var(str, &i))
                 return 1;
-            }
+            else if ((c != '\0' && c != '{' && (isalpha(c) || c == '_')))
+                return 1;   //normal variable : $name
+            else if (c != '\0' && c != '{')
+                return 0;   //exit
 
-            if (str[i + 1] == '\0'
-                || ((!isalnum(str[i + 1])) && str[i + 1] != '?'
-                    && str[i + 1] != '#' && str[i + 1] != '$'
-                    && str[i + 1] != '@' && str[i + 1] != '*'
-                    && str[i + 1] != '{' && str[i + 1] != '_'))
+            if (c != '\0' && c == '{')  //variable check : ${...}
             {
-                return 0;
-            }
-            if (str[i + 1] != '\0' && str[i + 1] == '{')
-            {
-                if (str[i + 3] != '\0'
-                    && (str[i + 2] == '#' || str[i + 2] == '$'
-                        || str[i + 2] == '@' || str[i + 2] == '*'
-                        || str[i + 2] == '?' || isdigit(str[i + 2])))
-                { // check if ${?} ${*} ...
-                    if (str[i + 3] == '}')
-                    {
-                        return 1;
-                    }
-                    else
-                    {
-                        exit(1);
-                    }
-                }
-
                 while (str[i] != '\0' && str[i] != '}')
                 {
-                    if ((!isalnum(str[i])) && str[i] != '}' && str[i] != '$'
-                        && str[i] != '{' && str[i] != '_')
+                    if ((!isalnum(str[i])) && str[i] != '}' 
+                            && str[i] != '{' && str[i] != '_')
                     {
                         exit(1);
                     }
                     i += 1;
                 }
                 if (str[i] == '}')
-                {
                     return 1;
-                }
                 else
-                {
                     return 0;
-                }
             }
         }
         i += 1;
@@ -191,8 +192,7 @@ char *delimite_var(char *prev, char *next, char *word)
         acol = 1;
         word += 1;
     }
-    if (*word == '@' || *word == '*' || *word == '?' || *word == '$'
-        || *word == '#')
+    if (isdigit(*word) || *word == '@' || *word == '*' || *word == '?' || *word == '$' || *word == '#')
     {
         acol += 1;
     }
@@ -217,28 +217,6 @@ char *delimite_var(char *prev, char *next, char *word)
     return new;
 }
 
-static void delete_back(char *word)
-{
-    char *tmp = calloc(1, strlen(word) * 2);
-    strcpy(tmp, word);
-    char *copy = word;// = calloc(1, strlen(word) + 1);
-
-    for (size_t i = 0; word[i] != '\0'; i += 1)
-    {
-        if (word[i] == '\\')
-        {
-            tmp[i] = '\0';
-            char *tmp2 = calloc(1, strlen(word) * 2);
-            snprintf(tmp2, strlen(word) + 1, "%s%s", tmp, copy + 1);
-            strcpy(tmp, tmp2);
-            free(tmp2);
-        }
-        copy+=1;
-    }
-    
-    strcpy(word, tmp);
-    free(tmp);
-}
 
 static void delete_c(char *word, size_t *j)
 {
@@ -251,28 +229,58 @@ static void delete_c(char *word, size_t *j)
     }
 
     word[*j] = '\0';
-    char *tmp2 = calloc(1, strlen(word) * 2);
-    snprintf(tmp2, strlen(word) + 10, "%s%s", word, copy + 1);
+    char *tmp2 = calloc(1, strlen(word) + strlen(copy));
+    snprintf(tmp2, strlen(word) + strlen(copy), "%s%s", word, copy + 1);
     strcpy(word, tmp2);
     free(tmp2);
     free(tmp);
 }
 
+static int isspecial(char c)
+{
+    if (c == '$' || c == '`' || c == '"' || c == '\\')
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
 char *delete_quote(char *str)
 {
-    while (test_back(str))
-    {
-        delete_back(str);
-    }
-
     if (!test_quote(str))
     {
         return str;
     }
-
-    size_t i = 10;
-    delete_c(str, &i);
     
+    char c = ' ';
+    for (size_t i = 0; str[i] != '\0'; i += 1)
+    {
+        if (str[i] == '\\' && c == '"' && i + 1 < strlen(str)
+                && !isspecial(str[i + 1]))
+        {
+            i += 1;
+        }
+        if (str[i] == '\\' && c != '\'')
+        {
+            delete_c(str, &i);
+        }
+        else if ((str[i] == '"' || str[i] == '\'') && (c == ' ')) 
+        {
+            c = str[i];
+            delete_c(str, &i);
+            i-=1;
+        }
+        else if (str[i] != '\0' && str[i] == c && c != ' ')
+        {
+            c = ' ';
+            delete_c(str, &i);
+            i-=1;
+        }
+        
+    }
     return str;
 }
 

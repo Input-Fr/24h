@@ -5,32 +5,27 @@
 #include <stddef.h>
 
 
-union retouir
-{
-    char *variable_value,
-    struct ast *function_value,
-};
+//union retouir
+//{
+//    char *variable_value,
+//    struct ast *function_value,
+//};
 
-enum type
-{
-    variable,
-    function,
-};
+//enum type
+//{
+//    variable,
+//    function,
+//};
 
 struct pair_list
 {
-    union retouir val;
-    enum type;
+    //union retouir val;
+    //enum type;
     char *key;
+    char *value;
     struct pair_list *next;
 };
 
-struct pair_function
-{
-    char *key;
-    struc
-    struct pair_list *next;
-};
 
 struct hash_map
 {

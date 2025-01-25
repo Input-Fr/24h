@@ -1,18 +1,7 @@
 echo "handle 'single quotes' within \"double quotes\" correctly."
 
-command="ls -l /"
-eval $command 
 
 echo "a quote in a quote: 'hello: \"Hello, world!\"?'"
-
-
-
-
-
-
-
-
-
 echo "Hello, world!"
 
 name="Alice"

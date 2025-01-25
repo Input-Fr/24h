@@ -211,8 +211,6 @@ static char *_expand(struct hash_map *h, char *str)
 
 // a faire : $OLDPWD $@ et $IFS
 
-
-
 char *expand(struct hash_map *h, char *str)
 {
     char *res = "";
@@ -228,9 +226,10 @@ char *expand(struct hash_map *h, char *str)
         res = tmp;
     }
 
-
     if (test_quote(res))
+    {
         res = delete_quote(res);
+    }
 
     return res;
 }
