@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "lexer.h"
+#include "../parser/parser.h"
 
 static struct token token_reco(struct lexer *lexer);
 static struct token continue_word(struct lexer *lexer);
@@ -200,6 +201,10 @@ static struct token blank(struct lexer *lexer)
     if (lexer->word)
     {
         lexer->current_tok.type = reserved_word(lexer);
+        if (is_reserved_words(lexer))
+        {
+            free(lexer->current_tok.data->str);
+        }
         return lexer->current_tok;
     }
     else

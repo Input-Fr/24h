@@ -53,7 +53,7 @@ char *reserved_words_to_char(struct lexer *lexer)
     else if (tok.type == TOKEN_DO)
         return "do";
     else if (tok.type == TOKEN_LBRACE)
-        return "}";
+        return "{";
     else if (tok.type == TOKEN_RBRACE)
         return "}";
     else
