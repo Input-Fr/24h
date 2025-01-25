@@ -129,16 +129,25 @@ static int nocomment(char *home_val)
 
 static void clean(int allocated, char *pwd, char *curpath);
 
+static void rule7(char *pwd, char *curpath);
+
+static void rule9(char *curpath, char *arg, char *pwd);
+
+static int minus_hyphen(void)
+{
+        char *oldchap = getenv("OLDPWD");
+        int ret = cmd_cd(oldchap);
+        printf("%s\n", oldchap);
+        return ret;
+}
+
 int cmd_cd(char *arg) // following SCL algorithm
 {
     char *home_val = getenv("HOME");
     char *pwd = getenv("PWD");
     if (!strcmp("-", arg))
     {
-        char *oldchap = getenv("OLDPWD");
-        int ret = cmd_cd(oldchap);
-        printf("%s\n", oldchap);
-        return ret;
+        minus_hyphen();
     }
     int allocated = 0;
     int step7 = 0;
@@ -175,6 +184,20 @@ int cmd_cd(char *arg) // following SCL algorithm
     if (curpath[0] != '/') // 7
     {
         step7 = 0;
+        rule7(pwd, curpath);
+    }
+    char *new = convert_to_canonical(curpath); // 8
+    free(curpath);
+    curpath = new;
+    rule9(curpath, arg, pwd);
+    setenv("OLDPWD", pwd, 1);
+    int ret = chdir(curpath);
+    clean(allocated, pwd, curpath);
+    return ret;
+}
+
+static void rule7(char *pwd, char *curpath)
+{
         char *newpath = calloc(strlen(pwd) + strlen(curpath) + 2, 1);
         strcpy(newpath, pwd);
 
@@ -186,10 +209,10 @@ int cmd_cd(char *arg) // following SCL algorithm
         strcat(newpath, curpath);
         free(curpath);
         curpath = newpath;
-    }
-    char *new = convert_to_canonical(curpath); // 8
-    free(curpath);
-    curpath = new;
+}
+
+static void rule9(char *curpath, char *arg, char *pwd)
+{
     // ------------- 9
     size_t pmax = pathconf("/", _PC_PATH_MAX);
     if ((strlen(curpath) + 1 > pmax && strlen(arg) + 1 <= pmax)
@@ -211,11 +234,8 @@ int cmd_cd(char *arg) // following SCL algorithm
         }
     }
     // --------------
-    setenv("OLDPWD", pwd, 1);
-    int ret = !chdir(curpath);
-    clean(allocated, pwd, curpath);
-    return ret;
 }
+
 static void clean(int allocated, char *pwd, char *curpath)
 {
     if (allocated)
