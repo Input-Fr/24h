@@ -64,10 +64,14 @@ int for_run(struct ast *ast, struct hash_map *h)
     {
         for (size_t i = 0; i < boucle->nbr_elt; i++)
         {
-	    hash_map_insert(h, boucle->variable, expand(h,boucle->list[i]));
+            char *extended = expand(h,boucle->list[i]);
+	        hash_map_insert(h, boucle->variable, extended);
             RUN(boucle->do_body, h);
+            if (i < boucle->nbr_elt-1)
+                free(extended);
+
         }
-	hash_map_remove(h, boucle->variable);
+	    hash_map_remove(h, boucle->variable);
     }
     return res;
 }
