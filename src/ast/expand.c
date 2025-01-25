@@ -114,6 +114,16 @@ static char *expand_pwd(char *prev, char *next)
     return result;
 }
 
+static char *expand_oldpwd(char *prev, char *next)
+{
+    char * str = getenv("OLDPWD");
+    size_t len = strlen(prev) + strlen(next) + strlen(str);
+    char *result = calloc(1, len + 1);
+    snprintf(result, len + 1, "%s%s%s", prev, str, next);
+    free(str);
+    return result;
+}
+
 static char *expand_random(char *prev, char *next)
 {
     srand(time(NULL));
@@ -130,6 +140,16 @@ static char *expand_random(char *prev, char *next)
     size_t len = strlen(prev) + strlen(next) + 5 + a;
     char *result = calloc(1, len + 1);
     snprintf(result, len, "%s%d%s", prev, nb, next);
+    return result;
+}
+
+static char *expand_ifs(char *prev, char *next)
+{
+    char * str = getenv("IFS");
+    size_t len = strlen(prev) + strlen(next) + strlen(str);
+    char *result = calloc(1, len + 1);
+    snprintf(result, len + 1, "%s%s%s", prev, str, next);
+    free(str);
     return result;
 }
 
@@ -168,9 +188,17 @@ static char *expand_special_var(char *key, char *prev, char *next,
     {
         return expand_pwd(prev, next);
     }
+    else if (strcmp(key, "OLDPWD") == 0)
+    {
+        return expand_oldpwd(prev, next);
+    }
     else if (strcmp(key, "RANDOM") == 0)
     {
         return expand_random(prev, next);
+    }
+    else if (strcmp(key, "IFS") == 0)
+    {
+        return expand_ifs(prev, next);
     }
     else
     {
@@ -208,8 +236,6 @@ static char *_expand(struct hash_map *h, char *str)
     expand_free(prev, next, var, key);
     return result;
 }
-
-// a faire : $OLDPWD $@ et $IFS
 
 char *expand(struct hash_map *h, char *str)
 {

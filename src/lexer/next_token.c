@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <err.h>
 
 #include "lexer.h"
 #include "../parser/parser.h"
@@ -18,14 +19,13 @@ static struct token end_of_file(struct lexer *lexer)
     {
         if (lexer->Quoting == SINGLE_QUOTE || lexer->Quoting == DOUBLE_QUOTE)
         {
-            fprintf(stderr,"missing quote");
-            exit(2);
+            errx(2, "missing quote");
         }
-        ungetc(EOF, lexer->file);
         if (lexer->current_tok.type == TOKEN_WORD)
         {
             lexer->current_tok.type = reserved_word(lexer);
         }
+        ungetc(EOF, lexer->file);
         return lexer->current_tok;
     }
     else

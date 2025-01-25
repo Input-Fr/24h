@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#include <err.h>
 
 #include "ast.h"
 #include "hash_map/hash_map.h"
@@ -54,10 +55,7 @@ static int is_special_var(char *str, size_t *i)
             if (str[*i+2] != '\0' && str[*i+2]== '}')
                 return 1;
             else
-            {
-                fprintf(stderr,"invalid variable");
-                exit(1);                 // Exit if not a valid format like ${12}
-            }
+                errx(1, "invalid variable"); //if not a valid format like ${12}
         }
     }
     else if (str[*i] != '\0' &&
@@ -97,8 +95,7 @@ int test_var(char *str) // test if a variable is in a word
                     if ((!isalnum(str[i])) && str[i] != '}' 
                             && str[i] != '{' && str[i] != '_')
                     {
-                        fprintf(stderr,"invalid variable");
-                        exit(1);
+                        errx(1,"invalid variable");
                     }
                     i += 1;
                 }
@@ -120,8 +117,7 @@ void error_var(char *word)
     {
         if (word[i] == ' ') // erreur d'espace: ${ a }
         {
-            fprintf(stdout, "bad substitution\n");
-            exit(1);
+            errx(1, "bad substitution");
         }
         i += 1;
     }
@@ -265,7 +261,6 @@ char *delete_quote(char *str)
             delete_c(str, &i);
             i-=1;
         }
-        
     }
     return str;
 }
@@ -298,6 +293,10 @@ int test_special_var(char *key)
     else if (strcmp(key, "UID") == 0)
         return 1;
     else if (strcmp(key, "PWD") == 0)
+        return 1;
+    else if (strcmp(key, "OLDPWD") == 0)
+        return 1;
+    else if (strcmp(key, "IFS") == 0)
         return 1;
     else if (strcmp(key, "RANDOM") == 0)
         return 1;

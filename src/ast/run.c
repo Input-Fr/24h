@@ -270,27 +270,17 @@ static int unset_builtin(char *args[], size_t nb_args, struct hash_map *h)
         for (size_t j = 1; args[i][j] != '\0'; j += 1) // cas -vvvvfvvvv
         {
             if (strlen(args[i]) > 0 && args[i][j] != 'v' && args[i][j] != 'f')
-            {
-                fprintf(stderr,"wrong option");
-                exit(2);
-            }
+                errx(2, "wrong option");
             if (first != args[i][j])
-            {
-                fprintf(stderr,"wrong option");
-                exit(1);
-            }
-        }
-        if ((first == 'f' && var) || (first == 'v' && fonc)) // cas -f -v -f
-        {
-            fprintf(stderr,"wrong option");
-            exit(1);
+                errx(1, "wrong option");
         }
 
+        if ((first == 'f' && var) || (first == 'v' && fonc)) // cas -f -v -f
+            errx(1, "wrong option");
+
         if (strlen(args[i]) > 0 && args[i][1] != 'v' && args[i][1] != 'f')
-        {
-            fprintf(stderr,"wrong option");
-            exit(2);
-        }
+            errx(2, "wrong option");
+
         if (args[i][1] != 'f')
         {
             var = false;
@@ -301,19 +291,17 @@ static int unset_builtin(char *args[], size_t nb_args, struct hash_map *h)
             var = true;
             fonc = false;
         }
-
         i += 1;
     }
 
     if (!var && !fonc)
-    {
         var = true;
-    }
 
     for (; i < nb_args; i += 1)
     {
         hash_map_remove(h, args[i]);
     }
+
     return 0;
 }
 
@@ -340,13 +328,11 @@ static int export_builtin(char *args[], size_t nb_args, struct hash_map *h)
         char *word = args[i];
         if (word[0] == '-' && word[1] != 'p')
         {
-            fprintf(stderr,"error option");
-            exit(2);
+            errx(2, "wrong option");
         }
         if (!test_name(word))
         {
-            fprintf(stderr,"error name");
-            exit(1);
+            errx(1, "wrong option");
         }
         else
         {
@@ -837,9 +823,9 @@ int simple_cmd_run(struct ast *ast, struct hash_map *h)
     if (cmd->word)
     {
         char *expanded = expand(h, cmd->word);
-	char **words = NULL;
-	words = MAKE_WORD(expanded, cmd->element, cmd->nbr_element, h);
-	result = cmd_run(words, h);
+        char **words = NULL;
+        words = MAKE_WORD(expanded, cmd->element, cmd->nbr_element, h);
+        result = cmd_run(words, h);
         free_words(words);
     }
     restore();

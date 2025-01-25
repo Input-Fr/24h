@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
         {
             h->ret = ret_code;
             h->nb_args = argc - 1;
-            h->all_args = argv;
+            h->all_args = argv + 1;
             h->old_pwd = getcwd(bufferpwd, 1024);
             ret_code = (*ast->ftable->run)(ast, h);
         }
