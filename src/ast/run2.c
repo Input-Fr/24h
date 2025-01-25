@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <err.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "ast.h"
 #include "hash_map/hash_map.h"
@@ -34,7 +35,21 @@ char **expand_all(char **word, size_t nbr, struct hash_map *h)
         }
         else
         {
-            new_word[i] = word[i];
+            char * save = malloc(strlen(word[i]) + 1);
+            if (!save)
+            {
+                for(size_t j = 0; j < i; i++)
+                {
+                    free(new_word[i]);
+                }
+                free(new_word);
+                return NULL;
+            }
+            else
+            {
+                strcpy(save,word[i]);
+                new_word[i] = save;
+            }
         }
     }
     return new_word;
@@ -54,15 +69,14 @@ int for_run(struct ast *ast, struct hash_map *h)
         }
         for (size_t i = 0; i < boucle->nbr_elt; i++)
         {
-	    hash_map_insert(h, boucle->variable, exp[i]);
+	        hash_map_insert(h, boucle->variable, exp[i]);
             RUN(boucle->do_body, h);
+            hash_map_remove(h, boucle->variable);
         }
         free(exp);
     }
-    hash_map_remove(h, boucle->variable);
     return res;
 }
-
 int function_run(struct ast *ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_FUNCTION);

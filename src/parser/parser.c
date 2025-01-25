@@ -500,8 +500,6 @@ static struct ast *parse_rule_until(enum parser_status *status,
 static void for_parenthesis(enum parser_status *status, struct lexer *lexer,
                             struct ast *ast_for)
 {
-    // TODO
-    (void)ast_for;
     struct token tok = lexer_peek(lexer);
     if (tok.type == TOKEN_SEMI)
     {
@@ -516,7 +514,6 @@ static void for_parenthesis(enum parser_status *status, struct lexer *lexer,
         }
         if (tok.type != TOKEN_IN)
         {
-            *status = PARSER_UNEXPECTED_TOKEN;
             return;
         }
         else
@@ -526,6 +523,7 @@ static void for_parenthesis(enum parser_status *status, struct lexer *lexer,
             while (tok.type == TOKEN_WORD)
             {
                 // add word to ast for iteration list
+                for_push_Word(ast_for, tok.data->str);
                 lexer_pop(lexer);
                 tok = lexer_peek(lexer);
             }
@@ -543,16 +541,14 @@ static void for_parenthesis(enum parser_status *status, struct lexer *lexer,
 static void handle_end(enum parser_status *status, struct lexer *lexer,
                        struct ast *ast_for)
 {
-    // TODO
-    (void)ast_for;
     struct ast *ast_cmpd_lst = parse_compound_list(status, lexer);
-    (void)ast_cmpd_lst;
     if (*status != PARSER_OK)
     {
         *status = PARSER_UNEXPECTED_TOKEN;
         return;
     }
     // add cmpd list to exec part of 'for'
+    for_push(ast_for, ast_cmpd_lst);
     struct token tok = lexer_peek(lexer);
     if (tok.type == TOKEN_DONE)
     {
@@ -568,7 +564,6 @@ static void handle_end(enum parser_status *status, struct lexer *lexer,
 static struct ast *parse_rule_for(enum parser_status *status,
                                   struct lexer *lexer)
 {
-    // TODO
     struct token tok = lexer_peek(lexer);
     if (tok.type != TOKEN_FOR)
     {
@@ -583,7 +578,8 @@ static struct ast *parse_rule_for(enum parser_status *status,
         return NULL;
     }
     // add word (tok.data->str) to variable name
-    for_parenthesis(status, lexer, NULL); // replace null with AST
+    struct ast *ast_for = ast_for_init(tok.data->str);
+    for_parenthesis(status, lexer, ast_for);
     if (*status != PARSER_OK)
     {
         return NULL;
@@ -604,12 +600,12 @@ static struct ast *parse_rule_for(enum parser_status *status,
         return NULL;
     }
 
-    handle_end(status, lexer, NULL); // replace null with AST
+    handle_end(status, lexer, ast_for);
     if (*status != PARSER_OK)
     {
         return NULL;
     }
-    return NULL; // return AST
+    return ast_for; // return AST
 }
 
 /*
