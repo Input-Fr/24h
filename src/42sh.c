@@ -22,30 +22,6 @@ static FILE *gere_usage(int argc, char *argv[])
     else
     {
         int begin = 1;
-        if (!strcmp(argv[1], "-l"))
-        {
-            if (argc < 3)
-            {
-                return NULL;
-            }
-            begin += 1;
-        }
-        if (!strcmp(argv[1], "-p"))
-        {
-            if (argc < 3)
-            {
-                return NULL;
-            }
-            begin += 1;
-        }
-        else if (!strcmp(argv[1], "-h"))
-        {
-            if (argc < 3)
-            {
-                return NULL;
-            }
-            begin += 1;
-        }
         int second = begin + 1;
         if (!strcmp(argv[begin], "-c"))
         {
@@ -78,12 +54,6 @@ int main(int argc, char *argv[])
     struct lexer *lexer = lexer_new();
     lexer->file = value;
 
-    if (argc > 1 && !strcmp(argv[1], "-l"))
-    {
-        print_lex(lexer);
-        return 0;
-    }
-
     int ret_code = 0;
     enum parser_status status;
     struct ast *ast;
@@ -107,18 +77,11 @@ int main(int argc, char *argv[])
                 errx(2, "Wrong grammar");
             }
         }
-        if (argc > 1 && !strcmp(argv[1], "-p"))
-        {
-            pretty_print_ast(ast);
-        }
-        else
-        {
-            h->ret = ret_code;
-            h->nb_args = argc - 1;
-            h->all_args = argv + 1;
-            h->old_pwd = getcwd(bufferpwd, 1024);
-            ret_code = (*ast->ftable->run)(ast, h);
-        }
+        h->ret = ret_code;
+        h->nb_args = argc - 1;
+        h->all_args = argv + 1;
+        h->old_pwd = getcwd(bufferpwd, 1024);
+        ret_code = (*ast->ftable->run)(ast, h);
         (*ast->ftable->free)(ast);
     }
 
@@ -129,6 +92,7 @@ int main(int argc, char *argv[])
     return ret_code;
 }
 
+/*
 static void print(char *string, enum token_type type)
 {
     if (type == TOKEN_WORD)
@@ -233,7 +197,6 @@ void print_lex(struct lexer *lexer)
     lexer_free(lexer);
 }
 
-/*
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

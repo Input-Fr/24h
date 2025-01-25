@@ -10,7 +10,6 @@ struct ast *ast_simple_cmd_init(char *word)
     static struct ast_ftable ftable = {
         .run = &simple_cmd_run,
         .free = &simple_cmd_free,
-        .pretty_print = &simple_cmd_pretty_print,
         .push = &simple_cmd_push,
     };
     struct ast_simp_cmd *cmd = calloc(1, sizeof(struct ast_simp_cmd));
@@ -29,7 +28,6 @@ struct ast *ast_for_init(char *variable)
     static struct ast_ftable ftable = {
         .run = &for_run,
         .free = &for_free,
-        .pretty_print = &for_pretty_print,
         .push = &for_push,
     };
     struct ast_for *boucle = calloc(1, sizeof(struct ast_for));

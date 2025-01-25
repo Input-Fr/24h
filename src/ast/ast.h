@@ -34,7 +34,6 @@ struct ast_ftable
 {
     int (*run)(struct ast *ast, struct hash_map *h);
     void (*free)(struct ast *ast);
-    int (*pretty_print)(struct ast *ast, int actual);
     void (*push)(struct ast *ast, struct ast *add);
 };
 
@@ -225,37 +224,31 @@ struct ast *ast_and_or_init(struct ast *pipeline);
 // list ast function
 int list_run(struct ast *ast, struct hash_map *h);
 void list_free(struct ast *ast);
-int list_pretty_print(struct ast *ast, int actual);
 void list_push(struct ast *ast, struct ast *add);
 
 // and_or ast function
 int and_or_run(struct ast *ast, struct hash_map *h);
 void and_or_free(struct ast *ast);
-int and_or_pretty_print(struct ast *ast, int actual);
 void and_or_push(struct ast *ast, struct ast *add);
 
 // if ast function
 int if_run(struct ast *ast, struct hash_map *h);
 void if_free(struct ast *ast);
-int if_pretty_print(struct ast *ast, int actual);
 void if_push(struct ast *ast, struct ast *add);
 
 // boucle (until and while)
 int boucle_run(struct ast *ast, struct hash_map *h);
 void boucle_free(struct ast *ast);
-int boucle_pretty_print(struct ast *ast, int actual);
 void boucle_push(struct ast *ast, struct ast *add);
 
 // redirection
 int redirection_run(struct ast *ast, struct hash_map *h);
 void redirection_free(struct ast *ast);
-int redirection_pretty_print(struct ast *ast, int actual);
 void redirection_push(struct ast *ast, struct ast *add);
 
 // element
 int element_run(struct ast *ast, struct hash_map *h);
 void element_free(struct ast *ast);
-int element_pretty_print(struct ast *ast, int actual);
 void element_push(struct ast *ast, struct ast *add);
 
 // variables
@@ -267,25 +260,21 @@ void variable_free(struct ast *ast);
 // simple command
 int simple_cmd_run(struct ast *ast, struct hash_map *h);
 void simple_cmd_free(struct ast *ast);
-int simple_cmd_pretty_print(struct ast *ast, int actual);
 void simple_cmd_push(struct ast *ast, struct ast *add);
 
 // shell command
 int shell_cmd_run(struct ast *ast, struct hash_map *h);
 void shell_cmd_free(struct ast *ast);
-int shell_cmd_pretty_print(struct ast *ast, int actual);
 void shell_cmd_push(struct ast *ast, struct ast *add);
 
 // pipeline command
 int pipeline_run(struct ast *ast, struct hash_map *h);
 void pipeline_free(struct ast *ast);
-int pipeline_pretty_print(struct ast *ast, int actual);
 void pipeline_push(struct ast *ast, struct ast *add);
 
 // for
 int for_run(struct ast *ast, struct hash_map *h);
 void for_free(struct ast *ast);
-int for_pretty_print(struct ast *ast, int actual);
 void for_push(struct ast *ast, struct ast *add);
 void for_push_Word(struct ast *ast, char *add);
 
@@ -293,9 +282,6 @@ void for_push_Word(struct ast *ast, char *add);
 int function_run(struct ast *ast, struct hash_map *h);
 void function_free(struct ast *ast);
 void function_push(struct ast *ast, struct ast *add);
-
-// pretty_print the entire_ast
-void pretty_print_ast(struct ast *ast);
 
 // function to expeand all the list of a char
 char **expand_all(char **words, size_t nbr, struct hash_map *h);
