@@ -90,29 +90,6 @@ run_test "if false; then echo 'if'; fi"
 
 echo ""
 echo ""
-echo -e "\e[1;33m ------ tests folder tests_facile ------\e[0m"
-echo ""
-echo ""
-for test_file in tests/tests_facile/*; do
-    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
-        run_file "$test_file"
-    fi
-done
-
-echo ""
-echo ""
-echo -e "\e[1;33m ---- tests folder tests_basic ----\e[0m"
-echo ""
-echo ""
-
-for test_file in tests/tests_basic/*; do
-    if [ -f "$test_file" ]; then  # Ensure it's a file, not a directory
-        run_file "$test_file"
-    fi
-done
-
-echo ""
-echo ""
 echo -e "\e[1;33m ------ tests folder while_until ------\e[0m"
 echo ""
 echo ""

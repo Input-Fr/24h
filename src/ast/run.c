@@ -341,6 +341,7 @@ static int export_builtin(char *args[], size_t nb_args, struct hash_map *h)
         }
         if (!test_name(word))
         {
+            fprintf(stderr,"sa mere la pute");
             exit(1);
         }
         else
