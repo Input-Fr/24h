@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                errx(2, "Wrong grammar");
+                errx(2, "Wrong grammar 1");
             }
         }
         h->ret = ret_code;
