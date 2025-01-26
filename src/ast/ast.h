@@ -286,18 +286,5 @@ void function_push(struct ast *ast, struct ast *add);
 // function to expeand all the list of a char
 char **expand_all(char **words, size_t nbr, struct hash_map *h);
 
-// extand.c
-
-int test_var(char *str);
-char *expand(struct hash_map *h, char *str);
-char *delete_quote(char *word);
-int test_quote(char *str);
-int test_back(char *str);
-char *delimite_var(char *prev, char *next, char *word);
-char *delete_dollar(char *word);
-void error_var(char *word);
-int calcul_len(int nb);
-int test_special_var(char *key);
-void separator_equal(char *name, char *val, char *as);
 
 #endif /* !AST_H */

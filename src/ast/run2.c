@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "ast.h"
+#include "expand/expand.h"
 #include "hash_map/hash_map.h"
 
 #define RUN(AST, HASH_TABLE) (*(AST)->ftable->run)((AST), (HASH_TABLE))
@@ -65,7 +66,7 @@ int for_run(struct ast *ast, struct hash_map *h)
         for (size_t i = 0; i < boucle->nbr_elt; i++)
         {
             char *extended = expand(h, boucle->list[i]);
-            hash_map_insert(h, boucle->variable, extended);
+            hash_map_insert(h, boucle->variable, extended, VARIABLE);
             RUN(boucle->do_body, h);
             if (i < boucle->nbr_elt - 1)
                 free(extended);

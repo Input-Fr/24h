@@ -15,6 +15,7 @@
 #include "hash_map/hash_map.h"
 #include "lexer/lexer.h"
 #include "parser/parser.h"
+#include "expand/expand.h"
 
 #define RUN(AST, HASH_TABLE) (*(AST)->ftable->run)((AST), (HASH_TABLE))
 
@@ -342,7 +343,7 @@ static int export_builtin(char *args[], size_t nb_args, struct hash_map *h)
                 char *val = calloc(1, strlen(word));
                 separator_equal(name, val, word);
                 hash_map_remove(h, name);
-                hash_map_insert(h, name, val);
+                hash_map_insert(h, name, val, VARIABLE);
             }
         }
     }
@@ -454,7 +455,7 @@ int variable_run(struct ast *ast, struct hash_map *h)
     assert(ast && ast->type == AST_VARIABLE);
     struct ast_variable *variable_ast = (struct ast_variable *)ast;
     hash_map_remove(h, variable_ast->name);
-    hash_map_insert(h, variable_ast->name, variable_ast->val);
+    hash_map_insert(h, variable_ast->name, variable_ast->val, VARIABLE);
     return 1;
 }
 

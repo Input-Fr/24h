@@ -45,12 +45,28 @@ void hash_map_free(struct hash_map *hash_map)
             {
                 struct pair_list *tmp = p->next;
                 free(p->key);
-                free(p->value);
+                if (p->type == VARIABLE)
+                {
+                    free(p->value.variable_value);
+                }
+                if (p->type == FUNCTION)
+                {
+                    free(p->value.function_value);
+                }
                 free(p);
                 p = tmp;
             }
             free(p->key);
-            free(p->value);
+            //free(p->value);
+
+            if (p->type == VARIABLE)
+            {
+                free(p->value.variable_value);
+            }
+            if (p->type == FUNCTION)
+            {
+                free(p->value.function_value);
+            }
             free(p);
         }
         i += 1;

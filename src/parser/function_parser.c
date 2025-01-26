@@ -56,6 +56,10 @@ char *reserved_words_to_char(struct lexer *lexer)
         return "{";
     else if (tok.type == TOKEN_RBRACE)
         return "}";
+    else if (tok.type == TOKEN_IN)
+        return "in";
+    else if (tok.type == TOKEN_BANG)
+        return "!";
     else
         return "";
 }

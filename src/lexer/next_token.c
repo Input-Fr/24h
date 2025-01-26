@@ -146,11 +146,25 @@ static struct token var(struct lexer *lexer)
     if (c == '{')
     {
         mbt_str_pushc(lexer->current_tok.data, c);
-        while (c != '}')
+        while (c != EOF && c != '}')
         {
             c = lexer_file(lexer->file);
             mbt_str_pushc(lexer->current_tok.data, c);
         }
+        if (c == EOF)
+            errx(1,"missing }");
+    }
+    else if (c == '(')
+    {
+        mbt_str_pushc(lexer->current_tok.data, c);
+        while (c != EOF && c != ')')
+        {
+            c = lexer_file(lexer->file);
+            mbt_str_pushc(lexer->current_tok.data, c);
+        }
+
+        if (c == EOF)
+            errx(1,"missing )");
     }
     else
     {
