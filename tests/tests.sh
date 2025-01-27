@@ -217,12 +217,12 @@ result=$(echo "$a / $b" | bc)
 echo""
 echo""
 echo""
-echo -e "\e[1;35m~~~~~~~~~~~~~ RESULT ~~~~~~~~~~~~\e[0m"
-echo -e "\e[1;35m|                               |\e[0m"
-echo -e "|\e[1;32m         $nb tests passed       \e[0m|"
-echo -e "|\e[1;32m         $result% tests passed      \e[0m|"
-echo -e "\e[1;35m|                               |\e[0m"
-echo -e "\e[1;35m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\e[0m"
+echo -e "\e[1;35m~~~~~~~~~~~~~~~~ RESULT ~~~~~~~~~~~~~~~\e[0m"
+echo -e "\e[1;35m|                                     |\e[0m"
+echo -e "|\e[1;32m            $nb tests passed         \e[0m|"
+echo -e "|\e[1;32m            $result% tests passed         \e[0m|"
+echo -e "\e[1;35m|                                     |\e[0m"
+echo -e "\e[1;35m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\e[0m"
 
 
 if [ "$COVERAGE" != "yes" ]; then

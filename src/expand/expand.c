@@ -1,3 +1,5 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include <assert.h>
 #include <pwd.h>
 #include <stdbool.h>
@@ -7,10 +9,12 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "expand.h"
 #include "ast/ast.h"
 #include "hash_map/hash_map.h"
+#include "expand/eval/evalexpr.h"
 
 
   
@@ -25,10 +29,10 @@ char *expand(struct hash_map *h, char *str)
         expand_variables(h, str, res);
     }
 
-    //if (test_ari(str))
-    //{
-    //    res = expand_ari(h, str);
-    //}
+    if (test_ari(str))
+    {
+        expand_ari(h, str, res);
+    }
 
     if (test_quote(res))
     {

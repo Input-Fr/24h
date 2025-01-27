@@ -12,8 +12,10 @@
 
 #include "ast/ast.h"
 #include "hash_map/hash_map.h"
+#include "expand/eval/evalexpr.h"
 
-int test_ari(char *str) // test if a variable is in a word
+
+int test_ari(char *str) // test if arithmetic
 {
     size_t i = 0;
     size_t quote = 0;
@@ -44,27 +46,7 @@ int test_ari(char *str) // test if a variable is in a word
     return 0;
 }
 
-/*
-
-static void delete_c(char *word, size_t *j)
-{
-    char *copy = calloc(1, strlen(word) * 2);
-    char *tmp = copy;
-    strcpy(copy, word);
-    for (size_t i = 0; i != *j; i += 1)
-    {
-        copy += 1;
-    }
-
-    word[*j] = '\0';
-    char *tmp2 = calloc(1, strlen(word) + strlen(copy));
-    snprintf(tmp2, strlen(word) + strlen(copy), "%s%s", word, copy + 1);
-    strcpy(word, tmp2);
-    free(tmp2);
-    free(tmp);
-}
-
-char *delimite_var(char *prev, char *next, char *word)
+static char *delimite_ari(char *prev, char *next, char *word)
 {
     char *tmp = word;
     prev = strcpy(prev, word);
@@ -76,98 +58,62 @@ char *delimite_var(char *prev, char *next, char *word)
     }
 
     prev[j] = '\0';
-
+    word += 3;
     char *new = calloc(1, strlen(word) + 1);
     new = strcpy(new, word);
     size_t i = 0;
-    int acol = 0;
 
     word += 1;
-    if (*word == '(')
+    while (*word != '\0' && *word != ')')
     {
-        acol = 1;
         word += 1;
+        i += 1;
     }
-    if (isdigit(*word) || *word == '@' || *word == '*' || *word == '?'
-        || *word == '$' || *word == '#')
-    {
-        acol += 1;
-    }
-    else
-    {
-        while (*word != '\0' && *word != '}' && *word != ' '
-               && (isalnum(*word) || *word == '_'))
-        {
-            word += 1;
-            i += 1;
-        }
-    }
-    new[i + acol + 1] = '\0';
-    // printf("new : %s\n",new);
+    new[i + 1] = '\0';
     if (*word == '\0')
         next = "";
-    else if (*word == ' ' || (!isalnum(*word)) || *word != '_')
-        next = strcpy(next, word + acol);
+    else
+    {
+        next = strcpy(next, word);
+        next[strlen(next) - 3] = '\0';
+    }
+        
 
     word = tmp;
     // error_var_brackets(word);
     return new;
 }
 
-
-
-
-char *delete_quote(char *str)
+static char *_expand_ari(char *operation, char *prev, char *next,
+                               struct hash_map *h)
 {
-    if (!test_quote(str))
+    if (h == NULL || strlen(operation) == 0)
     {
-        return str;
+        return "";
     }
 
-    char c = ' ';
-    for (size_t i = 0; str[i] != '\0'; i += 1)
-    {
-        if (str[i] == '\\' && c == '"' && i + 1 < strlen(str)
-            && !isspecial(str[i + 1]))
-        {
-            i += 1;
-        }
-        if (str[i] == '\\' && c != '\'')
-        {
-            delete_c(str, &i);
-        }
-        else if ((str[i] == '"' || str[i] == '\'') && (c == ' '))
-        {
-            c = str[i];
-            delete_c(str, &i);
-            i -= 1;
-        }
-        else if (str[i] != '\0' && str[i] == c && c != ' ')
-        {
-            c = ' ';
-            delete_c(str, &i);
-            i -= 1;
-        }
-    }
-    return str;
+    char *res = calloc(1, 32);
+    eval_arithmetic(res, operation, h);
+    size_t len = strlen(prev) + strlen(res) + strlen(next) + 1;
+    char *result = calloc(1, len);
+    snprintf(result, len, "%s%s%s", prev, res, next); // concat
+    free(res);
+    return result;
 }
-*/
 
+char *expand_ari(struct hash_map *h, char *str, char *res)
+{
+    char *word = str;
+    char *prev = calloc(1, strlen(word) + 1); // word before the variable
+    char *next = calloc(1, strlen(word) + 1); // word after the variable
+    char *operation = delimite_ari(prev, next, word); // divide the word in 3 words
 
+    char *result = _expand_ari(operation, prev, next, h);
 
-//static char *expand_ari(struct hash_map *h, char *str, char *res)
-//{
-//    char *word = str;
-//    char *prev = calloc(1, strlen(word) + 1); // word before the variable
-//    char *next = calloc(1, strlen(word) + 1); // word after the variable
-//    char *var = delimite_ari(prev, next, word); // divide the word in 3 words
-//    char *key = delete_par(var); //$((a + 1)) -> a + 1
-//    char *result = "";
-//    result = expand_normal_var(key, prev, next, h);
-//
-//    strcpy(res, result);
-//    free(result);
-//    expand_free(prev, next, var, key);
-//    return res;
-//
-//}
+    strcpy(res, result);
+    free(result);
+    free(next);
+    free(prev);
+    free(operation);
+    return res;
+}

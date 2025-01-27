@@ -10,7 +10,9 @@ void expand_variables(struct hash_map *h, char *str, char *res);
 int test_arithmetic(char *str);
 
 //expand_quotes.c
+char *expand_ari(struct hash_map *h, char *str, char *res);
 void delete_quote(char *str);
+int test_ari(char *str);
 
 //expand_function.c
 void delete_c(char *word, size_t *j);
@@ -23,5 +25,6 @@ int calcul_len(int nb);
 int test_special_var(char *key);
 
 char *expand(struct hash_map *h, char *str);
+
 
 #endif /* !expand_H */
