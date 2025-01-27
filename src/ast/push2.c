@@ -23,6 +23,14 @@ static struct ast **add_to(struct ast **ast, struct ast *add, size_t *nbr_elt)
     }
 }
 
+void function_push(struct ast *ast, struct ast *add)
+{
+    assert(ast && ast->type == AST_FUNCTION);
+    struct ast_function * fct = (struct ast_function *)ast;
+    fct->redirection = add_to(fct->redirection,add,&fct->nbr_redirection);
+    return;
+}
+
 void element_push(struct ast *ast, struct ast *add)
 {
     UNUSED(ast);
