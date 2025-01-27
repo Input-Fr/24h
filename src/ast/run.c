@@ -15,6 +15,7 @@
 #include "hash_map/hash_map.h"
 #include "lexer/lexer.h"
 #include "parser/parser.h"
+#include "expand/expand.h"
 
 #define RUN(AST, HASH_TABLE) (*(AST)->ftable->run)((AST), (HASH_TABLE))
 
@@ -130,7 +131,7 @@ static char **create_words(char *word, struct ast **asts, size_t *nbr_element,
                 exit(2);
             }
             words = test;
-            char *expands = expand(h,elt->elt.word);
+            char *expands = expand(h, elt->elt.word);
             words[(size - 1)] = expands;
         }
     }
@@ -270,27 +271,17 @@ static int unset_builtin(char *args[], size_t nb_args, struct hash_map *h)
         for (size_t j = 1; args[i][j] != '\0'; j += 1) // cas -vvvvfvvvv
         {
             if (strlen(args[i]) > 0 && args[i][j] != 'v' && args[i][j] != 'f')
-            {
-                fprintf(stderr,"wrong option");
-                exit(2);
-            }
+                errx(2, "wrong option");
             if (first != args[i][j])
-            {
-                fprintf(stderr,"wrong option");
-                exit(1);
-            }
-        }
-        if ((first == 'f' && var) || (first == 'v' && fonc)) // cas -f -v -f
-        {
-            fprintf(stderr,"wrong option");
-            exit(1);
+                errx(1, "wrong option");
         }
 
+        if ((first == 'f' && var) || (first == 'v' && fonc)) // cas -f -v -f
+            errx(1, "wrong option");
+
         if (strlen(args[i]) > 0 && args[i][1] != 'v' && args[i][1] != 'f')
-        {
-            fprintf(stderr,"wrong option");
-            exit(2);
-        }
+            errx(2, "wrong option");
+
         if (args[i][1] != 'f')
         {
             var = false;
@@ -301,19 +292,17 @@ static int unset_builtin(char *args[], size_t nb_args, struct hash_map *h)
             var = true;
             fonc = false;
         }
-
         i += 1;
     }
 
     if (!var && !fonc)
-    {
         var = true;
-    }
 
     for (; i < nb_args; i += 1)
     {
         hash_map_remove(h, args[i]);
     }
+
     return 0;
 }
 
@@ -340,13 +329,11 @@ static int export_builtin(char *args[], size_t nb_args, struct hash_map *h)
         char *word = args[i];
         if (word[0] == '-' && word[1] != 'p')
         {
-            fprintf(stderr,"error option");
-            exit(2);
+            return 2;
         }
         if (!test_name(word))
         {
-            fprintf(stderr,"error name");
-            exit(1);
+            return 1;
         }
         else
         {
@@ -356,7 +343,7 @@ static int export_builtin(char *args[], size_t nb_args, struct hash_map *h)
                 char *val = calloc(1, strlen(word));
                 separator_equal(name, val, word);
                 hash_map_remove(h, name);
-                hash_map_insert(h, name, val);
+                hash_map_insert(h, name, val, VARIABLE);
             }
         }
     }
@@ -395,24 +382,24 @@ int and_or_run(struct ast *ast, struct hash_map *h)
     {
         if (and_or_ast->c.op->op == AND_OP)
         {
-            return !RUN(and_or_ast->c.op->left, h)
-                && !RUN(and_or_ast->c.op->right, h);
+            return RUN(and_or_ast->c.op->left, h)
+                && RUN(and_or_ast->c.op->right, h);
         }
         else
         {
-            return !RUN(and_or_ast->c.op->left, h)
-                || !RUN(and_or_ast->c.op->right, h);
+            return RUN(and_or_ast->c.op->left, h)
+                || RUN(and_or_ast->c.op->right, h);
         }
     }
 }
 
-static int check_condition (int check,int cdt)
+static int check_condition(int check, int cdt)
 {
-	if (cdt)
-	{
-		return check;	
-	}
-	return !check;
+    if (cdt)
+    {
+        return check;
+    }
+    return !check;
 }
 
 // boucle (until and while) ast eval
@@ -468,7 +455,7 @@ int variable_run(struct ast *ast, struct hash_map *h)
     assert(ast && ast->type == AST_VARIABLE);
     struct ast_variable *variable_ast = (struct ast_variable *)ast;
     hash_map_remove(h, variable_ast->name);
-    hash_map_insert(h, variable_ast->name, variable_ast->val);
+    hash_map_insert(h, variable_ast->name, variable_ast->val, VARIABLE);
     return 1;
 }
 
@@ -751,7 +738,7 @@ static int handle_special_builtin(char **words, struct hash_map *h)
                 return cmd_cd(words[1]);
             return cmd_cd("");
         }
-	return 0;
+        return 0;
     }
 }
 
@@ -837,9 +824,9 @@ int simple_cmd_run(struct ast *ast, struct hash_map *h)
     if (cmd->word)
     {
         char *expanded = expand(h, cmd->word);
-	char **words = NULL;
-	words = MAKE_WORD(expanded, cmd->element, cmd->nbr_element, h);
-	result = cmd_run(words, h);
+        char **words = NULL;
+        words = MAKE_WORD(expanded, cmd->element, cmd->nbr_element, h);
+        result = cmd_run(words, h);
         free_words(words);
     }
     restore();

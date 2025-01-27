@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "ast.h"
+#include "expand/expand.h"
 #include "hash_map/hash_map.h"
 
 #define RUN(AST, HASH_TABLE) (*(AST)->ftable->run)((AST), (HASH_TABLE))
@@ -35,10 +36,10 @@ char **expand_all(char **word, size_t nbr, struct hash_map *h)
         }
         else
         {
-            char * save = malloc(strlen(word[i]) + 1);
+            char *save = malloc(strlen(word[i]) + 1);
             if (!save)
             {
-                for(size_t j = 0; j < i; i++)
+                for (size_t j = 0; j < i; i++)
                 {
                     free(new_word[i]);
                 }
@@ -47,7 +48,7 @@ char **expand_all(char **word, size_t nbr, struct hash_map *h)
             }
             else
             {
-                strcpy(save,word[i]);
+                strcpy(save, word[i]);
                 new_word[i] = save;
             }
         }

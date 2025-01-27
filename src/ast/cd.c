@@ -135,10 +135,10 @@ static void rule9(char *curpath, char *arg, char *pwd);
 
 static int minus_hyphen(void)
 {
-        char *oldchap = getenv("OLDPWD");
-        int ret = cmd_cd(oldchap);
-        printf("%s\n", oldchap);
-        return ret;
+    char *oldchap = getenv("OLDPWD");
+    int ret = cmd_cd(oldchap);
+    printf("%s\n", oldchap);
+    return ret;
 }
 
 int cmd_cd(char *arg) // following SCL algorithm
@@ -198,17 +198,17 @@ int cmd_cd(char *arg) // following SCL algorithm
 
 static void rule7(char *pwd, char *curpath)
 {
-        char *newpath = calloc(strlen(pwd) + strlen(curpath) + 2, 1);
-        strcpy(newpath, pwd);
+    char *newpath = calloc(strlen(pwd) + strlen(curpath) + 2, 1);
+    strcpy(newpath, pwd);
 
-        if (newpath[strlen(newpath) - 1] != '/')
-        {
-            strcat(newpath, "/");
-        }
+    if (newpath[strlen(newpath) - 1] != '/')
+    {
+        strcat(newpath, "/");
+    }
 
-        strcat(newpath, curpath);
-        free(curpath);
-        curpath = newpath;
+    strcat(newpath, curpath);
+    free(curpath);
+    curpath = newpath;
 }
 
 static void rule9(char *curpath, char *arg, char *pwd)

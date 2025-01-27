@@ -1,5 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 
+
 #include <ctype.h>
 #include <dirent.h>
 #include <errno.h>
@@ -9,9 +10,10 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "../ast/ast.h"
-#include "../lexer/lexer.h"
 #include "parser.h"
+#include "ast/ast.h"
+#include "expand/expand.h"
+#include "lexer/lexer.h"
 
 #define PATH_MAX 4096
 static struct ast *parse_list(enum parser_status *status, struct lexer *lexer);
@@ -796,7 +798,6 @@ static int isnum(const char *str);
 
 static int valid_fd(int fd);
 
-
 static struct ast *parse_element(enum parser_status *status,
                                  struct lexer *lexer)
 {
@@ -804,11 +805,11 @@ static struct ast *parse_element(enum parser_status *status,
     if (tok.type == TOKEN_WORD || tok.type == TOKEN_ASSIGNMENT_WORD
         || is_reserved_words(lexer))
     {
-        //if (tok.type == TOKEN_ASSIGNMENT_WORD && !test_name(tok.data->str))
-        //    exit(127);
+        // if (tok.type == TOKEN_ASSIGNMENT_WORD && !test_name(tok.data->str))
+        //     exit(127);
         char *str = tok.data->str;
-        if (is_reserved_words(lexer)) //if reserved words
-            str = strdup(reserved_words_to_char(lexer));   //malloc
+        if (is_reserved_words(lexer)) // if reserved words
+            str = strdup(reserved_words_to_char(lexer)); // malloc
         lexer_pop(lexer);
         if (redir_op(lexer_peek(lexer)) && isnum(str) && valid_fd(atoi(str)))
         {

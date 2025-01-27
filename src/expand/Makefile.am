@@ -1,0 +1,11 @@
+# lib name
+lib_LIBRARIES = libexpand.a
+
+# source files for libparser
+libexpand_a_SOURCES = expand.c expand_variables.c expand_arithmetic.c expand_quotes.c expand_functions.c expand.h
+
+# flags needed for the libparser
+libexpand_a_CPPFLAGS = -I$(top_srcdir)/src
+
+libexpand_a_CFLAGS = -std=c99 -Werror -Wall -Wextra -Wvla -pedantic
+noinst_LIBRARIES = libexpand.a

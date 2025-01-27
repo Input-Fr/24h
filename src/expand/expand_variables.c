@@ -7,9 +7,161 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#include <ctype.h>
+#include <err.h>
 
-#include "ast.h"
+#include "expand.h"
+#include "ast/ast.h"
 #include "hash_map/hash_map.h"
+
+static char *delete_dollar(char *word)
+{
+    char *tmp = word;
+    word += 1;
+    char *new = calloc(1, strlen(word) + 1);
+    if (strlen(word) > 1 && word[0] == '{')
+    {
+        error_var(word);
+        word += 1;
+        new = strcpy(new, word);
+        size_t i = 0;
+        while (*word != '\0' && *word != '}')
+        {
+            i += 1;
+            word += 1;
+        }
+        new[i] = '\0';
+    }
+    else
+    {
+        new = strcpy(new, word);
+    }
+    word = tmp;
+    return new;
+}
+
+static char *delimite_var(char *prev, char *next, char *word)
+{
+    char *tmp = word;
+    prev = strcpy(prev, word);
+    size_t j = 0;
+    while (*word != '\0' && *word != '$')
+    {
+        j += 1;
+        word += 1;
+    }
+
+    prev[j] = '\0';
+
+    char *new = calloc(1, strlen(word) + 1);
+    new = strcpy(new, word);
+    size_t i = 0;
+    int acol = 0;
+
+    word += 1;
+    if (*word == '{')
+    {
+        acol = 1;
+        word += 1;
+    }
+    if (isdigit(*word) || *word == '@' || *word == '*' || *word == '?'
+        || *word == '$' || *word == '#')
+    {
+        acol += 1;
+    }
+    else
+    {
+        while (*word != '\0' && *word != '}' && *word != ' '
+               && (isalnum(*word) || *word == '_'))
+        {
+            word += 1;
+            i += 1;
+        }
+    }
+    new[i + acol + 1] = '\0';
+    // printf("new : %s\n",new);
+    if (*word == '\0')
+        next = "";
+    else if (*word == ' ' || (!isalnum(*word)) || *word != '_')
+        next = strcpy(next, word + acol);
+
+    word = tmp;
+    // error_var_brackets(word);
+    return new;
+}
+
+static int is_special_var(char *str, size_t *i)
+{
+    if (str[*i] != '\0' && str[*i] == '{')
+    {
+        // check if ${?} ${*} ...
+        if (str[*i + 1] != '\0'
+            && (str[*i + 1] == '#' || str[*i + 1] == '$' || str[*i + 1] == '@'
+                || str[*i + 1] == '*' || str[*i + 1] == '?'
+                || isdigit(str[*i + 1])))
+        {
+            if (str[*i + 2] != '\0' && str[*i + 2] == '}')
+                return 1;
+            else
+                errx(1, "invalid variable"); // if not a valid format like ${12}
+        }
+    }
+    else if (str[*i] != '\0'
+             && (str[*i] == '#' || str[*i] == '$' || str[*i] == '@'
+                 || str[*i] == '*' || str[*i] == '?' || isdigit(str[*i])))
+    {
+        return 1;
+    }
+    return 0;
+}
+
+int test_var(char *str) // test if a variable is in a word
+{
+    size_t i = 0;
+    size_t quote = 0;
+    while (i < strlen(str) && str[i] != '\0')
+    {
+        if (str[i] == '\'' && !quote)
+            quote = 1;
+        else if (str[i] == '\'' && quote)
+            quote = 0;
+        if (((str[0] == '$' || (i > 0 && str[i - 1] != '\\' && str[i] == '$'))
+             && !quote))
+        {
+            i += 1;
+            char c = str[i];
+            if (is_special_var(str, &i))
+                return 1;
+            else if ((c != '\0' && c != '{' && (isalpha(c) || c == '_')))
+                return 1; // normal variable : $name
+            else if (c != '\0' && c != '{')
+                return 0; // exit
+
+            if (c != '\0' && c == '{') // variable check : ${...}
+            {
+                while (str[i] != '\0' && str[i] != '}')
+                {
+                    if ((!isalnum(str[i])) && str[i] != '}' && str[i] != '{'
+                        && str[i] != '_')
+                    {
+                        errx(1, "invalid variable");
+                    }
+                    i += 1;
+                }
+                if (str[i] == '}')
+                    return 1;
+                else
+                    return 0;
+            }
+        }
+        i += 1;
+    }
+    return 0;
+}
+
+
+
+
 
 static void expand_free(char *prev, char *next, char *var, char *key)
 {
@@ -114,6 +266,16 @@ static char *expand_pwd(char *prev, char *next)
     return result;
 }
 
+static char *expand_oldpwd(char *prev, char *next)
+{
+    char *str = getenv("OLDPWD");
+    size_t len = strlen(prev) + strlen(next) + strlen(str);
+    char *result = calloc(1, len + 1);
+    snprintf(result, len + 1, "%s%s%s", prev, str, next);
+    free(str);
+    return result;
+}
+
 static char *expand_random(char *prev, char *next)
 {
     srand(time(NULL));
@@ -130,6 +292,16 @@ static char *expand_random(char *prev, char *next)
     size_t len = strlen(prev) + strlen(next) + 5 + a;
     char *result = calloc(1, len + 1);
     snprintf(result, len, "%s%d%s", prev, nb, next);
+    return result;
+}
+
+static char *expand_ifs(char *prev, char *next)
+{
+    char *str = getenv("IFS");
+    size_t len = strlen(prev) + strlen(next) + strlen(str);
+    char *result = calloc(1, len + 1);
+    snprintf(result, len + 1, "%s%s%s", prev, str, next);
+    free(str);
     return result;
 }
 
@@ -168,9 +340,17 @@ static char *expand_special_var(char *key, char *prev, char *next,
     {
         return expand_pwd(prev, next);
     }
+    else if (strcmp(key, "OLDPWD") == 0)
+    {
+        return expand_oldpwd(prev, next);
+    }
     else if (strcmp(key, "RANDOM") == 0)
     {
         return expand_random(prev, next);
+    }
+    else if (strcmp(key, "IFS") == 0)
+    {
+        return expand_ifs(prev, next);
     }
     else
     {
@@ -188,7 +368,8 @@ static char *expand_normal_var(char *key, char *prev, char *next,
     return result;
 }
 
-static char *_expand(struct hash_map *h, char *str)
+
+void expand_variables(struct hash_map *h, char *str, char *res)
 {
     char *word = str;
     char *prev = calloc(1, strlen(word) + 1); // word before the variable
@@ -204,32 +385,7 @@ static char *_expand(struct hash_map *h, char *str)
     {
         result = expand_normal_var(key, prev, next, h);
     }
-
+    strcpy(res, result);
+    free(result);
     expand_free(prev, next, var, key);
-    return result;
-}
-
-// a faire : $OLDPWD $@ et $IFS
-
-char *expand(struct hash_map *h, char *str)
-{
-    char *res = "";
-    char *tmp;
-    if (test_var(str))
-    {
-        res = _expand(h, str);
-    }
-    else
-    {
-        tmp = calloc(1, strlen(str) * 2);
-        strcpy(tmp, str);
-        res = tmp;
-    }
-
-    if (test_quote(res))
-    {
-        res = delete_quote(res);
-    }
-
-    return res;
 }

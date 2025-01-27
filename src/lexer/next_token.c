@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "lexer.h"
 #include "../parser/parser.h"
+#include "lexer.h"
 
 static struct token token_reco(struct lexer *lexer);
 static struct token continue_word(struct lexer *lexer);
@@ -18,14 +18,13 @@ static struct token end_of_file(struct lexer *lexer)
     {
         if (lexer->Quoting == SINGLE_QUOTE || lexer->Quoting == DOUBLE_QUOTE)
         {
-            fprintf(stderr,"missing quote");
-            exit(2);
+            errx(2, "missing quote");
         }
-        ungetc(EOF, lexer->file);
         if (lexer->current_tok.type == TOKEN_WORD)
         {
             lexer->current_tok.type = reserved_word(lexer);
         }
+        ungetc(EOF, lexer->file);
         return lexer->current_tok;
     }
     else
@@ -147,11 +146,25 @@ static struct token var(struct lexer *lexer)
     if (c == '{')
     {
         mbt_str_pushc(lexer->current_tok.data, c);
-        while (c != '}')
+        while (c != EOF && c != '}')
         {
             c = lexer_file(lexer->file);
             mbt_str_pushc(lexer->current_tok.data, c);
         }
+        if (c == EOF)
+            errx(1,"missing }");
+    }
+    else if (c == '(')
+    {
+        mbt_str_pushc(lexer->current_tok.data, c);
+        while (c != EOF && c != ')')
+        {
+            c = lexer_file(lexer->file);
+            mbt_str_pushc(lexer->current_tok.data, c);
+        }
+
+        if (c == EOF)
+            errx(1,"missing )");
     }
     else
     {

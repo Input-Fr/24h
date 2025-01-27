@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-bool hash_map_insert(struct hash_map *hash_map, char *key, char *value)
+bool hash_map_insert(struct hash_map *hash_map, char *key, void *value, enum val_type type)
 {
     if (hash_map == NULL || hash_map->size == 0)
     {
@@ -19,7 +19,17 @@ bool hash_map_insert(struct hash_map *hash_map, char *key, char *value)
         return NULL;
     }
     list->key = key;
-    list->value = value;
+    
+    list->type = type;
+    if (list->type == VARIABLE) 
+    {
+        list->value.variable_value = value;
+    }
+    if (list->type == FUNCTION) 
+    {
+        list->value.function_value = value;
+    }
+
     size_t k = hash(key) % hash_map->size;
     if (hash_map->data[k] == NULL)
     {
@@ -36,7 +46,15 @@ bool hash_map_insert(struct hash_map *hash_map, char *key, char *value)
         }
         if (p != NULL)
         {
-            p->value = list->value;
+            if (p->type == VARIABLE) 
+            {
+                p->value.variable_value = value;
+            }
+            if (p->type == FUNCTION) 
+            {
+                p->value.function_value = value;
+            }
+            //p->value = list->value;
             free(list);
         }
         else
@@ -48,7 +66,7 @@ bool hash_map_insert(struct hash_map *hash_map, char *key, char *value)
     return true;
 }
 
-char *hash_map_get(struct hash_map *hash_map, char *key)
+void *hash_map_get(struct hash_map *hash_map, char *key)
 {
     size_t k = hash(key);
     if (hash_map == NULL || hash_map->size == 0)
@@ -73,7 +91,10 @@ char *hash_map_get(struct hash_map *hash_map, char *key)
         }
         if (p != NULL)
         {
-            return p->value;
+            if (p->type == VARIABLE)
+                return p->value.variable_value;
+            if (p->type == FUNCTION)
+                return p->value.function_value;
         }
     }
     return "";
@@ -105,7 +126,11 @@ bool hash_map_remove(struct hash_map *hash_map, char *key)
                 hash_map->data[k] = NULL;
             }
             free(p->key);
-            free(p->value);
+
+            if (p->type == VARIABLE)
+                free(p->value.variable_value);
+            if (p->type == FUNCTION)
+                free(p->value.function_value);
 
             free(p);
             return true;
@@ -121,7 +146,11 @@ bool hash_map_remove(struct hash_map *hash_map, char *key)
         {
             pre->next = p->next;
             free(p->key);
-            free(p->value);
+
+            if (p->type == VARIABLE)
+                free(p->value.variable_value);
+            if (p->type == FUNCTION)
+                free(p->value.function_value);
 
             free(p);
             return true;
