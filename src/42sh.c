@@ -100,6 +100,9 @@ int main(int argc, char *argv[])
             }
             if (status == PARSER_OK)
             {
+    lexer_free(lexer);
+    hash_map_free(h);
+    free(bufferpwd);
                 exit(ret_code);
             }
             else

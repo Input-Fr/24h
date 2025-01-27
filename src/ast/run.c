@@ -703,7 +703,7 @@ static int handle_executable_builtin(char **words)
     int return_value = WEXITSTATUS(wstatus);
     if (return_value == 127)
     {
-        errx(127, "Terminated Incorrectly\n");
+        return 127;
     }
     return 0;
 }
