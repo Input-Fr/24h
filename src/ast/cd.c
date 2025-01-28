@@ -129,7 +129,7 @@ static int nocomment(char *home_val)
 
 static void clean(int allocated, char *pwd, char *curpath);
 
-static void rule7(char *pwd, char *curpath);
+static void rule7(char *pwd, char **curpath);
 
 static void rule9(char *curpath, char *arg, char *pwd);
 
@@ -184,7 +184,7 @@ int cmd_cd(char *arg) // following SCL algorithm
     if (curpath[0] != '/') // 7
     {
         step7 = 0;
-        rule7(pwd, curpath);
+        rule7(pwd, &curpath);
     }
     char *new = convert_to_canonical(curpath); // 8
     free(curpath);
@@ -196,9 +196,9 @@ int cmd_cd(char *arg) // following SCL algorithm
     return ret;
 }
 
-static void rule7(char *pwd, char *curpath)
+static void rule7(char *pwd, char **curpath)
 {
-    char *newpath = calloc(strlen(pwd) + strlen(curpath) + 2, 1);
+    char *newpath = calloc(strlen(pwd) + strlen(*curpath) + 2, 1);
     strcpy(newpath, pwd);
 
     if (newpath[strlen(newpath) - 1] != '/')
@@ -206,9 +206,9 @@ static void rule7(char *pwd, char *curpath)
         strcat(newpath, "/");
     }
 
-    strcat(newpath, curpath);
-    free(curpath);
-    curpath = newpath;
+    strcat(newpath, *curpath);
+    free(*curpath);
+    *curpath = newpath;
 }
 
 static void rule9(char *curpath, char *arg, char *pwd)
