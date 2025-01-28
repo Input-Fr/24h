@@ -20,7 +20,7 @@ struct ast * ast_function(char * fname,struct ast * shell_command)
 	function->fname = fname;
 	function->shell_command = shell_command;
 	return &function->base;
-
+}
 
 struct ast *ast_simple_cmd_init(char *word)
 {

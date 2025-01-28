@@ -68,11 +68,11 @@ int for_run(struct ast *ast, struct hash_map *h)
 	    nbr = h->nb_args;
 	    get = h->all_args;
     }
-
+    enum val_type value = VARIABLE;
     for (size_t i = 0; i < nbr; i++)
     {
 	    char *extended = expand(h,get[i]);
-	    hash_map_insert(h, boucle->variable, extended);
+	    hash_map_insert(h, boucle->variable, extended,value);
 	    RUN(boucle->do_body, h);
 	    if (i < nbr-1)
 		    free(extended);
