@@ -179,6 +179,7 @@ static struct ast *parse_and_or(enum parser_status *status, struct lexer *lexer)
         struct ast *ast_pipe = parse_pipeline(status, lexer);
         if (*status != PARSER_OK)
         {
+            (*ast_and_or->ftable->free)(ast_and_or);
             return NULL;
         }
         ast_and_or = push_and_or(ast_and_or, op, ast_pipe);
@@ -220,6 +221,7 @@ static struct ast *parse_pipeline(enum parser_status *status,
         cmd = parse_command(status, lexer);
         if (*status != PARSER_OK)
         {
+            (*ast_pipeline->ftable->free)(ast_pipeline);
             return NULL;
         }
         pipeline_push(ast_pipeline, cmd);
@@ -282,6 +284,7 @@ static struct ast *parse_shell_command(enum parser_status *status,
             }
             else
             {
+                (*ast_compound->ftable->free)(ast_compound);
                 *status = PARSER_UNEXPECTED_TOKEN;
                 return NULL;
             }
@@ -482,6 +485,7 @@ static struct ast *parse_rule_until(enum parser_status *status,
         }
         else
         {
+            (*ast_cmpd_lst->ftable->free)(ast_cmpd_lst);
             *status = PARSER_UNEXPECTED_TOKEN;
             return NULL;
         }
@@ -530,6 +534,10 @@ static void for_parenthesis(enum parser_status *status, struct lexer *lexer,
             }
             if (tok.type != TOKEN_SEMI && tok.type != TOKEN_NEWLINE)
             {
+                if (tok.type == TOKEN_ASSIGNMENT_WORD)
+                {
+                    free(tok.data->str);
+                }
                 *status = PARSER_UNEXPECTED_TOKEN;
                 return;
             }
@@ -537,7 +545,13 @@ static void for_parenthesis(enum parser_status *status, struct lexer *lexer,
         }
     }
 }
-
+static void clean_w_aw(struct token tok)
+{
+    if(tok.type == TOKEN_WORD || tok.type == TOKEN_ASSIGNMENT_WORD)
+    {
+        free(tok.data->str);
+    }
+}
 // to handle : compound_list 'done'
 static void handle_end(enum parser_status *status, struct lexer *lexer,
                        struct ast *ast_for)
@@ -557,10 +571,13 @@ static void handle_end(enum parser_status *status, struct lexer *lexer,
     }
     else
     {
+        clean_w_aw(tok);
         *status = PARSER_UNEXPECTED_TOKEN;
         return;
     }
 }
+
+
 
 static struct ast *parse_rule_for(enum parser_status *status,
                                   struct lexer *lexer)
@@ -568,6 +585,7 @@ static struct ast *parse_rule_for(enum parser_status *status,
     struct token tok = lexer_peek(lexer);
     if (tok.type != TOKEN_FOR)
     {
+        clean_w_aw(tok);
         *status = PARSER_UNEXPECTED_TOKEN;
         return NULL;
     }
@@ -575,14 +593,19 @@ static struct ast *parse_rule_for(enum parser_status *status,
     tok = lexer_pop(lexer);
     if (tok.type != TOKEN_WORD)
     {
+        clean_w_aw(tok);
         *status = PARSER_UNEXPECTED_TOKEN;
         return NULL;
     }
     // add word (tok.data->str) to variable name
-    struct ast *ast_for = ast_for_init(tok.data->str);
+    char *var_name = tok.data->str;
+    struct ast *ast_for = ast_for_init(var_name);
     for_parenthesis(status, lexer, ast_for);
     if (*status != PARSER_OK)
     {
+        (*ast_for->ftable->free)(ast_for);
+        free(var_name);
+        clean_w_aw(tok);
         return NULL;
     }
     tok = lexer_peek(lexer);
@@ -597,6 +620,9 @@ static struct ast *parse_rule_for(enum parser_status *status,
     }
     else
     {
+        clean_w_aw(tok);
+        free(var_name);
+        (*ast_for->ftable->free)(ast_for);
         *status = PARSER_UNEXPECTED_TOKEN;
         return NULL;
     }
@@ -604,6 +630,9 @@ static struct ast *parse_rule_for(enum parser_status *status,
     handle_end(status, lexer, ast_for);
     if (*status != PARSER_OK)
     {
+        clean_w_aw(tok);
+        free(var_name);
+        (*ast_for->ftable->free)(ast_for);
         return NULL;
     }
     return ast_for; // return AST
@@ -624,6 +653,8 @@ static struct ast *handle_elif(enum parser_status *status, struct lexer *lexer)
     struct token tok = lexer_pop(lexer);
     if (tok.type != TOKEN_THEN)
     {
+        clean_w_aw(tok);
+        (*compound_list->ftable->free)(compound_list);
         *status = PARSER_UNEXPECTED_TOKEN;
         return NULL;
     }
@@ -661,13 +692,15 @@ static struct ast *parse_else_clause(enum parser_status *status,
         struct ast *ast_elif = handle_elif(status, lexer);
         if (*status != PARSER_OK)
         {
-            (*ast_elif->ftable->free)(ast_elif);
+            if (ast_elif)
+                (*ast_elif->ftable->free)(ast_elif);
             return NULL;
         }
         return ast_elif;
     }
     else
     {
+        clean_w_aw(tok);
         *status = PARSER_UNEXPECTED_TOKEN;
         return NULL;
     }
@@ -689,6 +722,7 @@ static struct ast *parse_compound_list(enum parser_status *status,
     struct ast *ast_and_or = parse_and_or(status, lexer);
     if (*status != PARSER_OK)
     {
+        clean_w_aw(tok);
         return NULL;
     }
 
@@ -733,7 +767,6 @@ simple_command = prefix { prefix }
 static struct ast *parse_simple_command(enum parser_status *status,
                                         struct lexer *lexer)
 {
-    // TODO
     struct ast *ast_prefix = parse_prefix(status, lexer);
     struct ast *smpcmd = ast_simple_cmd_init(NULL);
     while (*status == PARSER_OK)
@@ -749,6 +782,7 @@ static struct ast *parse_simple_command(enum parser_status *status,
         if (tok.type != TOKEN_WORD)
         {
             (*smpcmd->ftable->free)(smpcmd);
+            clean_w_aw(tok);
             *status = PARSER_UNEXPECTED_TOKEN;
             return NULL;
         }
@@ -757,7 +791,6 @@ static struct ast *parse_simple_command(enum parser_status *status,
             ((struct ast_simp_cmd *)smpcmd)->word = tok.data->str;
             lexer_pop(lexer);
             struct ast *ast_elt = parse_element(status, lexer);
-            (void)ast_elt;
             while (*status == PARSER_OK)
             {
                 // add elt to ast
@@ -821,6 +854,7 @@ static struct ast *parse_element(enum parser_status *status,
             }
             else
             {
+                free(str);
                 return NULL; // invalid
             }
         }
@@ -877,7 +911,7 @@ static struct ast *parse_prefix(enum parser_status *status, struct lexer *lexer)
     }
 }
 
-// redirection = [IONUMBER] ( '>' | '<' | '>>' | '>&' | '<&' | '>|' | '<>' )
+// redirection = [IONUMBER] ( '>' | '<' | '>>' | '>&' | '<&' | '>|' | '<>' ) 
 // WORD ;
 
 static enum REDIRECTION_TYPE strop(struct token op);
@@ -909,6 +943,7 @@ static struct ast *parse_redirection(enum parser_status *status,
         else
         {
             *status = PARSER_UNEXPECTED_TOKEN;
+            clean_w_aw(tok2);
             return NULL;
         }
     }
