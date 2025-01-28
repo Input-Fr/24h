@@ -9,6 +9,10 @@ void expand_variables(struct hash_map *h, char *res);
 //expand_arithmetics
 int test_arithmetic(char *str);
 
+// expand_cmd_sub.c
+char *expand_sub_cmd(char *sub_cmd);
+int test_cmd_sub(char *in);
+
 //expand_quotes.c
 void expand_ari(struct hash_map *h, char *res);
 void delete_quote(char *str);

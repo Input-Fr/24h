@@ -24,10 +24,17 @@ char *expand(struct hash_map *h, char *str)
     char *res = calloc(1, (strlen(str) * 2) + 1024);
     strcpy(res, str);
     //printf("res: %s\n",res);
+    
     if (test_var(res))
     {
         expand_variables(h, res);
         //printf("var : %s\n",res);
+    }
+    if (test_cmd_sub(res))
+    {
+        char *result = expand_sub_cmd(res);
+        free(res);
+        res = result;
     }
     if (test_ari(res))
     {
