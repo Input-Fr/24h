@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "ast.h"
+
 struct ast * ast_function(char * fname,struct ast * shell_command)
 {
 	static struct ast_ftable ftable = {

@@ -72,7 +72,7 @@ int for_run(struct ast *ast, struct hash_map *h)
     for (size_t i = 0; i < nbr; i++)
     {
 	    char *extended = expand(h,get[i]);
-	    hash_map_insert(h, boucle->variable, extended);
+	    hash_map_insert(h, boucle->variable, extended, VARIABLE);
 	    RUN(boucle->do_body, h);
 	    if (i < nbr-1)
 		    free(extended);
