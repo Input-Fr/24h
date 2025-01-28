@@ -1,0 +1,2 @@
+tita='$titi'
+echo "$tita"
