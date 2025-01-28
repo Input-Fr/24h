@@ -75,7 +75,7 @@ static char *delimite_ari(char *prev, char *next, char *word)
     else
     {
         next = strcpy(next, word);
-        next[strlen(next) - 3] = '\0';
+        next[strlen(next) - 2] = '\0';
     }
         
 
@@ -84,36 +84,21 @@ static char *delimite_ari(char *prev, char *next, char *word)
     return new;
 }
 
-static char *_expand_ari(char *operation, char *prev, char *next,
-                               struct hash_map *h)
-{
-    if (h == NULL || strlen(operation) == 0)
-    {
-        return "";
-    }
 
-    char *res = calloc(1, 32);
-    eval_arithmetic(res, operation, h);
+
+void expand_ari(struct hash_map *h, char *res)
+{
+    char *prev = calloc(1, strlen(res) + 1); // word before the variable
+    char *next = calloc(1, strlen(res) + 1); // word after the variable
+    char *operation = delimite_ari(prev, next, res); // divide the word in 3 words
+
+    char *val = calloc(1, 64);
+    eval_arithmetic(val, operation, h);
     size_t len = strlen(prev) + strlen(res) + strlen(next) + 1;
-    char *result = calloc(1, len);
-    snprintf(result, len, "%s%s%s", prev, res, next); // concat
-    free(res);
-    return result;
-}
 
-char *expand_ari(struct hash_map *h, char *str, char *res)
-{
-    char *word = str;
-    char *prev = calloc(1, strlen(word) + 1); // word before the variable
-    char *next = calloc(1, strlen(word) + 1); // word after the variable
-    char *operation = delimite_ari(prev, next, word); // divide the word in 3 words
-
-    char *result = _expand_ari(operation, prev, next, h);
-
-    strcpy(res, result);
-    free(result);
+    snprintf(res, len, "%s%s%s", prev, val, next); // concat
     free(next);
     free(prev);
     free(operation);
-    return res;
+    free(val);
 }

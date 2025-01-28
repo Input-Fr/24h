@@ -21,23 +21,26 @@
 
 char *expand(struct hash_map *h, char *str)
 {
-    char *res = calloc(1, strlen(str) * 2);
+    char *res = calloc(1, (strlen(str) * 2) + 1024);
     strcpy(res, str);
-
-    if (test_var(str))
+    //printf("res: %s\n",res);
+    if (test_var(res))
     {
-        expand_variables(h, str, res);
+        expand_variables(h, res);
+        //printf("var : %s\n",res);
     }
-
-    if (test_ari(str))
+    if (test_ari(res))
     {
-        expand_ari(h, str, res);
+        expand_ari(h, res);
+        //printf("ari: %s\n",res);
     }
 
     if (test_quote(res))
     {
         delete_quote(res);
+        //printf("quote: %s\n",res);
     }
+    //printf("result: %s\n",res);
 
     return res;
 }

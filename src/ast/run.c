@@ -454,8 +454,12 @@ int variable_run(struct ast *ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_VARIABLE);
     struct ast_variable *variable_ast = (struct ast_variable *)ast;
+    //expand
+    char *tmp = variable_ast->val;
+    char *str = expand(h,variable_ast->val);
+    free(tmp);
     hash_map_remove(h, variable_ast->name);
-    hash_map_insert(h, variable_ast->name, variable_ast->val, VARIABLE);
+    hash_map_insert(h, variable_ast->name, str, VARIABLE);
     return 1;
 }
 

@@ -87,6 +87,7 @@ static char *delimite_var(char *prev, char *next, char *word)
 
     word = tmp;
     // error_var_brackets(word);
+
     return new;
 }
 
@@ -118,15 +119,23 @@ static int is_special_var(char *str, size_t *i)
 int test_var(char *str) // test if a variable is in a word
 {
     size_t i = 0;
-    size_t quote = 0;
+    size_t single_quote = 0;
+    size_t double_quote = 0;
     while (i < strlen(str) && str[i] != '\0')
     {
-        if (str[i] == '\'' && !quote)
-            quote = 1;
-        else if (str[i] == '\'' && quote)
-            quote = 0;
+        if (str[i] == '\'' && single_quote && !double_quote)
+            single_quote = 1;
+        else if (str[i] == '\'' && !single_quote && !double_quote)
+            single_quote = 0;
+        else if (str[i] == '"' && !single_quote && !double_quote)
+            double_quote = 1;
+        else if (str[i] == '"' && !single_quote && double_quote)
+            double_quote = 0;
+
+
+
         if (((str[0] == '$' || (i > 0 && str[i - 1] != '\\' && str[i] == '$'))
-             && !quote))
+             && !single_quote))
         {
             i += 1;
             char c = str[i];
@@ -358,34 +367,41 @@ static char *expand_special_var(char *key, char *prev, char *next,
     }
 }
 
-static char *expand_normal_var(char *key, char *prev, char *next,
-                               struct hash_map *h)
-{
-    char *val = hash_map_get(h, key); // get the value of the variable
-    size_t len = strlen(prev) + strlen(val) + strlen(next) + 1;
-    char *result = calloc(1, len + 1);
-    snprintf(result, len, "%s%s%s", prev, val, next); // concat
-    return result;
-}
+//static char *expand_normal_var(char *key, char *prev, char *next,
+//                               struct hash_map *h)
+//{
+//    char *val = hash_map_get(h, key); // get the value of the variable
+//    size_t len = strlen(prev) + strlen(val) + strlen(next) + 1;
+//    char *result = calloc(1, len + 1);
+//    snprintf(result, len, "%s%s%s", prev, val, next); // concat
+//    return result;
+//}
 
 
-void expand_variables(struct hash_map *h, char *str, char *res)
+void expand_variables(struct hash_map *h, char *res)
 {
-    char *word = str;
-    char *prev = calloc(1, strlen(word) + 1); // word before the variable
-    char *next = calloc(1, strlen(word) + 1); // word after the variable
-    char *var = delimite_var(prev, next, word); // divide the word in 3 words
-    char *key = delete_dollar(var); //${name} -> name
-    char *result = "";
-    if (test_special_var(key)) // $@, $$, $*, $?, $1, $#, $RANDOM, $UID, $PWD
+    while (test_var(res))
     {
-        result = expand_special_var(key, prev, next, h);
+        char *prev = calloc(1, strlen(res) + 1); // word before the variable
+        char *next = calloc(1, strlen(res) + 1); // word after the variable
+        char *var = delimite_var(prev, next, res); // divide the word in 3 words
+        char *key = delete_dollar(var); //${name} -> name
+        if (test_special_var(key)) // $@, $$, $*, $?, $1, $#, $RANDOM, $UID, $PWD
+        {
+            char *tmp = expand_special_var(key, prev, next, h);
+            strcpy(res,tmp);
+            free(tmp);
+        }
+        else // variable classique : $name, ${name},"$name"...
+        {
+            char *val = hash_map_get(h, key); // get the value of the variable
+            size_t len = strlen(prev) + strlen(val) + strlen(next) + 1;
+            if (test_quote(val))
+            {
+                delete_quote(val);
+            }
+            snprintf(res, len, "%s%s%s", prev, val, next); // concat
+        }
+        expand_free(prev, next, var, key);
     }
-    else // variable classique : $name, ${name},"$name"...
-    {
-        result = expand_normal_var(key, prev, next, h);
-    }
-    strcpy(res, result);
-    free(result);
-    expand_free(prev, next, var, key);
 }

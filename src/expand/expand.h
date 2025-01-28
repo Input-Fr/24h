@@ -4,13 +4,13 @@
 #include "hash_map/hash_map.h"
 
 //expand_variables.c
-void expand_variables(struct hash_map *h, char *str, char *res);
+void expand_variables(struct hash_map *h, char *res);
 
 //expand_arithmetics
 int test_arithmetic(char *str);
 
 //expand_quotes.c
-char *expand_ari(struct hash_map *h, char *str, char *res);
+void expand_ari(struct hash_map *h, char *res);
 void delete_quote(char *str);
 int test_ari(char *str);
 
