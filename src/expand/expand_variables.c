@@ -120,30 +120,31 @@ static int is_special_var(char *str, size_t *i)
     return 0;
 }
 
-int test_var(char *str, size_t *i) // test if a variable is in a word
+int test_var(char *str) // test if a variable is in a word
 {
     size_t single_quote = 0;
     size_t double_quote = 0;
-    while (*i < strlen(str) && str[*i] != '\0')
+    size_t i = 0;
+    while (i < strlen(str) && str[i] != '\0')
     {
-        if (str[*i] == '\'' && !single_quote && !double_quote)
+        if (str[i] == '\'' && !single_quote && !double_quote)
             single_quote = 1;
-        else if (str[*i] == '\'' && single_quote && !double_quote)
+        else if (str[i] == '\'' && single_quote && !double_quote)
             single_quote = 0;
-        else if (str[*i] == '"' && !single_quote && !double_quote)
+        else if (str[i] == '"' && !single_quote && !double_quote)
             double_quote = 1;
-        else if (str[*i] == '"' && !single_quote && double_quote)
+        else if (str[i] == '"' && !single_quote && double_quote)
             double_quote = 0;
 
 
 
-        if (((str[0] == '$' || (*i > 0 && str[*i - 1] != '\\' && str[*i] == '$'))
+        if (((str[0] == '$' || (i > 0 && str[i - 1] != '\\' && str[i] == '$'))
              && !single_quote))
         {
             //printf("str: %s\n", str);
-            *i += 1;
-            char c = str[*i];
-            if (is_special_var(str, i))
+            i += 1;
+            char c = str[i];
+            if (is_special_var(str, &i))
                 return 1;
             else if ((c != '\0' && c != '{' && (isalpha(c) || c == '_')))
                 return 1; // normal variable : $name
@@ -152,22 +153,22 @@ int test_var(char *str, size_t *i) // test if a variable is in a word
 
             if (c != '\0' && c == '{') // variable check : ${...}
             {
-                while (str[*i] != '\0' && str[*i] != '}')
+                while (str[i] != '\0' && str[i] != '}')
                 {
-                    if ((!isalnum(str[*i])) && str[*i] != '}' && str[*i] != '{'
-                        && str[*i] != '_')
+                    if ((!isalnum(str[i])) && str[i] != '}' && str[i] != '{'
+                        && str[i] != '_')
                     {
                         errx(1, "invalid variable");
                     }
                     i += 1;
                 }
-                if (str[*i] == '}')
+                if (str[i] == '}')
                     return 1;
                 else
                     return 0;
             }
         }
-        *i += 1;
+        i += 1;
     }
     return 0;
 }
@@ -371,11 +372,9 @@ static char *expand_special_var(char *key, char *prev, char *next,
     }
 }
 
-
 void expand_variables(struct hash_map *h, char *res)
 {
-    size_t i = 0;
-    while (test_var(res, &i))
+    while (test_var(res))
     {
         char *prev = calloc(1, strlen(res) + 1); // word before the variable
         char *next = calloc(1, strlen(res) + 1); // word after the variable
@@ -393,6 +392,12 @@ void expand_variables(struct hash_map *h, char *res)
             size_t len = strlen(prev) + strlen(val) + strlen(next) + 1;
             if (test_quote(val))
             {
+                printf("here");
+                if (val[0] == '\'' && val[1] == '$')
+                {
+                    val[1] = '\\';
+                    val[2] = '$';
+                }
                 delete_quote(val);
             }
             snprintf(res, len, "%s%s%s", prev, val, next); // concat

@@ -31,6 +31,7 @@ struct hash_map
     int nb_args; //$#
     char **all_args;
     size_t size;
+    char *old_pwd;
 
 };
 
