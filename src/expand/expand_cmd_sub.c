@@ -15,6 +15,7 @@
 
 int test_cmd_sub(char *str)
 {
+    //printf("%s\n",str);
     size_t i = 0;
     size_t quote = 0;
     while (i < strlen(str) && str[i] != '\0')
@@ -194,9 +195,13 @@ void expand_substi(char *res)
         char *prev = calloc(1, strlen(res) + 1); // word before the variable
         char *next = calloc(1, strlen(res) + 1); // word after the variable
         char *substi = delimite_substi(prev, next, res); // divide the word in 3 words
-        char *result;
-        result = expand_sub_cmd(substi);
+        char *result = expand_sub_cmd(substi);
         strcpy(res,result);
+        size_t len = strlen(prev) + strlen(result) + strlen(next) + 1;
+        snprintf(res, len, "%s%s%s", prev, result, next); // concat
         free(result);
+        free(next);
+        free(prev);
+        free(substi);
     }
 }

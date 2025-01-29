@@ -48,7 +48,8 @@ static char *delimite_var(char *prev, char *next, char *word)
     size_t j = 0;
     size_t single_quote = 0;
     size_t double_quote = 0;
-    while (single_quote || (*word != '\0' && (*word != '$' || (j > 0 &&
+    while ((j + 1 < strlen(word) && tmp[j+1] == '(')
+            || single_quote || (*word != '\0' && (*word != '$' || (j > 0 &&
                     *word == '$' && tmp[j-1] == '\\'))))
     {
         if (tmp[j] == '\'' && !single_quote && !double_quote)
@@ -146,7 +147,9 @@ int test_var(char *str) // test if a variable is in a word
         else if (str[i] == '"' && !single_quote && double_quote)
             double_quote = 0;
 
-        if (((str[0] == '$' || (i > 0 && str[i - 1] != '\\' && str[i] == '$'))
+        if ((((str[0] == '$' && str[1] != '\0' && str[1] != '(')
+                        || ((i > 0 && str[i - 1] != '\\' && str[i] == '$' 
+                            && str[i + 1] != '\0' && str[i + 1] != '(')))
              && !single_quote))
         {
             i += 1;
