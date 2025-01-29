@@ -19,10 +19,10 @@ void free_function(struct ast *ast)
     free(ast);
 }
 
-void free_subshell(struct ast * ast)
+void subshell_free(struct ast *ast)
 {
     assert(ast && ast->type == AST_SUBSHELL);
-    struct ast_subshell * sub = (struct ast_subshell *)ast;
+    struct ast_subshell *sub = (struct ast_subshell *)ast;
     FREE(sub->compound_list);
     free(ast);
 }

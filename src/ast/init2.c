@@ -59,14 +59,14 @@ struct ast *ast_for_init(char *variable)
     return &boucle->base;
 }
 
-struct ast * ast_subshell_init(struct ast * compound_list)
+struct ast *ast_subshell_init(struct ast *compound_list)
 {
     static struct ast_ftable ftable = {
         .run = &subshell_run,
         .free = &subshell_free,
         .push = &subshell_push,
     };
-    struct ast_subshell * sub = (struct ast_subshell *)ast;
+    struct ast_subshell *sub = calloc(1, sizeof(struct ast_subshell));
     if (!sub)
     {
         return NULL;
@@ -76,5 +76,3 @@ struct ast * ast_subshell_init(struct ast * compound_list)
     sub->compound_list = compound_list;
     return &sub->base;
 }
-
-

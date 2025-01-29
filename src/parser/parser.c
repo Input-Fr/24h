@@ -367,30 +367,30 @@ static struct ast *parse_shell_command(enum parser_status *status,
         {
             return NULL;
         }
-    } /*
-     if (tok.type == TOKEN_LPAR)
-     {
-         lexer_pop(lexer);
-         struct ast *ast_compound = parse_compound_list(status, lexer);
-         if (*status == PARSER_OK)
-         {
-             tok = lexer_pop(lexer);
-             if (tok.type == TOKEN_RPAR)
-             {
-                 return subshell type given the compound list;
-             }
-             else
-             {
-                 (*ast_compound->ftable->free)(ast_compound);
-                 *status = PARSER_UNEXPECTED_TOKEN;
-                 return NULL;
-             }
-         }
-         else
-         {
-             return NULL;
-         }
-     }*/
+    }
+    if (tok.type == TOKEN_LPAR)
+    {
+        lexer_pop(lexer);
+        struct ast *ast_compound = parse_compound_list(status, lexer);
+        if (*status == PARSER_OK)
+        {
+            tok = lexer_pop(lexer);
+            if (tok.type == TOKEN_RPAR)
+            {
+                return ast_subshell_init(ast_compound);
+            }
+            else
+            {
+                (*ast_compound->ftable->free)(ast_compound);
+                *status = PARSER_UNEXPECTED_TOKEN;
+                return NULL;
+            }
+        }
+        else
+        {
+            return NULL;
+        }
+    }
     struct ast *ast_rule = parse_rule_if(status, lexer);
     if (*status != PARSER_OK)
     {

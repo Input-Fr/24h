@@ -195,11 +195,10 @@ struct ast_subshell
 {
     struct ast base;
     struct ast *compound_list;
-}
+};
 
 // function
-struct ast *
-ast_function_init(char *fname, struct ast *shell_command);
+struct ast *ast_function_init(char *fname, struct ast *shell_command);
 
 // if
 struct ast *ast_if_init(struct ast *condition, struct ast *then_body,
@@ -229,7 +228,7 @@ struct ast *ast_pipeline_init(int neg, struct ast *cmd);
 
 struct ast *ast_and_or_init(struct ast *pipeline);
 
-struct ast *ast_subshell(struct ast *compund_list);
+struct ast *ast_subshell_init(struct ast *compound_list);
 
 // subshell
 int subshell_run(struct ast *ast, struct hash_map *h);

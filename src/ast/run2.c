@@ -2,6 +2,9 @@
 #include <err.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #include "ast.h"
 #include "expand/expand.h"
@@ -87,4 +90,27 @@ int function_run(struct ast *ast, struct hash_map *h)
     RUN_LIST(func->redirection, func->nbr_redirection, h);
     int res = RUN(func->shell_command, h);
     return res;
+}
+
+int subshell_run(struct ast *ast, struct hash_map *h)
+{
+    assert(ast && ast->type == AST_SUBSHELL);
+    struct ast_subshell *subshell = (struct ast_subshell *)ast;
+    char *test = malloc(10);
+    (void)test;
+    pid_t pid = fork();
+    if (pid == 0) // child
+    {
+        int res = RUN(subshell->compound_list, h);
+        exit(res);
+    }
+    else
+    {
+        int wstatus;
+        waitpid(pid, &wstatus, 0);
+        int return_value = WEXITSTATUS(wstatus);
+        free(test);
+        return return_value;
+    }
+    return 0;
 }
