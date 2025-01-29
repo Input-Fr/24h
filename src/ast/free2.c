@@ -18,3 +18,11 @@ void free_function(struct ast *ast)
     free(fct->fname);
     free(ast);
 }
+
+void free_subshell(struct ast * ast)
+{
+    assert(ast && ast->type == AST_SUBSHELL);
+    struct ast_subshell * sub = (struct ast_subshell *)ast;
+    FREE(sub->compound_list);
+    free(ast);
+}

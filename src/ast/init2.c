@@ -58,3 +58,23 @@ struct ast *ast_for_init(char *variable)
     boucle->variable = variable;
     return &boucle->base;
 }
+
+struct ast * ast_subshell_init(struct ast * compound_list)
+{
+    static struct ast_ftable ftable = {
+        .run = &subshell_run,
+        .free = &subshell_free,
+        .push = &subshell_push,
+    };
+    struct ast_subshell * sub = (struct ast_subshell *)ast;
+    if (!sub)
+    {
+        return NULL;
+    }
+    sub->base.type = AST_SUBSHELL;
+    sub->base.ftable = &ftable;
+    sub->compound_list = compound_list;
+    return &sub->base;
+}
+
+
