@@ -331,6 +331,10 @@ static int export_builtin(char *args[], size_t nb_args, struct hash_map *h)
         {
             return 2;
         }
+        if (word[0] == '-')
+        {
+            word=args[i+1];
+        }
         if (!test_name(word))
         {
             return 1;

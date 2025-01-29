@@ -30,7 +30,7 @@ char **expand_all(char **word, size_t nbr, struct hash_map *h)
     }
     for (size_t i = 0; i < nbr; i++)
     {
-        if (test_var(word[i]) || test_quote(word[i]))
+        if (test_var(word[i],0) || test_quote(word[i]))
         {
             new_word[i] = expand(h, word[i]);
         }

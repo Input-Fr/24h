@@ -1,1 +1,1 @@
-echo $IFS
+echo "$IFS"

@@ -13,6 +13,7 @@
 #include "ast/ast.h"
 #include "hash_map/hash_map.h"
 
+
 void separator_equal(char *name, char *val, char *as)
 {
     size_t i = 0;

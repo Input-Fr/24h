@@ -30,8 +30,8 @@ struct hash_map
     int ret; //$?
     int nb_args; //$#
     char **all_args;
-    char *old_pwd;
     size_t size;
+
 };
 
 size_t hash(char *str);

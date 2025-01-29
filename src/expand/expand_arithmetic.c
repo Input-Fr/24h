@@ -74,10 +74,9 @@ static char *delimite_ari(char *prev, char *next, char *word)
         next = "";
     else
     {
-        next = strcpy(next, word);
-        next[strlen(next) - 2] = '\0';
+        next = strcpy(next, word + 2);
     }
-        
+
 
     word = tmp;
     // error_var_brackets(word);

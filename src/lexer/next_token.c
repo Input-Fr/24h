@@ -264,7 +264,6 @@ static struct token token_reco(struct lexer *lexer)
 {
     lexer->input = lexer_file(lexer->file);
     char c = lexer->input;
-    // printf("c : %c\n",c);
     if (c == EOF || c == '\0')
     {
         return end_of_file(lexer); // 1

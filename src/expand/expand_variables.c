@@ -14,6 +14,7 @@
 #include "ast/ast.h"
 #include "hash_map/hash_map.h"
 
+
 static char *delete_dollar(char *word)
 {
     char *tmp = word;
@@ -45,7 +46,9 @@ static char *delimite_var(char *prev, char *next, char *word)
     char *tmp = word;
     prev = strcpy(prev, word);
     size_t j = 0;
-    while (*word != '\0' && *word != '$')
+
+    while (*word != '\0' && (*word != '$' || (j > 0 &&
+                    *word == '$' && tmp[j-1] == '\\')))
     {
         j += 1;
         word += 1;
@@ -78,8 +81,9 @@ static char *delimite_var(char *prev, char *next, char *word)
             i += 1;
         }
     }
-    new[i + acol + 1] = '\0';
-    // printf("new : %s\n",new);
+
+        new[i + acol + 1] = '\0';
+
     if (*word == '\0')
         next = "";
     else if (*word == ' ' || (!isalnum(*word)) || *word != '_')
@@ -116,30 +120,30 @@ static int is_special_var(char *str, size_t *i)
     return 0;
 }
 
-int test_var(char *str) // test if a variable is in a word
+int test_var(char *str, size_t *i) // test if a variable is in a word
 {
-    size_t i = 0;
     size_t single_quote = 0;
     size_t double_quote = 0;
-    while (i < strlen(str) && str[i] != '\0')
+    while (*i < strlen(str) && str[*i] != '\0')
     {
-        if (str[i] == '\'' && single_quote && !double_quote)
+        if (str[*i] == '\'' && !single_quote && !double_quote)
             single_quote = 1;
-        else if (str[i] == '\'' && !single_quote && !double_quote)
+        else if (str[*i] == '\'' && single_quote && !double_quote)
             single_quote = 0;
-        else if (str[i] == '"' && !single_quote && !double_quote)
+        else if (str[*i] == '"' && !single_quote && !double_quote)
             double_quote = 1;
-        else if (str[i] == '"' && !single_quote && double_quote)
+        else if (str[*i] == '"' && !single_quote && double_quote)
             double_quote = 0;
 
 
 
-        if (((str[0] == '$' || (i > 0 && str[i - 1] != '\\' && str[i] == '$'))
+        if (((str[0] == '$' || (*i > 0 && str[*i - 1] != '\\' && str[*i] == '$'))
              && !single_quote))
         {
-            i += 1;
-            char c = str[i];
-            if (is_special_var(str, &i))
+            //printf("str: %s\n", str);
+            *i += 1;
+            char c = str[*i];
+            if (is_special_var(str, i))
                 return 1;
             else if ((c != '\0' && c != '{' && (isalpha(c) || c == '_')))
                 return 1; // normal variable : $name
@@ -148,22 +152,22 @@ int test_var(char *str) // test if a variable is in a word
 
             if (c != '\0' && c == '{') // variable check : ${...}
             {
-                while (str[i] != '\0' && str[i] != '}')
+                while (str[*i] != '\0' && str[*i] != '}')
                 {
-                    if ((!isalnum(str[i])) && str[i] != '}' && str[i] != '{'
-                        && str[i] != '_')
+                    if ((!isalnum(str[*i])) && str[*i] != '}' && str[*i] != '{'
+                        && str[*i] != '_')
                     {
                         errx(1, "invalid variable");
                     }
                     i += 1;
                 }
-                if (str[i] == '}')
+                if (str[*i] == '}')
                     return 1;
                 else
                     return 0;
             }
         }
-        i += 1;
+        *i += 1;
     }
     return 0;
 }
@@ -192,7 +196,7 @@ static char *expand_argn(char *key, char *prev, char *next, struct hash_map *h)
 {
     char *result;
     size_t len = strlen(prev) + strlen(next);
-    if (atoi(key) > h->nb_args)
+    if (atoi(key) + 1 > h->nb_args)
     {
         result = calloc(1, len + 1);
         snprintf(result, len + 1, "%s%s%s", prev, "", next);
@@ -202,7 +206,7 @@ static char *expand_argn(char *key, char *prev, char *next, struct hash_map *h)
     {
         len += strlen(h->all_args[atoi(key)]);
         result = calloc(1, len + 1);
-        snprintf(result, len + 1, "%s%s%s", prev, h->all_args[atoi(key)], next);
+        snprintf(result, len + 1, "%s%s%s", prev, h->all_args[atoi(key) + 1], next);
         return result;
     }
 }
@@ -278,7 +282,9 @@ static char *expand_pwd(char *prev, char *next)
 static char *expand_oldpwd(char *prev, char *next)
 {
     char *str = getenv("OLDPWD");
-    size_t len = strlen(prev) + strlen(next) + strlen(str);
+    //setenv("OLDPWD", getcw(buf,1024),1);
+
+    size_t len = strlen(prev) + strlen(next) + 100;
     char *result = calloc(1, len + 1);
     snprintf(result, len + 1, "%s%s%s", prev, str, next);
     free(str);
@@ -287,7 +293,6 @@ static char *expand_oldpwd(char *prev, char *next)
 
 static char *expand_random(char *prev, char *next)
 {
-    srand(time(NULL));
     int nb = rand();
     int a = 1;
     if (nb % 2 == 0)
@@ -304,13 +309,12 @@ static char *expand_random(char *prev, char *next)
     return result;
 }
 
-static char *expand_ifs(char *prev, char *next)
+static char *expand_ifs(char *prev, char *next, struct hash_map *h)
 {
-    char *str = getenv("IFS");
-    size_t len = strlen(prev) + strlen(next) + strlen(str);
+    size_t len = strlen(prev) + strlen(next) + 10;
     char *result = calloc(1, len + 1);
-    snprintf(result, len + 1, "%s%s%s", prev, str, next);
-    free(str);
+    char *ifs = hash_map_get(h,"IFS");
+    snprintf(result, len + 1, "%s%s%s", prev, ifs, next);
     return result;
 }
 
@@ -359,7 +363,7 @@ static char *expand_special_var(char *key, char *prev, char *next,
     }
     else if (strcmp(key, "IFS") == 0)
     {
-        return expand_ifs(prev, next);
+        return expand_ifs(prev, next, h);
     }
     else
     {
@@ -367,20 +371,11 @@ static char *expand_special_var(char *key, char *prev, char *next,
     }
 }
 
-//static char *expand_normal_var(char *key, char *prev, char *next,
-//                               struct hash_map *h)
-//{
-//    char *val = hash_map_get(h, key); // get the value of the variable
-//    size_t len = strlen(prev) + strlen(val) + strlen(next) + 1;
-//    char *result = calloc(1, len + 1);
-//    snprintf(result, len, "%s%s%s", prev, val, next); // concat
-//    return result;
-//}
-
 
 void expand_variables(struct hash_map *h, char *res)
 {
-    while (test_var(res))
+    size_t i = 0;
+    while (test_var(res, &i))
     {
         char *prev = calloc(1, strlen(res) + 1); // word before the variable
         char *next = calloc(1, strlen(res) + 1); // word after the variable

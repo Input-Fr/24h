@@ -19,7 +19,7 @@ bool hash_map_insert(struct hash_map *hash_map, char *key, void *value, enum val
         return NULL;
     }
     list->key = key;
-    
+
     list->type = type;
     if (list->type == VARIABLE) 
     {
@@ -46,11 +46,11 @@ bool hash_map_insert(struct hash_map *hash_map, char *key, void *value, enum val
         }
         if (p != NULL)
         {
-            if (p->type == VARIABLE) 
+            if (p->type == VARIABLE)
             {
                 p->value.variable_value = value;
             }
-            if (p->type == FUNCTION) 
+            if (p->type == FUNCTION)
             {
                 p->value.function_value = value;
             }
@@ -125,12 +125,15 @@ bool hash_map_remove(struct hash_map *hash_map, char *key)
             {
                 hash_map->data[k] = NULL;
             }
-            free(p->key);
 
-            if (p->type == VARIABLE)
+            if (p->type == VARIABLE && strcmp(p->key,"IFS") != 0)
                 free(p->value.variable_value);
             if (p->type == FUNCTION)
                 free(p->value.function_value);
+
+            if (strcmp(p->key,"IFS") != 0)
+                free(p->key);
+
 
             free(p);
             return true;
