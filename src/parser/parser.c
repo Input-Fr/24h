@@ -232,8 +232,13 @@ static struct ast *parse_pipeline(enum parser_status *status,
 
 /*
 command = simple_command
-          | shell_command { redirection } ;
+          | shell_command { redirection } 
+          | funcdec { redirection };
 */
+
+static struct ast *parse_func(enum parser_status *status,
+                                 struct lexer *lexer);
+
 static struct ast *parse_command(enum parser_status *status,
                                  struct lexer *lexer)
 {
@@ -256,8 +261,76 @@ static struct ast *parse_command(enum parser_status *status,
         *status = PARSER_OK;
         return ast_shellcmd;
     }
+    *status = PARSER_OK;
+    struct ast *ast_func = parse_func(status, lexer);
+    if (*status == PARSER_OK)
+    {
+        struct ast *ast_redir = parse_redirection(status, lexer);
+        while (*status == PARSER_OK)
+        {
+            function_push(ast_func, ast_redir);
+            ast_redir = parse_redirection(status, lexer);
+        }
+        *status = PARSER_OK;
+        return ast_func;
+    }
     return NULL;
 }
+
+// funcdec = WORD '(' ')' {'\n'} shell_command ;
+static struct ast *parse_func(enum parser_status *status,
+                                 struct lexer *lexer)
+{
+    struct token tok = lexer_peek(lexer);
+    if (tok.type == TOKEN_WORD)
+    {
+        char *str = tok.data->str;
+        tok = lexer_peek(lexer);
+        if (tok.type == TOKEN_LPAR)
+        {
+            lexer_pop(lexer);
+            tok = lexer_peek(lexer);
+            if (tok.type == TOKEN_RPAR)
+            {
+                lexer_pop(lexer);
+                tok = lexer_peek(lexer);
+                while (tok.type == TOKEN_NEWLINE)
+                {
+                    lexer_pop(lexer);
+                    tok = lexer_peek(lexer);
+                }
+                struct ast *shl_cmd = parse_shell_command(status, lexer);
+                if (*status != PARSER_OK)
+                {
+                    free(str);
+                    return NULL
+                }
+                return ast_function_init(str, shl_cmd);
+            }
+            else
+            {
+                free(str);
+                clean_w_aw(tok);
+                *status = PARSER_UNEXPECTED_TOKEN;
+                return NULL;
+            }
+        }
+        else
+        {
+            free(str);
+            clean_w_aw(tok);
+            *status = PARSER_UNEXPECTED_TOKEN;
+            return NULL;
+        }
+    }
+    else
+    {
+        clean_w_aw(tok);
+        *status = PARSER_UNEXPECTED_TOKEN;
+        return NULL;
+    }
+}
+
 
 /*
 shell_command = '{' compound_list '}'
