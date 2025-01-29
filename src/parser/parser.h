@@ -98,6 +98,7 @@ command = simple_command
         | shell_command { redirection };
 
 shell_command = '{' compound_list '}'
+                |'(' compound_list ')'
                 | rule_if
                 | rule_while
                 | rule_until

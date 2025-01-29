@@ -261,6 +261,7 @@ static struct ast *parse_command(enum parser_status *status,
 
 /*
 shell_command = '{' compound_list '}'
+                | '(' compound_list ')'
                 | rule_if
                 | rule_while
                 | rule_until
