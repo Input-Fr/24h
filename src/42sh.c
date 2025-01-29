@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
     enum parser_status status;
     struct ast *ast;
     struct hash_map *h = hash_map_init(7);
-    hash_map_insert(h,"IFS"," \t\n", VARIABLE);
+    hash_map_insert(h, "IFS", " \t\n", VARIABLE);
     char *bufferpwd = malloc(1024 * sizeof(char));
     while (lexer->current_tok.type != TOKEN_EOF)
     {
@@ -187,6 +187,10 @@ static void print(char *string, enum token_type type)
         printf("rw: {\n");
     else if (type == TOKEN_RBRACE)
         printf("rw: }\n");
+    else if (type == TOKEN_LPAR)
+        printf("rw: (\n");
+    else if (type == TOKEN_RPAR)
+        printf("rw: )\n");
     else if (type == TOKEN_BANG)
         printf("rw: !\n");
     else if (type == TOKEN_IN)

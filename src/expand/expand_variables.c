@@ -1,4 +1,6 @@
 #include <assert.h>
+#include <ctype.h>
+#include <err.h>
 #include <pwd.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -7,13 +9,10 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
-#include <ctype.h>
-#include <err.h>
 
-#include "expand.h"
 #include "ast/ast.h"
+#include "expand.h"
 #include "hash_map/hash_map.h"
-
 
 static char *delete_dollar(char *word)
 {
@@ -48,9 +47,10 @@ static char *delimite_var(char *prev, char *next, char *word)
     size_t j = 0;
     size_t single_quote = 0;
     size_t double_quote = 0;
-    while ((j + 1 < strlen(word) && tmp[j+1] == '(')
-            || single_quote || (*word != '\0' && (*word != '$' || (j > 0 &&
-                    *word == '$' && tmp[j-1] == '\\'))))
+    while (
+        (j + 1 < strlen(word) && tmp[j + 1] == '(') || single_quote
+        || (*word != '\0'
+            && (*word != '$' || (j > 0 && *word == '$' && tmp[j - 1] == '\\'))))
     {
         if (tmp[j] == '\'' && !single_quote && !double_quote)
             single_quote = 1;
@@ -93,7 +93,7 @@ static char *delimite_var(char *prev, char *next, char *word)
         }
     }
 
-        new[i + acol + 1] = '\0';
+    new[i + acol + 1] = '\0';
 
     if (*word == '\0')
         next = "";
@@ -106,7 +106,7 @@ static char *delimite_var(char *prev, char *next, char *word)
     return new;
 }
 
-static int is_special_var(char *str, size_t *i)
+int is_special_var(char *str, size_t *i)
 {
     if (str[*i] != '\0' && str[*i] == '{')
     {
@@ -148,8 +148,8 @@ int test_var(char *str) // test if a variable is in a word
             double_quote = 0;
 
         if ((((str[0] == '$' && str[1] != '\0' && str[1] != '(')
-                        || ((i > 0 && str[i - 1] != '\\' && str[i] == '$' 
-                            && str[i + 1] != '\0' && str[i + 1] != '(')))
+              || ((i > 0 && str[i - 1] != '\\' && str[i] == '$'
+                   && str[i + 1] != '\0' && str[i + 1] != '(')))
              && !single_quote))
         {
             i += 1;
@@ -183,10 +183,6 @@ int test_var(char *str) // test if a variable is in a word
     return 0;
 }
 
-
-
-
-
 static void expand_free(char *prev, char *next, char *var, char *key)
 {
     free(prev);
@@ -217,7 +213,8 @@ static char *expand_argn(char *key, char *prev, char *next, struct hash_map *h)
     {
         len += strlen(h->all_args[atoi(key)]);
         result = calloc(1, len + 1);
-        snprintf(result, len + 1, "%s%s%s", prev, h->all_args[atoi(key) + 1], next);
+        snprintf(result, len + 1, "%s%s%s", prev, h->all_args[atoi(key) + 1],
+                 next);
         return result;
     }
 }
@@ -293,7 +290,7 @@ static char *expand_pwd(char *prev, char *next)
 static char *expand_oldpwd(char *prev, char *next)
 {
     char *str = getenv("OLDPWD");
-    //setenv("OLDPWD", getcw(buf,1024),1);
+    // setenv("OLDPWD", getcw(buf,1024),1);
 
     size_t len = strlen(prev) + strlen(next) + 100;
     char *result = calloc(1, len + 1);
@@ -324,7 +321,7 @@ static char *expand_ifs(char *prev, char *next, struct hash_map *h)
 {
     size_t len = strlen(prev) + strlen(next) + 10;
     char *result = calloc(1, len + 1);
-    char *ifs = hash_map_get(h,"IFS");
+    char *ifs = hash_map_get(h, "IFS");
     snprintf(result, len + 1, "%s%s%s", prev, ifs, next);
     return result;
 }
@@ -390,20 +387,21 @@ void expand_variables(struct hash_map *h, char *res)
         char *next = calloc(1, strlen(res) + 1); // word after the variable
         char *var = delimite_var(prev, next, res); // divide the word in 3 words
         char *key = delete_dollar(var); //${name} -> name
-        if (test_special_var(key)) // $@, $$, $*, $?, $1, $#, $RANDOM, $UID, $PWD
+        if (test_special_var(
+                key)) // $@, $$, $*, $?, $1, $#, $RANDOM, $UID, $PWD
         {
             char *tmp = expand_special_var(key, prev, next, h);
-            strcpy(res,tmp);
+            strcpy(res, tmp);
             free(tmp);
         }
         else // variable classique : $name, ${name},"$name"...
         {
             char *val = hash_map_get(h, key); // get the value of the variable
             size_t len = strlen(prev) + strlen(val) + strlen(next) + 1;
-            //if (test_quote(val))
+            // if (test_quote(val))
             //{
-            //    delete_quote(val);
-            //}
+            //     delete_quote(val);
+            // }
             snprintf(res, len, "%s%s%s", prev, val, next); // concat
         }
         expand_free(prev, next, var, key);
