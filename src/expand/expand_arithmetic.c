@@ -87,17 +87,20 @@ static char *delimite_ari(char *prev, char *next, char *word)
 
 void expand_ari(struct hash_map *h, char *res)
 {
-    char *prev = calloc(1, strlen(res) + 1); // word before the variable
-    char *next = calloc(1, strlen(res) + 1); // word after the variable
-    char *operation = delimite_ari(prev, next, res); // divide the word in 3 words
+    if (test_ari(res))
+    {
+        char *prev = calloc(1, strlen(res) + 1); // word before the variable
+        char *next = calloc(1, strlen(res) + 1); // word after the variable
+        char *operation = delimite_ari(prev, next, res); // divide the word in 3 words
 
-    char *val = calloc(1, 64);
-    eval_arithmetic(val, operation, h);
-    size_t len = strlen(prev) + strlen(res) + strlen(next) + 1;
+        char *val = calloc(1, 64);
+        eval_arithmetic(val, operation, h);
+        size_t len = strlen(prev) + strlen(res) + strlen(next) + 1;
 
-    snprintf(res, len, "%s%s%s", prev, val, next); // concat
-    free(next);
-    free(prev);
-    free(operation);
-    free(val);
+        snprintf(res, len, "%s%s%s", prev, val, next); // concat
+        free(next);
+        free(prev);
+        free(operation);
+        free(val);
+    }
 }

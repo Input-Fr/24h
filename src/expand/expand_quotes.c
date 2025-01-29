@@ -36,34 +36,32 @@ static int isspecial(char c)
 
 void delete_quote(char *str)
 {
-    if (!test_quote(str))
+    if (test_quote(str))
     {
-        return;
-    }
-
-    char c = ' ';
-    for (size_t i = 0; str[i] != '\0'; i += 1)
-    {
-        if (str[i] == '\\' && c == '"' && i + 1 < strlen(str)
-            && !isspecial(str[i + 1]))
+        char c = ' ';
+        for (size_t i = 0; str[i] != '\0'; i += 1)
         {
-            i += 1;
-        }
-        if (str[i] == '\\' && c != '\'')
-        {
-            delete_c(str, &i);
-        }
-        else if ((str[i] == '"' || str[i] == '\'') && (c == ' '))
-        {
-            c = str[i];
-            delete_c(str, &i);
-            i -= 1;
-        }
-        else if (str[i] != '\0' && str[i] == c && c != ' ')
-        {
-            c = ' ';
-            delete_c(str, &i);
-            i -= 1;
+            if (str[i] == '\\' && c == '"' && i + 1 < strlen(str)
+                && !isspecial(str[i + 1]))
+            {
+                i += 1;
+            }
+            if (str[i] == '\\' && c != '\'')
+            {
+                delete_c(str, &i);
+            }
+            else if ((str[i] == '"' || str[i] == '\'') && (c == ' '))
+            {
+                c = str[i];
+                delete_c(str, &i);
+                i -= 1;
+            }
+            else if (str[i] != '\0' && str[i] == c && c != ' ')
+            {
+                c = ' ';
+                delete_c(str, &i);
+                i -= 1;
+            }
         }
     }
 }

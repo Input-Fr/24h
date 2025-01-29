@@ -7,10 +7,10 @@ run_test()
 {
     local args=$1
 
-    bash --posix -c "$args" > tests/ex.txt  #2>/dev/null
+    bash --posix -c "$args" > tests/ex.txt  2>/dev/null
     local bash_status=$?
 
-    "$BIN_PATH" -c "$args" > tests/get.txt #2>/dev/null
+    "$BIN_PATH" -c "$args" > tests/get.txt 2>/dev/null
     local bin_path_status=$?
 
     if diff -q tests/ex.txt tests/get.txt > /dev/null; then
@@ -40,10 +40,10 @@ run_file()
 {
     local file="$1"
 
-    bash --posix "$file" > tests/ex.txt #2>/dev/null
+    bash --posix "$file" > tests/ex.txt 2>/dev/null
     local bash_status=$?
 
-    "$BIN_PATH" "$file" > tests/get.txt #2>/dev/null
+    "$BIN_PATH" "$file" > tests/get.txt 2>/dev/null
     local bin_path_status=$?
 
     if diff -q tests/ex.txt tests/get.txt > /dev/null && [ $bash_status -eq $bin_path_status ] ; then
@@ -210,8 +210,10 @@ done
 
 
 nb=$a
+total=$b
 b=$((b*10))
 a=$((a*1000))
+fail=$((total-nb))
 
 result=$(echo "$a / $b" | bc)
 echo""
@@ -219,8 +221,9 @@ echo""
 echo""
 echo -e "\e[1;35m~~~~~~~~~~~~~~~~ RESULT ~~~~~~~~~~~~~~~\e[0m"
 echo -e "\e[1;35m|                                     |\e[0m"
-echo -e "|\e[1;32m           $nb tests passed          \e[0m|"
-echo -e "|\e[1;32m           $result% tests passed          \e[0m|"
+echo -e "|\e[1;32m       $nb ($result%) tests passed        \e[0m|"
+echo -e "|\e[1;31m       $fail tests failed               \e[0m|"
+echo -e "|\e[1;36m       $total tests                     \e[0m|"
 echo -e "\e[1;35m|                                     |\e[0m"
 echo -e "\e[1;35m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\e[0m"
 

@@ -105,7 +105,7 @@ void launch_subshell(char *sub_cmd)
     exit(ret_code);
 }
 
-char *expand_sub_cmd(char *sub_cmd)
+static char *expand_sub_cmd(char *sub_cmd)
 {
     int pipefd[2]; // 0 read side ; 1 write side
     if (pipe(pipefd) == -1)
@@ -119,7 +119,7 @@ char *expand_sub_cmd(char *sub_cmd)
     {
         close(pipefd[0]);
         dup2(pipefd[1], STDOUT_FILENO);
-        clean_input(sub_cmd);
+        //clean_input(sub_cmd);
         launch_subshell(sub_cmd);
     }
     else
@@ -150,4 +150,53 @@ char *expand_sub_cmd(char *sub_cmd)
         return out;
     }
     return NULL;
+}
+
+static char *delimite_substi(char *prev, char *next, char *word)
+{
+    char *tmp = word;
+    prev = strcpy(prev, word);
+    size_t j = 0;
+    while (*word != '\0' && *word != '$')
+    {
+        j += 1;
+        word += 1;
+    }
+
+    prev[j] = '\0';
+    word += 2;
+    char *new = calloc(1, strlen(word) + 1);
+    new = strcpy(new, word);
+    size_t i = 0;
+
+    word += 1;
+    while (*word != '\0' && *word != ')')
+    {
+        word += 1;
+        i += 1;
+    }
+    new[i + 1] = '\0';
+    if (*word == '\0')
+        next = "";
+    else
+    {
+        next = strcpy(next, word + 1);
+    }
+    word = tmp;
+    // error_var_brackets(word);
+    return new;
+}
+
+void expand_substi(char *res)
+{
+    if (test_cmd_sub(res))
+    {
+        char *prev = calloc(1, strlen(res) + 1); // word before the variable
+        char *next = calloc(1, strlen(res) + 1); // word after the variable
+        char *substi = delimite_substi(prev, next, res); // divide the word in 3 words
+        char *result;
+        result = expand_sub_cmd(substi);
+        strcpy(res,result);
+        free(result);
+    }
 }

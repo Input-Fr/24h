@@ -46,10 +46,20 @@ static char *delimite_var(char *prev, char *next, char *word)
     char *tmp = word;
     prev = strcpy(prev, word);
     size_t j = 0;
-
-    while (*word != '\0' && (*word != '$' || (j > 0 &&
-                    *word == '$' && tmp[j-1] == '\\')))
+    size_t single_quote = 0;
+    size_t double_quote = 0;
+    while (single_quote || (*word != '\0' && (*word != '$' || (j > 0 &&
+                    *word == '$' && tmp[j-1] == '\\'))))
     {
+        if (tmp[j] == '\'' && !single_quote && !double_quote)
+            single_quote = 1;
+        else if (tmp[j] == '\'' && single_quote && !double_quote)
+            single_quote = 0;
+        else if (tmp[j] == '"' && !single_quote && !double_quote)
+            double_quote = 1;
+        else if (tmp[j] == '"' && !single_quote && double_quote)
+            double_quote = 0;
+
         j += 1;
         word += 1;
     }
@@ -136,12 +146,9 @@ int test_var(char *str) // test if a variable is in a word
         else if (str[i] == '"' && !single_quote && double_quote)
             double_quote = 0;
 
-
-
         if (((str[0] == '$' || (i > 0 && str[i - 1] != '\\' && str[i] == '$'))
              && !single_quote))
         {
-            //printf("str: %s\n", str);
             i += 1;
             char c = str[i];
             if (is_special_var(str, &i))
@@ -390,16 +397,10 @@ void expand_variables(struct hash_map *h, char *res)
         {
             char *val = hash_map_get(h, key); // get the value of the variable
             size_t len = strlen(prev) + strlen(val) + strlen(next) + 1;
-            if (test_quote(val))
-            {
-                printf("here");
-                if (val[0] == '\'' && val[1] == '$')
-                {
-                    val[1] = '\\';
-                    val[2] = '$';
-                }
-                delete_quote(val);
-            }
+            //if (test_quote(val))
+            //{
+            //    delete_quote(val);
+            //}
             snprintf(res, len, "%s%s%s", prev, val, next); // concat
         }
         expand_free(prev, next, var, key);

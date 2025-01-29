@@ -10,7 +10,7 @@ void expand_variables(struct hash_map *h, char *res);
 int test_arithmetic(char *str);
 
 // expand_cmd_sub.c
-char *expand_sub_cmd(char *sub_cmd);
+void expand_substi(char *res);
 int test_cmd_sub(char *in);
 
 //expand_quotes.c

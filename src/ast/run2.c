@@ -62,21 +62,20 @@ int for_run(struct ast *ast, struct hash_map *h)
     struct ast_for *boucle = (struct ast_for *)ast;
     int res = 0;
     char **get = boucle->list;
-    size_t nbr =  boucle->nbr_elt;
+    size_t nbr = boucle->nbr_elt;
     if (!nbr)
     {
-	    nbr = h->nb_args;
-	    get = h->all_args;
+        nbr = h->nb_args;
+        get = h->all_args;
     }
 
     for (size_t i = 0; i < nbr; i++)
     {
-	    char *extended = expand(h,get[i]);
-	    hash_map_insert(h, boucle->variable, extended, VARIABLE);
-	    RUN(boucle->do_body, h);
-	    if (i < nbr-1)
-		    free(extended);
-
+        char *extended = expand(h, get[i]);
+        hash_map_insert(h, boucle->variable, extended, VARIABLE);
+        RUN(boucle->do_body, h);
+        if (i < nbr - 1)
+            free(extended);
     }
     hash_map_remove(h, boucle->variable);
     return res;
