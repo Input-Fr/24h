@@ -1,3 +1,4 @@
 cd ../
 cd ../
+echo $PWD
 

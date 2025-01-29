@@ -147,7 +147,7 @@ int cmd_cd(char *arg) // following SCL algorithm
     char *pwd = getenv("PWD");
     if (!strcmp("-", arg))
     {
-        minus_hyphen();
+        return minus_hyphen();
     }
     int allocated = 0;
     int step7 = 0;
@@ -190,8 +190,14 @@ int cmd_cd(char *arg) // following SCL algorithm
     free(curpath);
     curpath = new;
     rule9(curpath, arg, pwd);
-    setenv("OLDPWD", pwd, 1);
     int ret = chdir(curpath);
+    setenv("OLDPWD", pwd, 1);
+    setenv("PWD", curpath, 1);
+    if (ret == -1)
+    {
+        ret = 1;
+        fprintf(stderr, "wrong path: %s\n", curpath);
+    }
     clean(allocated, pwd, curpath);
     return ret;
 }
