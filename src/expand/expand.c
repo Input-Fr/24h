@@ -20,7 +20,7 @@ char *expand(struct hash_map *h, char *str)
     char *res = calloc(1, (strlen(str) * 2) + 1024);
     strcpy(res, str);
     expand_variables(h, res);
-    // expand_substi(res);
+    expand_substi(res);
     expand_ari(h, res);
 
     // char **list_words = calloc(len_ifs(res, h) + 1, sizeof(char *));

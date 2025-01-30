@@ -96,12 +96,14 @@ int subshell_run(struct ast *ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_SUBSHELL);
     struct ast_subshell *subshell = (struct ast_subshell *)ast;
-    char *test = malloc(10);
-    (void)test;
     pid_t pid = fork();
     if (pid == 0) // child
     {
-        int res = RUN(subshell->compound_list, h);
+        struct hash_map *h2 = hash_map_init(7);
+        struct ast_list *subshellLst = (struct ast_list *)subshell->compound_list;
+        int res = handle_list_ast(subshellLst->cmd, &subshellLst->nbr_cmd, h2);
+        hash_map_free(h2);
+        (void)h;
         exit(res);
     }
     else
@@ -109,7 +111,6 @@ int subshell_run(struct ast *ast, struct hash_map *h)
         int wstatus;
         waitpid(pid, &wstatus, 0);
         int return_value = WEXITSTATUS(wstatus);
-        free(test);
         return return_value;
     }
     return 0;
