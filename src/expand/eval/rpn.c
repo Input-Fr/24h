@@ -104,7 +104,7 @@ struct token *tri(int val1, int val2, enum token_type type, int *error)
     return t;
 }
 
-int rpn (struct fifo *f, char *result)
+int rpn(struct fifo *f, char *result)
 {
     struct stack *s = malloc(sizeof(struct stack));
     s->data = 0;

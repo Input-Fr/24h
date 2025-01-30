@@ -104,7 +104,7 @@ void field_splitting(char *str, char *check, char **res, struct hash_map *h)
         size_t nb = split(str, res, deli);
         for (size_t i = 0; i < nb; i += 1)
         {
-//            printf("%s\n", res[i]);
+            //            printf("%s\n", res[i]);
             free(res[i]);
         }
     }

@@ -350,7 +350,6 @@ static int export_builtin(char *args[], size_t nb_args, struct hash_map *h)
                 separator_equal(name, val, word);
                 hash_map_remove(h, name);
                 hash_map_insert(h, name, val, VARIABLE);
-                unsetenv(name);
                 setenv(name, val, 1);
             }
         }

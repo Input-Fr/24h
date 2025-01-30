@@ -68,26 +68,25 @@ int tri2(char *string, size_t len, struct fifo *f, struct hash_map *h)
     }
     for (size_t i = 0; i < len; i += 1)
     {
-        //if (error(string[i]))
+        // if (error(string[i]))
         //{
-        //    free(string);
-        //    return 1;
-        //}
+        //     free(string);
+        //     return 1;
+        // }
 
-        if (isalpha(string[i]) || string[i] == '_' || string[i] == '$' 
-                || string[i] == '"')
+        if (isalpha(string[i]) || string[i] == '_' || string[i] == '$'
+            || string[i] == '"')
         {
             char *str = calloc(1, 64);
             str[0] = string[i];
-            i+=1;
+            i += 1;
             int j = 1;
-            while (isalnum(string[i]) || string[i] == '_' || string[i] == '"' 
-                    || string[i] == '}'
-                    || string[i] == '{' || string[i] == '$')
+            while (isalnum(string[i]) || string[i] == '_' || string[i] == '"'
+                   || string[i] == '}' || string[i] == '{' || string[i] == '$')
             {
                 str[j] = string[i];
-                i+=1;
-                j+=1;
+                i += 1;
+                j += 1;
             }
             struct token *tok = malloc(sizeof(struct token));
             char *val;
@@ -97,7 +96,7 @@ int tri2(char *string, size_t len, struct fifo *f, struct hash_map *h)
                 val = expand(h, str);
                 a = 1;
             }
-            else 
+            else
             {
                 val = hash_map_get(h, str);
             }
@@ -141,11 +140,11 @@ int tri2(char *string, size_t len, struct fifo *f, struct hash_map *h)
             fifo_push(f, tok);
         }
     }
-    //if (f->size == 0)
+    // if (f->size == 0)
     //{
-    //    return 0;
-    //}
-    //return -1;
+    //     return 0;
+    // }
+    // return -1;
     return 0;
 }
 

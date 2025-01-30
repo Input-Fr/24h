@@ -6,14 +6,14 @@
 
 union retouir
 {
-     char *variable_value;
-     struct ast *function_value;
+    char *variable_value;
+    struct ast *function_value;
 };
 
 enum val_type
 {
-     VARIABLE,
-     FUNCTION,
+    VARIABLE,
+    FUNCTION,
 };
 
 struct pair_list
@@ -32,12 +32,12 @@ struct hash_map
     char **all_args;
     size_t size;
     char *old_pwd;
-
 };
 
 size_t hash(char *str);
 struct hash_map *hash_map_init(size_t size);
-bool hash_map_insert(struct hash_map *hash_map, char *key, void *value, enum val_type type);
+bool hash_map_insert(struct hash_map *hash_map, char *key, void *value,
+                     enum val_type type);
 void hash_map_free(struct hash_map *hash_map);
 void *hash_map_get(struct hash_map *hash_map, char *key);
 bool hash_map_remove(struct hash_map *hash_map, char *key);
