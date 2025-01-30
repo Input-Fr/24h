@@ -222,6 +222,7 @@ int test_ass(struct lexer *lexer)
             {
                 if (!test_name(str))
                 {
+                    fprintf(stderr, "error\n");
                     return 0;
                 }
                 return 1;

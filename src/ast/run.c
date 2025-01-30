@@ -331,6 +331,7 @@ static int export_builtin(char *args[], size_t nb_args, struct hash_map *h)
         char *word = args[i];
         if (word[0] == '-' && word[1] != 'p')
         {
+            fprintf(stderr, "error\n");
             return 2;
         }
         if (word[0] == '-')
@@ -339,6 +340,7 @@ static int export_builtin(char *args[], size_t nb_args, struct hash_map *h)
         }
         if (!test_name(word))
         {
+            fprintf(stderr, "error\n");
             return 1;
         }
         else
