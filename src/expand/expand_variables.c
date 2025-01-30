@@ -295,7 +295,7 @@ static char *expand_oldpwd(char *prev, char *next)
     size_t len = strlen(prev) + strlen(next) + 100;
     char *result = calloc(1, len + 1);
     snprintf(result, len + 1, "%s%s%s", prev, str, next);
-    //free(str);
+    // free(str);
     return result;
 }
 

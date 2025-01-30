@@ -1,22 +1,22 @@
+#define _POSIX_C_SOURCE 200809L
 #include <ctype.h>
 #include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "../expand/expand.h"
 #include "../parser/parser.h"
 #include "lexer.h"
-#include "../expand/expand.h"
 
 static struct token token_reco(struct lexer *lexer);
 static struct token continue_word(struct lexer *lexer);
 static struct token begin_word(struct lexer *lexer);
 
-
-char * add_double_quote(char *str)
+char *add_double_quote(char *str)
 {
     char *res = calloc(1, strlen(str) + 6);
-   
+
     snprintf(res, strlen(str) + 5, "\"^*%s\"", str); // concat
     free(str);
     return res;
@@ -28,13 +28,11 @@ static struct token end_of_file(struct lexer *lexer)
     if (lexer->word || lexer->ope)
     {
         if (lexer->Quoting == SINGLE_QUOTE || lexer->Quoting == DOUBLE_QUOTE)
-        {
             errx(2, "missing quote");
-        }
+
         if (lexer->current_tok.type == TOKEN_WORD)
-        {
             lexer->current_tok.type = reserved_word(lexer);
-        }
+
         ungetc(EOF, lexer->file);
         return lexer->current_tok;
     }
@@ -331,9 +329,28 @@ struct token lexer_next_token(struct lexer *lexer)
     lexer->word = 0;
     lexer->ope = 0;
     struct token tok = token_reco(lexer);
-    //char *str_tok;
-    if (tok.type == TOKEN_WORD && test_var(tok.data->str) && tok.data->str[0] != '"')
+    if (tok.type == TOKEN_WORD && test_var(tok.data->str)
+        && tok.data->str[0] != '"')
         tok.data->str = add_double_quote(tok.data->str);
+
+    if (tok.type == TOKEN_ALIAS)
+    {
+        lexer_next_token(lexer);
+        char *aw = lexer->current_tok.data->str;
+        char *name = calloc(1, strlen(aw));
+        char *val = calloc(1, strlen(aw));
+        separator_equal(name, val, aw);
+        delete_quote(val);
+        setenv(name, val, 1);
+        lexer_next_token(lexer);
+        free(name);
+        free(val);
+        free(aw);
+        return lexer->current_tok;
+    }
+
+    if (tok.type == TOKEN_COM)
+        lexer_next_token(lexer);
+
     return tok;
-    
 }

@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include <assert.h>
 #include <ctype.h>
 #include <err.h>
@@ -300,6 +301,7 @@ static int unset_builtin(char *args[], size_t nb_args, struct hash_map *h)
 
     for (; i < nb_args; i += 1)
     {
+        unsetenv(args[i]);
         hash_map_remove(h, args[i]);
     }
 
@@ -348,6 +350,8 @@ static int export_builtin(char *args[], size_t nb_args, struct hash_map *h)
                 separator_equal(name, val, word);
                 hash_map_remove(h, name);
                 hash_map_insert(h, name, val, VARIABLE);
+                unsetenv(name);
+                setenv(name, val, 1);
             }
         }
     }

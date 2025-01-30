@@ -1,9 +1,13 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include "lexer.h"
 
 #include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "expand/expand.h"
 
 struct lexer *lexer_new(void)
 {
@@ -33,10 +37,8 @@ struct token lexer_peek(struct lexer *lexer)
     {
         struct token tok = lexer_next_token(lexer);
         lexer->peek = 1;
-        if (tok.type == TOKEN_COM)
-        {
-            lexer_pop(lexer);
-        }
+        // if (tok.type == TOKEN_COM)
+        //     lexer_pop(lexer);
         return tok;
     }
     else
@@ -51,10 +53,8 @@ struct token lexer_pop(struct lexer *lexer)
     {
         struct token tok = lexer_next_token(lexer);
 
-        if (tok.type == TOKEN_COM)
-        {
-            lexer_pop(lexer);
-        }
+        // if (tok.type == TOKEN_COM)
+        //     lexer_pop(lexer);
         return tok;
     }
     else

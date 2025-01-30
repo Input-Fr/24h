@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,7 +8,7 @@
 static int test_if(struct lexer *lexer)
 {
     char *str = lexer->current_tok.data->str;
-    if (lexer->current_tok.data->size == 2 && strcmp(str, "if") == 0)
+    if (strcmp(str, "if") == 0)
     {
         return 1;
     }
@@ -17,7 +18,7 @@ static int test_if(struct lexer *lexer)
 static int test_fi(struct lexer *lexer)
 {
     char *str = lexer->current_tok.data->str;
-    if (lexer->current_tok.data->size == 2 && strcmp(str, "fi") == 0)
+    if (strcmp(str, "fi") == 0)
     {
         return 1;
     }
@@ -27,7 +28,7 @@ static int test_fi(struct lexer *lexer)
 static int test_then(struct lexer *lexer)
 {
     char *str = lexer->current_tok.data->str;
-    if (lexer->current_tok.data->size == 4 && strcmp(str, "then") == 0)
+    if (strcmp(str, "then") == 0)
     {
         return 1;
     }
@@ -37,7 +38,7 @@ static int test_then(struct lexer *lexer)
 static int test_elif(struct lexer *lexer)
 {
     char *str = lexer->current_tok.data->str;
-    if (lexer->current_tok.data->size == 4 && strcmp(str, "elif") == 0)
+    if (strcmp(str, "elif") == 0)
     {
         return 1;
     }
@@ -47,7 +48,7 @@ static int test_elif(struct lexer *lexer)
 static int test_else(struct lexer *lexer)
 {
     char *str = lexer->current_tok.data->str;
-    if (lexer->current_tok.data->size == 4 && strcmp(str, "else") == 0)
+    if (strcmp(str, "else") == 0)
     {
         return 1;
     }
@@ -57,7 +58,7 @@ static int test_else(struct lexer *lexer)
 static int test_do(struct lexer *lexer)
 {
     char *str = lexer->current_tok.data->str;
-    if (lexer->current_tok.data->size == 2 && strcmp(str, "do") == 0)
+    if (strcmp(str, "do") == 0)
     {
         return 1;
     }
@@ -67,7 +68,7 @@ static int test_do(struct lexer *lexer)
 static int test_done(struct lexer *lexer)
 {
     char *str = lexer->current_tok.data->str;
-    if (lexer->current_tok.data->size == 4 && strcmp(str, "done") == 0)
+    if (strcmp(str, "done") == 0)
     {
         return 1;
     }
@@ -77,7 +78,7 @@ static int test_done(struct lexer *lexer)
 static int test_case(struct lexer *lexer)
 {
     char *str = lexer->current_tok.data->str;
-    if (lexer->current_tok.data->size == 4 && strcmp(str, "case") == 0)
+    if (strcmp(str, "case") == 0)
     {
         return 1;
     }
@@ -87,7 +88,7 @@ static int test_case(struct lexer *lexer)
 static int test_esac(struct lexer *lexer)
 {
     char *str = lexer->current_tok.data->str;
-    if (lexer->current_tok.data->size == 4 && strcmp(str, "esac") == 0)
+    if (strcmp(str, "esac") == 0)
     {
         return 1;
     }
@@ -97,7 +98,7 @@ static int test_esac(struct lexer *lexer)
 static int test_while(struct lexer *lexer)
 {
     char *str = lexer->current_tok.data->str;
-    if (lexer->current_tok.data->size == 5 && strcmp(str, "while") == 0)
+    if (strcmp(str, "while") == 0)
     {
         return 1;
     }
@@ -107,7 +108,7 @@ static int test_while(struct lexer *lexer)
 static int test_until(struct lexer *lexer)
 {
     char *str = lexer->current_tok.data->str;
-    if (lexer->current_tok.data->size == 5 && strcmp(str, "until") == 0)
+    if (strcmp(str, "until") == 0)
     {
         return 1;
     }
@@ -117,7 +118,7 @@ static int test_until(struct lexer *lexer)
 static int test_for(struct lexer *lexer)
 {
     char *str = lexer->current_tok.data->str;
-    if (lexer->current_tok.data->size == 3 && strcmp(str, "for") == 0)
+    if (strcmp(str, "for") == 0)
     {
         return 1;
     }
@@ -127,7 +128,7 @@ static int test_for(struct lexer *lexer)
 static int test_lbrace(struct lexer *lexer)
 {
     char *str = lexer->current_tok.data->str;
-    if (lexer->current_tok.data->size == 1 && strcmp(str, "{") == 0)
+    if (strcmp(str, "{") == 0)
     {
         return 1;
     }
@@ -137,7 +138,7 @@ static int test_lbrace(struct lexer *lexer)
 static int test_rbrace(struct lexer *lexer)
 {
     char *str = lexer->current_tok.data->str;
-    if (lexer->current_tok.data->size == 1 && strcmp(str, "}") == 0)
+    if (strcmp(str, "}") == 0)
     {
         return 1;
     }
@@ -147,7 +148,7 @@ static int test_rbrace(struct lexer *lexer)
 static int test_bang(struct lexer *lexer)
 {
     char *str = lexer->current_tok.data->str;
-    if (lexer->current_tok.data->size == 1 && strcmp(str, "!") == 0)
+    if (strcmp(str, "!") == 0)
     {
         return 1;
     }
@@ -157,7 +158,17 @@ static int test_bang(struct lexer *lexer)
 static int test_in(struct lexer *lexer)
 {
     char *str = lexer->current_tok.data->str;
-    if (lexer->current_tok.data->size == 2 && strcmp(str, "in") == 0)
+    if (strcmp(str, "in") == 0)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+static int test_alias(struct lexer *lexer)
+{
+    char *str = lexer->current_tok.data->str;
+    if (strcmp(str, "alias") == 0)
     {
         return 1;
     }
@@ -258,6 +269,14 @@ static int token_rw(struct lexer *lexer)
 
 enum token_type reserved_word(struct lexer *lexer)
 {
+    if (lexer->current_tok.type == TOKEN_WORD
+        && getenv(lexer->current_tok.data->str) != NULL)
+    {
+        char *tmp = lexer->current_tok.data->str;
+        lexer->current_tok.data->str = strdup(getenv(tmp));
+        free(tmp);
+    }
+
     if (test_ass(lexer))
         return TOKEN_ASSIGNMENT_WORD;
     if (token_rw(lexer))
@@ -278,6 +297,8 @@ enum token_type reserved_word(struct lexer *lexer)
         return TOKEN_BANG;
     else if (test_in(lexer))
         return TOKEN_IN;
+    else if (test_alias(lexer))
+        return TOKEN_ALIAS;
     else
         return TOKEN_WORD;
 }
