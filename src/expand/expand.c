@@ -23,10 +23,10 @@ char *expand(struct hash_map *h, char *str)
     expand_substi(res);
     expand_ari(h, res);
 
-    char *deli = hash_map_get(h, "IFS");
-    char **list_words = calloc(len_ifs(res, deli) + 1, sizeof(char *));
-    field_splitting(res, str, list_words, h);
-    free(list_words);
+    //char *deli = hash_map_get(h, "IFS");
+    //char **list_words = calloc(len_ifs(res, deli) + 1, sizeof(char *));
+    //field_splitting(res, str, list_words, h);
+    //free(list_words);
 
     delete_quote(res);
 
