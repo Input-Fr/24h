@@ -6,10 +6,21 @@
 
 #include "../parser/parser.h"
 #include "lexer.h"
+#include "../expand/expand.h"
 
 static struct token token_reco(struct lexer *lexer);
 static struct token continue_word(struct lexer *lexer);
 static struct token begin_word(struct lexer *lexer);
+
+
+char * add_double_quote(char *str)
+{
+    char *res = calloc(1, strlen(str) + 6);
+   
+    snprintf(res, strlen(str) + 5, "\"^*%s\"", str); // concat
+    free(str);
+    return res;
+}
 
 static struct token end_of_file(struct lexer *lexer)
 {
@@ -136,6 +147,7 @@ static struct token var(struct lexer *lexer)
     //--5
     if (!(lexer->word))
     {
+        lexer->current_tok.type = TOKEN_WORD;
         lexer->current_tok.data = mbt_str_init();
         lexer->word = 1;
     }
@@ -152,7 +164,7 @@ static struct token var(struct lexer *lexer)
             mbt_str_pushc(lexer->current_tok.data, c);
         }
         if (c == EOF)
-            errx(1,"missing }");
+            errx(1, "missing }");
     }
     else if (c == '(')
     {
@@ -164,7 +176,7 @@ static struct token var(struct lexer *lexer)
         }
 
         if (c == EOF)
-            errx(1,"missing )");
+            errx(1, "missing )");
     }
     else
     {
@@ -317,5 +329,10 @@ struct token lexer_next_token(struct lexer *lexer)
     clear_current_tok(lexer);
     lexer->word = 0;
     lexer->ope = 0;
-    return token_reco(lexer);
+    struct token tok = token_reco(lexer);
+    //char *str_tok;
+    if (tok.type == TOKEN_WORD && test_var(tok.data->str) && tok.data->str[0] != '"')
+        tok.data->str = add_double_quote(tok.data->str);
+    return tok;
+    
 }

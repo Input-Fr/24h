@@ -9,31 +9,26 @@ void operator_1(struct lexer *lexer)
 {
     char c = lexer->input;
     if (c == ';')
-    {
         lexer->current_tok.type = TOKEN_SEMI;
-    }
     else if (c == '|')
-    {
         lexer->current_tok.type = TOKEN_PIPE;
-    }
     else if (c == '&')
-    {
         lexer->current_tok.type = TOKEN_AND;
-    }
     else if (c == '<')
-    {
         lexer->current_tok.type = TOKEN_LESS;
-    }
     else if (c == '>')
-    {
         lexer->current_tok.type = TOKEN_GREAT;
-    }
+    else if (c == '(')
+        lexer->current_tok.type = TOKEN_LPAR;
+    else if (c == ')')
+        lexer->current_tok.type = TOKEN_RPAR;
 }
 
 int test_operator_1(struct lexer *lexer)
 {
     char c = lexer->input;
-    if (c == ';' || c == '|' || c == '&' || c == '>' || c == '<')
+    if (c == ';' || c == '|' || c == '&' || c == '>' || c == '<' || c == '('
+        || c == ')')
     {
         return 1;
     }

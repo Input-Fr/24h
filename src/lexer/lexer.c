@@ -55,7 +55,6 @@ struct token lexer_pop(struct lexer *lexer)
         {
             lexer_pop(lexer);
         }
-
         return tok;
     }
     else

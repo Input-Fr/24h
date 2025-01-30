@@ -36,6 +36,8 @@ enum token_type
     TOKEN_DO, // do
     TOKEN_LBRACE, // {
     TOKEN_RBRACE, //}
+    TOKEN_LPAR, // (
+    TOKEN_RPAR, //)
     TOKEN_BANG, // !
     TOKEN_IN, // in
     TOKEN_DONE, // done

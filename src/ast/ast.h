@@ -20,6 +20,7 @@ enum AST_TYPE
     AST_VARIABLE,
     AST_FUNCTION,
     AST_ELEMENT,
+    AST_SUBSHELL,
 };
 
 struct ast_ftable;
@@ -190,6 +191,12 @@ struct ast_function
     struct ast **redirection;
 };
 
+struct ast_subshell
+{
+    struct ast base;
+    struct ast *compound_list;
+};
+
 // function
 struct ast *ast_function_init(char *fname, struct ast *shell_command);
 
@@ -220,6 +227,13 @@ struct ast *ast_simple_cmd_init(char *word);
 struct ast *ast_pipeline_init(int neg, struct ast *cmd);
 
 struct ast *ast_and_or_init(struct ast *pipeline);
+
+struct ast *ast_subshell_init(struct ast *compound_list);
+
+// subshell
+int subshell_run(struct ast *ast, struct hash_map *h);
+void subshell_free(struct ast *ast);
+void subshell_push(struct ast *ast, struct ast *add);
 
 // list ast function
 int list_run(struct ast *ast, struct hash_map *h);
@@ -285,6 +299,5 @@ void function_push(struct ast *ast, struct ast *add);
 
 // function to expeand all the list of a char
 char **expand_all(char **words, size_t nbr, struct hash_map *h);
-
 
 #endif /* !AST_H */

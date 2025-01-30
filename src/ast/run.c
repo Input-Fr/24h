@@ -12,10 +12,10 @@
 
 #include "ast.h"
 #include "cd.h"
+#include "expand/expand.h"
 #include "hash_map/hash_map.h"
 #include "lexer/lexer.h"
 #include "parser/parser.h"
-#include "expand/expand.h"
 
 #define RUN(AST, HASH_TABLE) (*(AST)->ftable->run)((AST), (HASH_TABLE))
 
@@ -333,7 +333,7 @@ static int export_builtin(char *args[], size_t nb_args, struct hash_map *h)
         }
         if (word[0] == '-')
         {
-            word=args[i+1];
+            word = args[i + 1];
         }
         if (!test_name(word))
         {
@@ -458,11 +458,11 @@ int variable_run(struct ast *ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_VARIABLE);
     struct ast_variable *variable_ast = (struct ast_variable *)ast;
-    //char *tmp = variable_ast->val;
-    //char *str = expand(h,variable_ast->val);
-    //free(tmp);
+    char *tmp = variable_ast->val;
+    char *str = expand(h, variable_ast->val);
+    free(tmp);
     hash_map_remove(h, variable_ast->name);
-    hash_map_insert(h, variable_ast->name, variable_ast->val, VARIABLE);
+    hash_map_insert(h, variable_ast->name, str, VARIABLE);
     return 1;
 }
 

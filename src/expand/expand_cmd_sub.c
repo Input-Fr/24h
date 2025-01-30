@@ -29,7 +29,7 @@ int test_cmd_sub(char *str)
         {
             i += 1;
             char c = str[i];
-            if (c != '\0' && c == '(') // arith check : $((...))
+            if (c != '\0' && c == '(')
             {
                 while (str[i] != '\0' && str[i] != ')')
                 {
@@ -53,19 +53,18 @@ void clean_input(char *input)
     input[strlen(input) - 3] = 0;
 }
 
-void launch_subshell(char *sub_cmd)
+int launch_subshell(char *sub_cmd)
 {
     FILE *value = fmemopen(sub_cmd, strlen(sub_cmd), "r");
     if (!value)
     {
-        return;
+        return -1;
     }
-    
+
     // init lexer
     struct lexer *lexer = lexer_new();
     lexer->file = value;
 
-    
     int ret_code = 0;
     enum parser_status status;
     struct ast *ast;
@@ -103,7 +102,7 @@ void launch_subshell(char *sub_cmd)
     hash_map_free(h);
     free(bufferpwd);
 
-    exit(ret_code);
+    return ret_code;
 }
 
 static char *expand_sub_cmd(char *sub_cmd)
@@ -121,12 +120,13 @@ static char *expand_sub_cmd(char *sub_cmd)
         close(pipefd[0]);
         dup2(pipefd[1], STDOUT_FILENO);
         //clean_input(sub_cmd);
-        launch_subshell(sub_cmd);
+        int res = launch_subshell(sub_cmd);
+        close(pipefd[1]);
+        exit(res);
     }
     else
     {
         close(pipefd[1]);
-        waitpid(pid, NULL, 0);
         int wstatus;
         waitpid(pid, &wstatus, 0);
         int return_value = WEXITSTATUS(wstatus);
@@ -147,7 +147,8 @@ static char *expand_sub_cmd(char *sub_cmd)
             out = realloc(out, size);
             nb_bytes_read = read(pipefd[0], out + idx, 1024);
         }
-        out[idx] = 0;
+        out[idx-1] = 0;
+        close(pipefd[0]);
         return out;
     }
     return NULL;

@@ -5,22 +5,22 @@
 
 #include "ast.h"
 
-struct ast * ast_function(char * fname,struct ast * shell_command)
+struct ast *ast_function_init(char *fname, struct ast *shell_command)
 {
-	static struct ast_ftable ftable = {
-		.run = &function_run,
-		.free = &variable_free,
-	};
-	struct ast_function * function = calloc(1,sizeof(struct ast_function));
-	if (!function)
-	{
-		return NULL;
-	}
-	function->base.type = AST_FUNCTION;
-	function->base.ftable = &ftable;
-	function->fname = fname;
-	function->shell_command = shell_command;
-	return &function->base;
+    static struct ast_ftable ftable = {
+        .run = &function_run,
+        .free = &variable_free,
+    };
+    struct ast_function *function = calloc(1, sizeof(struct ast_function));
+    if (!function)
+    {
+        return NULL;
+    }
+    function->base.type = AST_FUNCTION;
+    function->base.ftable = &ftable;
+    function->fname = fname;
+    function->shell_command = shell_command;
+    return &function->base;
 }
 
 struct ast *ast_simple_cmd_init(char *word)
@@ -57,4 +57,22 @@ struct ast *ast_for_init(char *variable)
     boucle->base.ftable = &ftable;
     boucle->variable = variable;
     return &boucle->base;
+}
+
+struct ast *ast_subshell_init(struct ast *compound_list)
+{
+    static struct ast_ftable ftable = {
+        .run = &subshell_run,
+        .free = &subshell_free,
+        .push = &subshell_push,
+    };
+    struct ast_subshell *sub = calloc(1, sizeof(struct ast_subshell));
+    if (!sub)
+    {
+        return NULL;
+    }
+    sub->base.type = AST_SUBSHELL;
+    sub->base.ftable = &ftable;
+    sub->compound_list = compound_list;
+    return &sub->base;
 }
