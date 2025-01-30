@@ -64,7 +64,6 @@ static void single_quote(struct lexer *lexer)
     char c = lexer->input;
     if (lexer->Quoting == NO_QUOTE && c == '\'')
     {
-        lexer->current_tok.type = TOKEN_WORD;
         if (!lexer->word)
         {
             lexer->word = 1;
@@ -72,6 +71,7 @@ static void single_quote(struct lexer *lexer)
         }
         mbt_str_pushc(lexer->current_tok.data, '\'');
         lexer->Quoting = SINGLE_QUOTE;
+        lexer->current_tok.type = TOKEN_WORD;
     }
     else if (lexer->Quoting == SINGLE_QUOTE && c == '\'')
     {
@@ -90,9 +90,9 @@ static void double_quote(struct lexer *lexer)
             lexer->word = 1;
             lexer->current_tok.data = mbt_str_init();
         }
-        lexer->current_tok.type = TOKEN_WORD;
         mbt_str_pushc(lexer->current_tok.data, '"');
         lexer->Quoting = DOUBLE_QUOTE;
+        lexer->current_tok.type = TOKEN_WORD;
     }
     else if (lexer->Quoting == DOUBLE_QUOTE && c == '"')
     {
@@ -117,6 +117,7 @@ static void backslash_quote(struct lexer *lexer)
             lexer->word = 1;
             lexer->current_tok.data = mbt_str_init();
             mbt_str_pushc(lexer->current_tok.data, c);
+            lexer->current_tok.type = TOKEN_WORD;
         }
         mbt_str_pushc(lexer->current_tok.data, next_c);
     }
@@ -147,9 +148,9 @@ static struct token var(struct lexer *lexer)
     //--5
     if (!(lexer->word))
     {
+        lexer->word = 1;
         lexer->current_tok.type = TOKEN_WORD;
         lexer->current_tok.data = mbt_str_init();
-        lexer->word = 1;
     }
 
     char c = lexer->input;
@@ -266,9 +267,9 @@ static struct token begin_word(struct lexer *lexer)
 {
     // --11
     lexer->word = 1;
+    lexer->current_tok.type = TOKEN_WORD;
     lexer->current_tok.data = mbt_str_init();
     mbt_str_pushc(lexer->current_tok.data, lexer->input);
-    lexer->current_tok.type = TOKEN_WORD;
     return token_reco(lexer);
 }
 
