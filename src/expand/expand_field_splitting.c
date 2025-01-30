@@ -69,8 +69,9 @@ static int ispresent(char c, char *deli)
     return 0;
 }
 
-size_t len_ifs(char *str, char *deli)
+size_t len_ifs(char *str, struct hash_map *h)
 {
+    char *deli = hash_map_get(h, "IFS");
     size_t cpt = 0;
     for (size_t i = 0; str[i] != '\0'; i += 1)
     {
@@ -103,7 +104,7 @@ void field_splitting(char *str, char *check, char **res, struct hash_map *h)
         size_t nb = split(str, res, deli);
         for (size_t i = 0; i < nb; i += 1)
         {
-            printf("%s\n", res[i]);
+//            printf("%s\n", res[i]);
             free(res[i]);
         }
     }

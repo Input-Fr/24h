@@ -60,6 +60,7 @@ enum token_type
     TOKEN_LESSGREAT, //<>
     TOKEN_DLESSDASH, //<<-
     TOKEN_CLOBBER, // >|
+    TOKEN_ALIAS,
     TOKEN_EOF,
     TOKEN_ERROR,
     NO_TOKEN,

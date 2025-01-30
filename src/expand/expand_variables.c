@@ -295,7 +295,7 @@ static char *expand_oldpwd(char *prev, char *next)
     size_t len = strlen(prev) + strlen(next) + 100;
     char *result = calloc(1, len + 1);
     snprintf(result, len + 1, "%s%s%s", prev, str, next);
-    free(str);
+    // free(str);
     return result;
 }
 
@@ -398,10 +398,6 @@ void expand_variables(struct hash_map *h, char *res)
         {
             char *val = hash_map_get(h, key); // get the value of the variable
             size_t len = strlen(prev) + strlen(val) + strlen(next) + 1;
-            // if (test_quote(val))
-            //{
-            //     delete_quote(val);
-            // }
             snprintf(res, len, "%s%s%s", prev, val, next); // concat
         }
         expand_free(prev, next, var, key);

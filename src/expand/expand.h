@@ -31,7 +31,7 @@ int is_special_var(char *str, size_t *i);
 
 // expand_field_splitting.c
 void field_splitting(char *str, char *check, char **res, struct hash_map *h);
-size_t len_ifs(char *str, char *deli);
+size_t len_ifs(char *str, struct hash_map *h);
 
 char *expand(struct hash_map *h, char *str);
 
