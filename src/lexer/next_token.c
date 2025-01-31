@@ -173,6 +173,11 @@ static struct token var(struct lexer *lexer)
             c = lexer_file(lexer->file);
             mbt_str_pushc(lexer->current_tok.data, c);
         }
+        c = lexer_file(lexer->file);
+        if (c == ')')
+            mbt_str_pushc(lexer->current_tok.data, c);
+        else
+            ungetc(c, lexer->file);
 
         if (c == EOF)
             errx(1, "missing )");
@@ -329,24 +334,32 @@ struct token lexer_next_token(struct lexer *lexer)
     lexer->word = 0;
     lexer->ope = 0;
     struct token tok = token_reco(lexer);
-    if (tok.type == TOKEN_WORD && test_var(tok.data->str)
-        && tok.data->str[0] != '"')
-        tok.data->str = add_double_quote(tok.data->str);
+    // if (tok.type == TOKEN_WORD && test_var(tok.data->str)
+    //     && tok.data->str[0] != '"')
+    //     tok.data->str = add_double_quote(tok.data->str);
 
     if (tok.type == TOKEN_ALIAS)
     {
-        lexer_next_token(lexer);
-        char *aw = lexer->current_tok.data->str;
+        struct token tok = lexer_next_token(lexer);
+        char *aw = tok.data->str;
         char *name = calloc(1, strlen(aw));
         char *val = calloc(1, strlen(aw));
         separator_equal(name, val, aw);
         delete_quote(val);
         setenv(name, val, 1);
-        lexer_next_token(lexer);
+        tok = lexer_next_token(lexer);
         free(name);
         free(val);
         free(aw);
-        return lexer->current_tok;
+        return tok;
+    }
+    else if (tok.type == TOKEN_ALIAS)
+    {
+        lexer_next_token(lexer);
+        char *name = lexer->current_tok.data->str;
+        unsetenv(name);
+        free(name);
+        lexer_next_token(lexer);
     }
 
     if (tok.type == TOKEN_COM)
