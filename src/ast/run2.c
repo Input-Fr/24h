@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <err.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
@@ -102,6 +103,7 @@ int subshell_run(struct ast *ast, struct hash_map *h)
     if (pid == 0) // child
     {
         int res = RUN(subshell->compound_list, h);
+        fprintf(stderr, "error");
         exit(res);
     }
     else

@@ -89,6 +89,7 @@ int launch_subshell(char *sub_cmd)
                 lexer_free(lexer);
                 hash_map_free(h);
                 free(bufferpwd);
+                fprintf(stderr, "error\n");
                 exit(ret_code);
             }
             else
@@ -127,6 +128,7 @@ static char *expand_sub_cmd(char *sub_cmd)
         // clean_input(sub_cmd);
         int res = launch_subshell(sub_cmd);
         close(pipefd[1]);
+        fprintf(stderr, "error\n");
         exit(res);
     }
     else

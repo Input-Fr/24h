@@ -129,6 +129,7 @@ static char **create_words(char *word, struct ast **asts, size_t *nbr_element,
             char **test = realloc(words, size * sizeof(char *));
             if (!test)
             {
+                fprintf(stderr, "error");
                 exit(2);
             }
             words = test;
@@ -140,6 +141,7 @@ static char **create_words(char *word, struct ast **asts, size_t *nbr_element,
     char **test = realloc(words, size * sizeof(char *));
     if (!test)
     {
+        fprintf(stderr, "error");
         exit(2);
     }
     words = test;
@@ -252,8 +254,10 @@ static void exit_builtin(char *opt)
     if (opt && isnum(opt))
     {
         int n = atoi(opt);
+        fprintf(stderr, "error\n");
         exit(n);
     }
+    fprintf(stderr, "error\n");
     exit(0);
 }
 
@@ -331,7 +335,7 @@ static int export_builtin(char *args[], size_t nb_args, struct hash_map *h)
         char *word = args[i];
         if (word[0] == '-' && word[1] != 'p')
         {
-            fprintf(stderr, "error\n");
+            // fprintf(stderr, "error\n");
             return 2;
         }
         if (word[0] == '-')
@@ -340,7 +344,7 @@ static int export_builtin(char *args[], size_t nb_args, struct hash_map *h)
         }
         if (!test_name(word))
         {
-            fprintf(stderr, "error\n");
+            // fprintf(stderr, "error\n");
             return 1;
         }
         else
@@ -694,6 +698,7 @@ static int handle_executable_builtin(char **words)
         int status_code = execvp(words[0], words);
         if (status_code == -1)
         {
+            fprintf(stderr, "command error\n");
             exit(127);
         }
     }
@@ -702,6 +707,7 @@ static int handle_executable_builtin(char **words)
     int return_value = WEXITSTATUS(wstatus);
     if (return_value == 127)
     {
+        fprintf(stderr, "error\n");
         return 127;
     }
     return 0;

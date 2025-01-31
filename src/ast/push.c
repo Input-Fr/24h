@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "ast.h"
@@ -13,6 +14,7 @@ static struct ast **add_to(struct ast **ast, struct ast *add, size_t *nbr_elt)
     asts = realloc(ast, sizeof(struct ast *) * (*nbr_elt + 1));
     if (asts == NULL)
     {
+        fprintf(stderr, "error\n");
         exit(2);
     }
     else

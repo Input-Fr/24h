@@ -28,6 +28,5 @@ char *expand(struct hash_map *h, char *str)
     // free(list_words);
 
     delete_quote(res);
-
     return res;
 }

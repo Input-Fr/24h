@@ -33,6 +33,19 @@ static int isspecial(char c)
     }
 }
 
+static void var_field(char *str, size_t *i)
+{
+    if (str[*i] == '^' && str[*i + 1] == '^')
+    {
+        *i += 1;
+        while (!(str[*i] == '^' && str[*i + 1] == '^'))
+        {
+            *i += 1;
+        }
+        *i += 1;
+    }
+}
+
 void delete_quote(char *str)
 {
     if (test_quote(str))
@@ -40,6 +53,7 @@ void delete_quote(char *str)
         char c = ' ';
         for (size_t i = 0; str[i] != '\0'; i += 1)
         {
+            var_field(str, &i);
             if (str[i] == '\\' && c == '"' && i + 1 < strlen(str)
                 && !isspecial(str[i + 1]))
             {
@@ -53,11 +67,6 @@ void delete_quote(char *str)
             {
                 c = str[i];
                 delete_c(str, &i);
-                if (str[i] == '^' && str[i + 1] == '*')
-                {
-                    delete_c(str, &i);
-                    delete_c(str, &i);
-                }
                 i -= 1;
             }
             else if (str[i] != '\0' && str[i] == c && c != ' ')
@@ -66,6 +75,17 @@ void delete_quote(char *str)
                 delete_c(str, &i);
                 i -= 1;
             }
+        }
+    }
+
+    for (size_t j = 0; str[j] != '\0'; j += 1)
+    {
+        // printf("-str: %s\n", str);
+        if (str[j] == '^' && str[j + 1] == '^')
+        {
+            delete_c(str, &j);
+            delete_c(str, &j);
+            j--;
         }
     }
 }

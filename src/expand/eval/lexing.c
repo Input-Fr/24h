@@ -5,16 +5,16 @@
 #include "evalexpr.h"
 #include "expand/expand.h"
 
-int error(char val)
-{
-    if ((val >= '0' && val <= '9') || val == ' ' || val == '+' || val == '-'
-        || val == '/' || val == ' ' || val == '%' || val == '^' || val == ')'
-        || val == '(' || val == '*')
-    {
-        return 0;
-    }
-    return 1;
-}
+// int error(char val)
+//{
+//     if ((val >= '0' && val <= '9') || val == ' ' || val == '+' || val == '-'
+//         || val == '/' || val == ' ' || val == '%' || val == '^' || val == ')'
+//         || val == '(' || val == '*')
+//     {
+//         return 0;
+//     }
+//     return 1;
+// }
 
 void tritoken(struct token *tok, char val)
 {
@@ -60,12 +60,45 @@ void tritoken(struct token *tok, char val)
     }
 }
 
+void expand_ariii(char *string, size_t *i, struct hash_map *h, struct fifo *f)
+{
+    char *str = calloc(1, 64);
+    str[0] = string[*i];
+    *i += 1;
+    int j = 1;
+    while (isalnum(string[*i]) || string[*i] == '_' || string[*i] == '"'
+           || string[*i] == '}' || string[*i] == '{' || string[*i] == '$')
+    {
+        str[j] = string[*i];
+        *i += 1;
+        j += 1;
+    }
+    struct token *tok = malloc(sizeof(struct token));
+    char *val;
+    int a = 0;
+    if (str[0] == '$' || str[0] == '"')
+    {
+        val = expand(h, str);
+        a = 1;
+    }
+    else
+    {
+        val = hash_map_get(h, str);
+    }
+    if (strlen(val) != 0)
+        tok->value = my_atoi(val);
+    else
+        tok->value = 0;
+
+    tok->type = INT;
+    fifo_push(f, tok);
+    free(str);
+    if (a)
+        free(val);
+}
+
 int tri2(char *string, size_t len, struct fifo *f, struct hash_map *h)
 {
-    if (h == NULL)
-    {
-        return 0;
-    }
     for (size_t i = 0; i < len; i += 1)
     {
         // if (error(string[i]))
@@ -77,39 +110,7 @@ int tri2(char *string, size_t len, struct fifo *f, struct hash_map *h)
         if (isalpha(string[i]) || string[i] == '_' || string[i] == '$'
             || string[i] == '"')
         {
-            char *str = calloc(1, 64);
-            str[0] = string[i];
-            i += 1;
-            int j = 1;
-            while (isalnum(string[i]) || string[i] == '_' || string[i] == '"'
-                   || string[i] == '}' || string[i] == '{' || string[i] == '$')
-            {
-                str[j] = string[i];
-                i += 1;
-                j += 1;
-            }
-            struct token *tok = malloc(sizeof(struct token));
-            char *val;
-            int a = 0;
-            if (str[0] == '$' || str[0] == '"')
-            {
-                val = expand(h, str);
-                a = 1;
-            }
-            else
-            {
-                val = hash_map_get(h, str);
-            }
-            if (strlen(val) != 0)
-                tok->value = my_atoi(val);
-            else
-                tok->value = 0;
-
-            tok->type = INT;
-            fifo_push(f, tok);
-            free(str);
-            if (a)
-                free(val);
+            expand_ariii(string, &i, h, f);
         }
 
         if (string[i] >= '0' && string[i] <= '9')
