@@ -89,7 +89,6 @@ int launch_subshell(char *sub_cmd)
                 lexer_free(lexer);
                 hash_map_free(h);
                 free(bufferpwd);
-                fprintf(stderr, "error\n");
                 exit(ret_code);
             }
             else
@@ -128,7 +127,6 @@ static char *expand_sub_cmd(char *sub_cmd)
         // clean_input(sub_cmd);
         int res = launch_subshell(sub_cmd);
         close(pipefd[1]);
-        fprintf(stderr, "error\n");
         exit(res);
     }
     else
@@ -166,6 +164,7 @@ static char *delimite_substi(char *prev, char *next, char *word)
     char *tmp = word;
     prev = strcpy(prev, word);
     size_t j = 0;
+    int contxt = 0;
     while (*word != '\0' && *word != '$')
     {
         j += 1;
@@ -179,12 +178,16 @@ static char *delimite_substi(char *prev, char *next, char *word)
     size_t i = 0;
 
     word += 1;
-    while (*word != '\0' && *word != ')')
+    while (*word != '\0' && contxt != -1)
     {
+        if (*word == ')')
+            contxt--;
+        if (*word == '(')
+            contxt++;
         word += 1;
         i += 1;
     }
-    new[i + 1] = '\0';
+    new[i] = '\0';
     if (*word == '\0')
         next = "";
     else

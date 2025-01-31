@@ -33,13 +33,6 @@ void function_push(struct ast *ast, struct ast *add)
     return;
 }
 
-void element_push(struct ast *ast, struct ast *add)
-{
-    UNUSED(ast);
-    UNUSED(add);
-    return;
-}
-
 void simple_cmd_push(struct ast *ast, struct ast *add)
 {
     assert(ast && ast->type == AST_SIMPLE_CMD);
@@ -66,10 +59,4 @@ void pipeline_push(struct ast *ast, struct ast *add)
     assert(ast && ast->type == AST_PIPELINE);
     struct ast_pipeline *pipe = (struct ast_pipeline *)ast;
     pipe->cmd = ADD(pipe->cmd, add, &pipe->nbr_cmd);
-}
-
-void subshell_push(struct ast *ast, struct ast *add)
-{
-    UNUSED(ast);
-    UNUSED(add);
 }

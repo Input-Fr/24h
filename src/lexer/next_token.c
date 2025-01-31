@@ -168,19 +168,36 @@ static struct token var(struct lexer *lexer)
     else if (c == '(')
     {
         mbt_str_pushc(lexer->current_tok.data, c);
-        while (c != EOF && c != ')')
+        int doublep = 0;
+        int context = 0;
+        c = lexer_file(lexer->file);
+        mbt_str_pushc(lexer->current_tok.data, c);
+        if (c == '(')
+        {
+            doublep = 1;
+        }
+        while (c != EOF && context != -1)
         {
             c = lexer_file(lexer->file);
+            if (c == '(')
+                context++;
+            if (c == ')')
+                context--;
             mbt_str_pushc(lexer->current_tok.data, c);
         }
-        c = lexer_file(lexer->file);
-        if (c == ')')
-            mbt_str_pushc(lexer->current_tok.data, c);
-        else
-            ungetc(c, lexer->file);
-
-        if (c == EOF)
+        if (!doublep && c == EOF)
             errx(1, "missing )");
+        c = lexer_file(lexer->file);
+        if (doublep && c == ')')
+            mbt_str_pushc(lexer->current_tok.data, c);
+        if (!doublep)
+        {
+            ungetc(c, lexer->file);
+        }
+        if (doublep && c != ')')
+        {
+            errx(2, "opened 2 '(' but not closed\n");
+        }
     }
     else
     {

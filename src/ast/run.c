@@ -254,10 +254,10 @@ static void exit_builtin(char *opt)
     if (opt && isnum(opt))
     {
         int n = atoi(opt);
-        fprintf(stderr, "error\n");
+        if (n != 0)
+            fprintf(stderr, "error\n");
         exit(n);
     }
-    fprintf(stderr, "error\n");
     exit(0);
 }
 

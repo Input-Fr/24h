@@ -32,20 +32,6 @@ void list_push(struct ast *ast, struct ast *add)
     list->cmd = ADD(list->cmd, add, &list->nbr_cmd);
 }
 
-void if_push(struct ast *ast, struct ast *add)
-{
-    UNUSED(ast);
-    UNUSED(add);
-    return;
-}
-
-void boucle_push(struct ast *ast, struct ast *add)
-{
-    UNUSED(ast);
-    UNUSED(add);
-    return;
-}
-
 void for_push(struct ast *ast, struct ast *add)
 {
     assert(ast && ast->type == AST_FOR);
@@ -72,25 +58,4 @@ void for_push_Word(struct ast *ast, char *add)
         words[boucle->nbr_elt] = add;
         boucle->nbr_elt += 1;
     }
-}
-
-void redirection_push(struct ast *ast, struct ast *add)
-{
-    UNUSED(ast);
-    UNUSED(add);
-    return;
-}
-
-void variable_push(struct ast *ast, struct ast *add)
-{
-    UNUSED(ast);
-    UNUSED(add);
-    return;
-}
-
-void and_or_push(struct ast *ast, struct ast *add)
-{
-    UNUSED(ast);
-    UNUSED(add);
-    return;
 }
