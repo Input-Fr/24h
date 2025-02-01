@@ -4,18 +4,31 @@
 #include <pwd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #include "../ast/ast.h"
 #include "../hash_map/hash_map.h"
 #include "../lexer/lexer.h"
 #include "../parser/parser.h"
 
+// static void var_field(char *str, size_t *i)
+//{
+//     if (str[*i] == '^' && str[*i + 1] == '^')
+//     {
+//         *i += 1;
+//         while (*i + 1 < strlen(str) && !(str[*i] == '^' && str[*i + 1] ==
+//         '^'))
+//         {
+//             *i += 1;
+//         }
+//         *i += 1;
+//     }
+// }
+
 int test_cmd_sub(char *str)
 {
-    //printf("%s\n",str);
     size_t i = 0;
     size_t quote = 0;
     while (i < strlen(str) && str[i] != '\0')
@@ -31,12 +44,18 @@ int test_cmd_sub(char *str)
             char c = str[i];
             if (c != '\0' && c == '(')
             {
+                if (str[i + 1] == '(')
+                {
+                    return 0;
+                }
                 while (str[i] != '\0' && str[i] != ')')
                 {
                     i += 1;
                 }
                 if (str[i] == ')')
+                {
                     return 1;
+                }
             }
         }
         i += 1;
@@ -46,7 +65,7 @@ int test_cmd_sub(char *str)
 
 void clean_input(char *input)
 {
-    for(size_t i = 2; i < strlen(input) - 1; i++)
+    for (size_t i = 2; i < strlen(input) - 1; i++)
     {
         input[i - 2] = input[i];
     }
@@ -119,7 +138,7 @@ static char *expand_sub_cmd(char *sub_cmd)
     {
         close(pipefd[0]);
         dup2(pipefd[1], STDOUT_FILENO);
-        //clean_input(sub_cmd);
+        // clean_input(sub_cmd);
         int res = launch_subshell(sub_cmd);
         close(pipefd[1]);
         exit(res);
@@ -147,7 +166,7 @@ static char *expand_sub_cmd(char *sub_cmd)
             out = realloc(out, size);
             nb_bytes_read = read(pipefd[0], out + idx, 1024);
         }
-        out[idx-1] = 0;
+        out[idx - 1] = 0;
         close(pipefd[0]);
         return out;
     }
@@ -171,13 +190,13 @@ static char *delimite_substi(char *prev, char *next, char *word)
     new = strcpy(new, word);
     size_t i = 0;
 
-    word += 1;
     while (*word != '\0' && *word != ')')
     {
         word += 1;
         i += 1;
     }
-    new[i + 1] = '\0';
+
+    new[i] = '\0';
     if (*word == '\0')
         next = "";
     else
@@ -195,9 +214,10 @@ void expand_substi(char *res)
     {
         char *prev = calloc(1, strlen(res) + 1); // word before the variable
         char *next = calloc(1, strlen(res) + 1); // word after the variable
-        char *substi = delimite_substi(prev, next, res); // divide the word in 3 words
+        char *substi =
+            delimite_substi(prev, next, res); // divide the word in 3 words
         char *result = expand_sub_cmd(substi);
-        strcpy(res,result);
+        strcpy(res, result);
         size_t len = strlen(prev) + strlen(result) + strlen(next) + 1;
         snprintf(res, len, "%s%s%s", prev, result, next); // concat
         free(result);

@@ -1,12 +1,13 @@
 #ifndef EVALEXPR_H
 #define EVALEXPR_H
 
+#include <ctype.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <ctype.h>
+
 #include "hash_map/hash_map.h"
 
 enum token_type

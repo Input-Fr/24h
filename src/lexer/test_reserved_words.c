@@ -175,6 +175,16 @@ static int test_alias(struct lexer *lexer)
     return 0;
 }
 
+static int test_unalias(struct lexer *lexer)
+{
+    char *str = lexer->current_tok.data->str;
+    if (strcmp(str, "unalias") == 0)
+    {
+        return 1;
+    }
+    return 0;
+}
+
 int test_name(char *name)
 {
     size_t i = 0;
@@ -222,6 +232,7 @@ int test_ass(struct lexer *lexer)
             {
                 if (!test_name(str))
                 {
+                    // fprintf(stderr, "error\n");
                     return 0;
                 }
                 return 1;
@@ -299,6 +310,8 @@ enum token_type reserved_word(struct lexer *lexer)
         return TOKEN_IN;
     else if (test_alias(lexer))
         return TOKEN_ALIAS;
+    else if (test_unalias(lexer))
+        return TOKEN_UNALIAS;
     else
         return TOKEN_WORD;
 }

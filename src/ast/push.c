@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "ast.h"
@@ -13,6 +14,7 @@ static struct ast **add_to(struct ast **ast, struct ast *add, size_t *nbr_elt)
     asts = realloc(ast, sizeof(struct ast *) * (*nbr_elt + 1));
     if (asts == NULL)
     {
+        fprintf(stderr, "error\n");
         exit(2);
     }
     else
@@ -28,20 +30,6 @@ void list_push(struct ast *ast, struct ast *add)
     assert(ast && ast->type == AST_LIST);
     struct ast_list *list = (struct ast_list *)ast;
     list->cmd = ADD(list->cmd, add, &list->nbr_cmd);
-}
-
-void if_push(struct ast *ast, struct ast *add)
-{
-    UNUSED(ast);
-    UNUSED(add);
-    return;
-}
-
-void boucle_push(struct ast *ast, struct ast *add)
-{
-    UNUSED(ast);
-    UNUSED(add);
-    return;
 }
 
 void for_push(struct ast *ast, struct ast *add)
@@ -70,25 +58,4 @@ void for_push_Word(struct ast *ast, char *add)
         words[boucle->nbr_elt] = add;
         boucle->nbr_elt += 1;
     }
-}
-
-void redirection_push(struct ast *ast, struct ast *add)
-{
-    UNUSED(ast);
-    UNUSED(add);
-    return;
-}
-
-void variable_push(struct ast *ast, struct ast *add)
-{
-    UNUSED(ast);
-    UNUSED(add);
-    return;
-}
-
-void and_or_push(struct ast *ast, struct ast *add)
-{
-    UNUSED(ast);
-    UNUSED(add);
-    return;
 }

@@ -80,7 +80,18 @@ int main(int argc, char *argv[])
     enum parser_status status;
     struct ast *ast;
     struct hash_map *h = hash_map_init(7);
-    hash_map_insert(h, "IFS", " \t\n", VARIABLE);
+    char *ifs = calloc(1, 20);
+    ifs[0] = 'I';
+    ifs[1] = 'F';
+    ifs[2] = 'S';
+    ifs[3] = '\0';
+
+    char *ifs2 = calloc(1, 20);
+    ifs2[0] = ' ';
+    ifs2[1] = '\t';
+    ifs2[2] = '\n';
+    ifs2[3] = '\0';
+    hash_map_insert(h, ifs, ifs2, VARIABLE);
     char *bufferpwd = malloc(1024 * sizeof(char));
     while (lexer->current_tok.type != TOKEN_EOF)
     {

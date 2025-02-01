@@ -11,9 +11,8 @@
 #include <unistd.h>
 
 #include "ast/ast.h"
-#include "hash_map/hash_map.h"
 #include "expand/eval/evalexpr.h"
-
+#include "hash_map/hash_map.h"
 
 int test_ari(char *str) // test if arithmetic
 {
@@ -37,7 +36,7 @@ int test_ari(char *str) // test if arithmetic
                 {
                     i += 1;
                 }
-                if (c1 == '(' && str[i] == ')' && str[i+1] == ')')
+                if (c1 == '(' && str[i] == ')' && str[i + 1] == ')')
                     return 1;
             }
         }
@@ -77,13 +76,10 @@ static char *delimite_ari(char *prev, char *next, char *word)
         next = strcpy(next, word + 2);
     }
 
-
     word = tmp;
     // error_var_brackets(word);
     return new;
 }
-
-
 
 void expand_ari(struct hash_map *h, char *res)
 {
@@ -91,7 +87,8 @@ void expand_ari(struct hash_map *h, char *res)
     {
         char *prev = calloc(1, strlen(res) + 1); // word before the variable
         char *next = calloc(1, strlen(res) + 1); // word after the variable
-        char *operation = delimite_ari(prev, next, res); // divide the word in 3 words
+        char *operation =
+            delimite_ari(prev, next, res); // divide the word in 3 words
 
         char *val = calloc(1, 64);
         eval_arithmetic(val, operation, h);

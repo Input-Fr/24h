@@ -64,7 +64,6 @@ struct ast *ast_subshell_init(struct ast *compound_list)
     static struct ast_ftable ftable = {
         .run = &subshell_run,
         .free = &subshell_free,
-        .push = &subshell_push,
     };
     struct ast_subshell *sub = calloc(1, sizeof(struct ast_subshell));
     if (!sub)

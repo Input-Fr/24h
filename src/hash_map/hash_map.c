@@ -6,7 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-bool hash_map_insert(struct hash_map *hash_map, char *key, void *value, enum val_type type)
+bool hash_map_insert(struct hash_map *hash_map, char *key, void *value,
+                     enum val_type type)
 {
     if (hash_map == NULL || hash_map->size == 0)
     {
@@ -21,11 +22,11 @@ bool hash_map_insert(struct hash_map *hash_map, char *key, void *value, enum val
     list->key = key;
 
     list->type = type;
-    if (list->type == VARIABLE) 
+    if (list->type == VARIABLE)
     {
         list->value.variable_value = value;
     }
-    if (list->type == FUNCTION) 
+    if (list->type == FUNCTION)
     {
         list->value.function_value = value;
     }
@@ -54,7 +55,7 @@ bool hash_map_insert(struct hash_map *hash_map, char *key, void *value, enum val
             {
                 p->value.function_value = value;
             }
-            //p->value = list->value;
+            // p->value = list->value;
             free(list);
         }
         else
@@ -126,14 +127,13 @@ bool hash_map_remove(struct hash_map *hash_map, char *key)
                 hash_map->data[k] = NULL;
             }
 
-            if (p->type == VARIABLE && strcmp(p->key,"IFS") != 0)
-                free(p->value.variable_value);
+            // if (p->type == VARIABLE && strcmp(p->key, "IFS") != 0)
+            free(p->value.variable_value);
             if (p->type == FUNCTION)
                 free(p->value.function_value);
 
-            if (strcmp(p->key,"IFS") != 0)
-                free(p->key);
-
+            // if (strcmp(p->key, "IFS") != 0)
+            free(p->key);
 
             free(p);
             return true;

@@ -32,8 +32,6 @@ void separator_equal(char *name, char *val, char *as)
     val[j] = '\0';
 }
 
-
-
 void error_var(char *word)
 {
     size_t i = 0;
@@ -46,7 +44,6 @@ void error_var(char *word)
         i += 1;
     }
 }
-
 
 void delete_c(char *word, size_t *j)
 {
@@ -65,7 +62,6 @@ void delete_c(char *word, size_t *j)
     free(tmp2);
     free(tmp);
 }
-
 
 int calcul_len(int nb)
 {

@@ -56,18 +56,18 @@ void hash_map_free(struct hash_map *hash_map)
                 free(p);
                 p = tmp;
             }
-            //free(p->value);
+            // free(p->value);
 
-            if (p->type == VARIABLE && strcmp(p->key,"IFS") != 0)
-            {
-                free(p->value.variable_value);
-            }
+            // if (p->type == VARIABLE && strcmp(p->key, "IFS") != 0)
+            //{
+            free(p->value.variable_value);
+            //}
             if (p->type == FUNCTION)
             {
                 free(p->value.function_value);
             }
-            if (strcmp(p->key,"IFS") != 0)
-                free(p->key);
+            // if (strcmp(p->key, "IFS") != 0)
+            free(p->key);
             free(p);
         }
         i += 1;

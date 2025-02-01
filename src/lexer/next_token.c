@@ -13,15 +13,6 @@ static struct token token_reco(struct lexer *lexer);
 static struct token continue_word(struct lexer *lexer);
 static struct token begin_word(struct lexer *lexer);
 
-char *add_double_quote(char *str)
-{
-    char *res = calloc(1, strlen(str) + 6);
-
-    snprintf(res, strlen(str) + 5, "\"^*%s\"", str); // concat
-    free(str);
-    return res;
-}
-
 static struct token end_of_file(struct lexer *lexer)
 {
     // --1
@@ -168,14 +159,37 @@ static struct token var(struct lexer *lexer)
     else if (c == '(')
     {
         mbt_str_pushc(lexer->current_tok.data, c);
-        while (c != EOF && c != ')')
+        int doublep = 0;
+        int context = 0;
+        c = lexer_file(lexer->file);
+        mbt_str_pushc(lexer->current_tok.data, c);
+        if (c == '(')
+        {
+            doublep = 1;
+        }
+        while (c != EOF && context != -1)
         {
             c = lexer_file(lexer->file);
+            if (c == '(')
+                context++;
+            if (c == ')')
+                context--;
             mbt_str_pushc(lexer->current_tok.data, c);
         }
 
-        if (c == EOF)
+        if (!doublep && c == EOF)
             errx(1, "missing )");
+        c = lexer_file(lexer->file);
+        if (doublep && c == ')')
+            mbt_str_pushc(lexer->current_tok.data, c);
+        if (!doublep)
+        {
+            ungetc(c, lexer->file);
+        }
+        if (doublep && c != ')')
+        {
+            errx(2, "opened 2 '(' but not closed\n");
+        }
     }
     else
     {
@@ -329,24 +343,29 @@ struct token lexer_next_token(struct lexer *lexer)
     lexer->word = 0;
     lexer->ope = 0;
     struct token tok = token_reco(lexer);
-    if (tok.type == TOKEN_WORD && test_var(tok.data->str)
-        && tok.data->str[0] != '"')
-        tok.data->str = add_double_quote(tok.data->str);
 
     if (tok.type == TOKEN_ALIAS)
     {
-        lexer_next_token(lexer);
-        char *aw = lexer->current_tok.data->str;
+        struct token tok = lexer_next_token(lexer);
+        char *aw = tok.data->str;
         char *name = calloc(1, strlen(aw));
         char *val = calloc(1, strlen(aw));
         separator_equal(name, val, aw);
         delete_quote(val);
         setenv(name, val, 1);
-        lexer_next_token(lexer);
+        tok = lexer_next_token(lexer);
         free(name);
         free(val);
         free(aw);
-        return lexer->current_tok;
+        return tok;
+    }
+    else if (tok.type == TOKEN_ALIAS)
+    {
+        lexer_next_token(lexer);
+        char *name = lexer->current_tok.data->str;
+        unsetenv(name);
+        free(name);
+        lexer_next_token(lexer);
     }
 
     if (tok.type == TOKEN_COM)

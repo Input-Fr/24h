@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "ast.h"
@@ -13,6 +14,7 @@ static struct ast **add_to(struct ast **ast, struct ast *add, size_t *nbr_elt)
     asts = realloc(ast, sizeof(struct ast *) * (*nbr_elt + 1));
     if (asts == NULL)
     {
+        fprintf(stderr, "error\n");
         exit(2);
     }
     else
@@ -28,13 +30,6 @@ void function_push(struct ast *ast, struct ast *add)
     assert(ast && ast->type == AST_FUNCTION);
     struct ast_function *fct = (struct ast_function *)ast;
     fct->redirection = add_to(fct->redirection, add, &fct->nbr_redirection);
-    return;
-}
-
-void element_push(struct ast *ast, struct ast *add)
-{
-    UNUSED(ast);
-    UNUSED(add);
     return;
 }
 
@@ -64,10 +59,4 @@ void pipeline_push(struct ast *ast, struct ast *add)
     assert(ast && ast->type == AST_PIPELINE);
     struct ast_pipeline *pipe = (struct ast_pipeline *)ast;
     pipe->cmd = ADD(pipe->cmd, add, &pipe->nbr_cmd);
-}
-
-void subshell_push(struct ast *ast, struct ast *add)
-{
-    UNUSED(ast);
-    UNUSED(add);
 }

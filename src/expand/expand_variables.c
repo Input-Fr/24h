@@ -40,6 +40,41 @@ static char *delete_dollar(char *word)
     return new;
 }
 
+static int while_condition(size_t j, char *word, char *tmp, int single_quote)
+{
+    if ((tmp[j + 1] == '(') || single_quote
+        || (*word != '\0'
+            && (*word != '$' || (j > 0 && *word == '$' && tmp[j - 1] == '\\'))))
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+static void quote_handling(size_t *single_quote, size_t *double_quote, char c)
+{
+    if (c == '\'' && !*single_quote && !*double_quote)
+        *single_quote = 1;
+    else if (c == '\'' && *single_quote && !*double_quote)
+        *single_quote = 0;
+    else if (c == '"' && !*single_quote && !*double_quote)
+        *double_quote = 1;
+    else if (c == '"' && !*single_quote && *double_quote)
+        *double_quote = 0;
+}
+
+static int is_special(char c)
+{
+    if (isdigit(c) || c == '@' || c == '*' || c == '?' || c == '$' || c == '#')
+    {
+        return 1;
+    }
+    return 0;
+}
+
 static char *delimite_var(char *prev, char *next, char *word)
 {
     char *tmp = word;
@@ -47,20 +82,10 @@ static char *delimite_var(char *prev, char *next, char *word)
     size_t j = 0;
     size_t single_quote = 0;
     size_t double_quote = 0;
-    while (
-        (j + 1 < strlen(word) && tmp[j + 1] == '(') || single_quote
-        || (*word != '\0'
-            && (*word != '$' || (j > 0 && *word == '$' && tmp[j - 1] == '\\'))))
-    {
-        if (tmp[j] == '\'' && !single_quote && !double_quote)
-            single_quote = 1;
-        else if (tmp[j] == '\'' && single_quote && !double_quote)
-            single_quote = 0;
-        else if (tmp[j] == '"' && !single_quote && !double_quote)
-            double_quote = 1;
-        else if (tmp[j] == '"' && !single_quote && double_quote)
-            double_quote = 0;
 
+    while (while_condition(j, word, tmp, single_quote))
+    {
+        quote_handling(&single_quote, &double_quote, tmp[j]);
         j += 1;
         word += 1;
     }
@@ -71,15 +96,15 @@ static char *delimite_var(char *prev, char *next, char *word)
     new = strcpy(new, word);
     size_t i = 0;
     int acol = 0;
-
     word += 1;
+
     if (*word == '{')
     {
         acol = 1;
         word += 1;
     }
-    if (isdigit(*word) || *word == '@' || *word == '*' || *word == '?'
-        || *word == '$' || *word == '#')
+
+    if (is_special(*word))
     {
         acol += 1;
     }
@@ -92,17 +117,13 @@ static char *delimite_var(char *prev, char *next, char *word)
             i += 1;
         }
     }
-
     new[i + acol + 1] = '\0';
-
     if (*word == '\0')
         next = "";
     else if (*word == ' ' || (!isalnum(*word)) || *word != '_')
         next = strcpy(next, word + acol);
-
     word = tmp;
     // error_var_brackets(word);
-
     return new;
 }
 
@@ -111,10 +132,7 @@ int is_special_var(char *str, size_t *i)
     if (str[*i] != '\0' && str[*i] == '{')
     {
         // check if ${?} ${*} ...
-        if (str[*i + 1] != '\0'
-            && (str[*i + 1] == '#' || str[*i + 1] == '$' || str[*i + 1] == '@'
-                || str[*i + 1] == '*' || str[*i + 1] == '?'
-                || isdigit(str[*i + 1])))
+        if (str[*i + 1] != '\0' && is_special(str[*i + 1]))
         {
             if (str[*i + 2] != '\0' && str[*i + 2] == '}')
                 return 1;
@@ -122,13 +140,52 @@ int is_special_var(char *str, size_t *i)
                 errx(1, "invalid variable"); // if not a valid format like ${12}
         }
     }
-    else if (str[*i] != '\0'
-             && (str[*i] == '#' || str[*i] == '$' || str[*i] == '@'
-                 || str[*i] == '*' || str[*i] == '?' || isdigit(str[*i])))
+    else if (str[*i] != '\0' && is_special(str[*i]))
     {
         return 1;
     }
     return 0;
+}
+
+static int condition_var(char *str, int i)
+{
+    if ((str[0] == '$' && str[1] != '\0' && str[1] != '(')
+        || ((i > 0 && str[i - 1] != '\\' && str[i] == '$' && str[i + 1] != '\0'
+             && str[i + 1] != '(')))
+    {
+        // printf("c: %c ", str[i + 1]);
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+static void var_field(char *str, size_t *i)
+{
+    if (str[*i] == '^' && str[*i + 1] == '^')
+    {
+        *i += 1;
+        while (*i + 1 < strlen(str) && !(str[*i] == '^' && str[*i + 1] == '^'))
+        {
+            *i += 1;
+        }
+        *i += 1;
+    }
+}
+
+static void ari_field(char *str, size_t *i)
+{
+    if (str[*i] == '$' && str[*i + 1] == '(')
+    {
+        *i += 1;
+        while (*i + 1 < strlen(str) && !(str[*i] == ')'))
+        {
+            *i += 1;
+        }
+        *i += 1;
+    }
 }
 
 int test_var(char *str) // test if a variable is in a word
@@ -138,25 +195,18 @@ int test_var(char *str) // test if a variable is in a word
     size_t i = 0;
     while (i < strlen(str) && str[i] != '\0')
     {
-        if (str[i] == '\'' && !single_quote && !double_quote)
-            single_quote = 1;
-        else if (str[i] == '\'' && single_quote && !double_quote)
-            single_quote = 0;
-        else if (str[i] == '"' && !single_quote && !double_quote)
-            double_quote = 1;
-        else if (str[i] == '"' && !single_quote && double_quote)
-            double_quote = 0;
+        var_field(str, &i);
+        ari_field(str, &i);
+        quote_handling(&single_quote, &double_quote, str[i]);
 
-        if ((((str[0] == '$' && str[1] != '\0' && str[1] != '(')
-              || ((i > 0 && str[i - 1] != '\\' && str[i] == '$'
-                   && str[i + 1] != '\0' && str[i + 1] != '(')))
-             && !single_quote))
+        if (condition_var(str, i) && !single_quote)
         {
             i += 1;
             char c = str[i];
             if (is_special_var(str, &i))
                 return 1;
-            else if ((c != '\0' && c != '{' && (isalpha(c) || c == '_')))
+            else if ((c != '\0' && c != '{' && c != '('
+                      && (isalpha(c) || c == '_')))
                 return 1; // normal variable : $name
             else if (c != '\0' && c != '{')
                 return 0; // exit
@@ -386,9 +436,8 @@ void expand_variables(struct hash_map *h, char *res)
         char *prev = calloc(1, strlen(res) + 1); // word before the variable
         char *next = calloc(1, strlen(res) + 1); // word after the variable
         char *var = delimite_var(prev, next, res); // divide the word in 3 words
-        char *key = delete_dollar(var); //${name} -> name
-        if (test_special_var(
-                key)) // $@, $$, $*, $?, $1, $#, $RANDOM, $UID, $PWD
+        char *key = delete_dollar(var); // ${name} -> name
+        if (test_special_var(key)) // $@, $$, $*, $?, $0, $#, $RANDOM,$UID,$PWD
         {
             char *tmp = expand_special_var(key, prev, next, h);
             strcpy(res, tmp);
@@ -398,7 +447,7 @@ void expand_variables(struct hash_map *h, char *res)
         {
             char *val = hash_map_get(h, key); // get the value of the variable
             size_t len = strlen(prev) + strlen(val) + strlen(next) + 1;
-            snprintf(res, len, "%s%s%s", prev, val, next); // concat
+            snprintf(res, len + 4, "%s^^%s^^%s", prev, val, next); // concat
         }
         expand_free(prev, next, var, key);
     }

@@ -25,7 +25,6 @@ struct ast *ast_and_or_init(struct ast *pipeline)
     static struct ast_ftable ftable = {
         .run = &and_or_run,
         .free = &and_or_free,
-        .push = &and_or_push,
     };
     struct ast_and_or *and_or = calloc(1, sizeof(struct ast_and_or));
     if (!and_or)
@@ -46,7 +45,6 @@ struct ast *ast_if_init(struct ast *condition, struct ast *then_body,
     static struct ast_ftable ftable = {
         .run = &if_run,
         .free = &if_free,
-        .push = &if_push,
     };
     struct ast_if *if_ast = malloc(sizeof(struct ast_if));
     if (!if_ast)
@@ -83,9 +81,10 @@ struct ast *ast_list_init(void)
 struct ast *ast_boucle_init(struct ast *condition, struct ast *do_body,
                             int run_condition)
 {
-    static struct ast_ftable ftable = { .run = &boucle_run,
-                                        .free = &boucle_free,
-                                        .push = &boucle_push };
+    static struct ast_ftable ftable = {
+        .run = &boucle_run,
+        .free = &boucle_free,
+    };
     struct ast_boucle *boucle = malloc(sizeof(struct ast_boucle));
     if (!boucle)
     {
@@ -105,7 +104,6 @@ struct ast *ast_redirection_init(int fd, char *words,
     static struct ast_ftable ftable = {
         .run = &redirection_run,
         .free = &redirection_free,
-        .push = &redirection_push,
     };
     struct ast_redirection *redi = malloc(sizeof(struct ast_redirection));
     if (!redi)
@@ -126,7 +124,6 @@ struct ast *ast_element_init(enum ELEMENT_TYPE type, char *word,
     static struct ast_ftable ftable = {
         .run = &element_run,
         .free = &element_free,
-        .push = &element_push,
     };
     struct ast_element *element = malloc(sizeof(struct ast_element));
     if (!element)
