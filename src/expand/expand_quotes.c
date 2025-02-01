@@ -38,7 +38,7 @@ static void var_field(char *str, size_t *i)
     if (str[*i] == '^' && str[*i + 1] == '^')
     {
         *i += 1;
-        while (!(str[*i] == '^' && str[*i + 1] == '^'))
+        while (*i + 1 < strlen(str) && !(str[*i] == '^' && str[*i + 1] == '^'))
         {
             *i += 1;
         }

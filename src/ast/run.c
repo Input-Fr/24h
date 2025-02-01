@@ -351,12 +351,16 @@ static int export_builtin(char *args[], size_t nb_args, struct hash_map *h)
         {
             if (test_ifvalexist(word))
             {
-                char *name = calloc(1, strlen(word));
-                char *val = calloc(1, strlen(word));
+                char *name = calloc(1, strlen(word) + 1);
+                char *val = calloc(1, strlen(word) + 1);
                 separator_equal(name, val, word);
                 hash_map_remove(h, name);
                 hash_map_insert(h, name, val, VARIABLE);
                 setenv(name, val, 1);
+            }
+            else
+            {
+                setenv(word, hash_map_get(h, word), 1);
             }
         }
     }

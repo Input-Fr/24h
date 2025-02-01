@@ -13,6 +13,20 @@
 #include "../lexer/lexer.h"
 #include "../parser/parser.h"
 
+// static void var_field(char *str, size_t *i)
+//{
+//     if (str[*i] == '^' && str[*i + 1] == '^')
+//     {
+//         *i += 1;
+//         while (*i + 1 < strlen(str) && !(str[*i] == '^' && str[*i + 1] ==
+//         '^'))
+//         {
+//             *i += 1;
+//         }
+//         *i += 1;
+//     }
+// }
+
 int test_cmd_sub(char *str)
 {
     size_t i = 0;
@@ -30,7 +44,7 @@ int test_cmd_sub(char *str)
             char c = str[i];
             if (c != '\0' && c == '(')
             {
-                if (i < strlen(str) - 1 && str[i + 1] == '(')
+                if (str[i + 1] == '(')
                 {
                     return 0;
                 }
@@ -164,7 +178,6 @@ static char *delimite_substi(char *prev, char *next, char *word)
     char *tmp = word;
     prev = strcpy(prev, word);
     size_t j = 0;
-    int contxt = 0;
     while (*word != '\0' && *word != '$')
     {
         j += 1;
@@ -177,16 +190,12 @@ static char *delimite_substi(char *prev, char *next, char *word)
     new = strcpy(new, word);
     size_t i = 0;
 
-    word += 1;
-    while (*word != '\0' && contxt != -1)
+    while (*word != '\0' && *word != ')')
     {
-        if (*word == ')')
-            contxt--;
-        if (*word == '(')
-            contxt++;
         word += 1;
         i += 1;
     }
+
     new[i] = '\0';
     if (*word == '\0')
         next = "";

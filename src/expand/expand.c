@@ -22,7 +22,6 @@ char *expand(struct hash_map *h, char *str)
     expand_variables(h, res);
     expand_substi(res);
     expand_ari(h, res);
-
     // char **list_words = calloc(len_ifs(res, h) + 1, sizeof(char *));
     // field_splitting(res, str, list_words, h);
     // free(list_words);

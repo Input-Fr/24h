@@ -42,7 +42,7 @@ static char *delete_dollar(char *word)
 
 static int while_condition(size_t j, char *word, char *tmp, int single_quote)
 {
-    if ((j + 1 < strlen(word) && tmp[j + 1] == '(') || single_quote
+    if ((tmp[j + 1] == '(') || single_quote
         || (*word != '\0'
             && (*word != '$' || (j > 0 && *word == '$' && tmp[j - 1] == '\\'))))
     {
@@ -153,6 +153,7 @@ static int condition_var(char *str, int i)
         || ((i > 0 && str[i - 1] != '\\' && str[i] == '$' && str[i + 1] != '\0'
              && str[i + 1] != '(')))
     {
+        // printf("c: %c ", str[i + 1]);
         return 1;
     }
     else
@@ -204,7 +205,8 @@ int test_var(char *str) // test if a variable is in a word
             char c = str[i];
             if (is_special_var(str, &i))
                 return 1;
-            else if ((c != '\0' && c != '{' && (isalpha(c) || c == '_')))
+            else if ((c != '\0' && c != '{' && c != '('
+                      && (isalpha(c) || c == '_')))
                 return 1; // normal variable : $name
             else if (c != '\0' && c != '{')
                 return 0; // exit
@@ -445,7 +447,7 @@ void expand_variables(struct hash_map *h, char *res)
         {
             char *val = hash_map_get(h, key); // get the value of the variable
             size_t len = strlen(prev) + strlen(val) + strlen(next) + 1;
-            snprintf(res, len + 40, "%s^^%s^^%s", prev, val, next); // concat
+            snprintf(res, len + 4, "%s^^%s^^%s", prev, val, next); // concat
         }
         expand_free(prev, next, var, key);
     }

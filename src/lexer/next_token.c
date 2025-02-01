@@ -13,15 +13,6 @@ static struct token token_reco(struct lexer *lexer);
 static struct token continue_word(struct lexer *lexer);
 static struct token begin_word(struct lexer *lexer);
 
-char *add_double_quote(char *str)
-{
-    char *res = calloc(1, strlen(str) + 6);
-
-    snprintf(res, strlen(str) + 5, "\"^*%s\"", str); // concat
-    free(str);
-    return res;
-}
-
 static struct token end_of_file(struct lexer *lexer)
 {
     // --1
@@ -185,6 +176,7 @@ static struct token var(struct lexer *lexer)
                 context--;
             mbt_str_pushc(lexer->current_tok.data, c);
         }
+
         if (!doublep && c == EOF)
             errx(1, "missing )");
         c = lexer_file(lexer->file);
@@ -351,9 +343,6 @@ struct token lexer_next_token(struct lexer *lexer)
     lexer->word = 0;
     lexer->ope = 0;
     struct token tok = token_reco(lexer);
-    // if (tok.type == TOKEN_WORD && test_var(tok.data->str)
-    //     && tok.data->str[0] != '"')
-    //     tok.data->str = add_double_quote(tok.data->str);
 
     if (tok.type == TOKEN_ALIAS)
     {
