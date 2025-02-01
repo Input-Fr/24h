@@ -14,8 +14,6 @@ void free_function(struct ast *ast)
 {
     assert(ast && ast->type == AST_FUNCTION);
     struct ast_function *fct = (struct ast_function *)ast;
-    FREE(fct->shell_command);
-    free(fct->fname);
     free(ast);
 }
 
