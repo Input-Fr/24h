@@ -361,7 +361,7 @@ static int export_builtin(char *args[], size_t nb_args, struct hash_map *h)
             else
             {
                 struct ast *test = NULL;
-                setenv(word, hash_map_get(h, word,&test), 1);
+                setenv(word, hash_map_get(h, word, &test), 1);
             }
         }
     }
@@ -817,15 +817,14 @@ static int is_type_or_ulimit(char *word)
     return i < 18;
 }
 
-
-static short is_created_function(char * words, struct hash_map *h)
+static short is_created_function(char *words, struct hash_map *h)
 {
-    struct ast * save = NULL;
+    struct ast *save = NULL;
     hash_map_get(h, words, &save);
     return save != NULL;
 }
 
-static int get_nbrelt(char ** words)
+static int get_nbrelt(char **words)
 {
     int i = 0;
     while (words[i])
@@ -835,18 +834,18 @@ static int get_nbrelt(char ** words)
     return i;
 }
 
-static int handle_created_function(char ** words, struct hash_map *h)
+static int handle_created_function(char **words, struct hash_map *h)
 {
-    struct ast * save = NULL;
+    struct ast *save = NULL;
     hash_map_get(h, words[0], &save);
     assert(save && save->type == AST_FUNCTION);
     int save_nbrags = h->nb_args;
-    char ** save_args = h->all_args;
+    char **save_args = h->all_args;
     h->nb_args = get_nbrelt(words);
     h->all_args = words;
-    int res = function_run_hashmap(save,h); 
+    int res = function_run_hashmap(save, h);
     h->all_args = save_args;
-    h->nb_args = save_nbrags; 
+    h->nb_args = save_nbrags;
     return res;
 }
 
@@ -866,7 +865,7 @@ static int cmd_run(char **words, struct hash_map *h)
     }
     else if (is_created_function(words[0], h))
     {
-        return handle_created_function(words,h);
+        return handle_created_function(words, h);
     }
     else if (is_type_or_ulimit(words[0]))
     {
@@ -875,7 +874,8 @@ static int cmd_run(char **words, struct hash_map *h)
     return handle_executable_builtin(words);
 }
 
-int simple_cmd_run(struct ast *ast, struct hash_map *h) {
+int simple_cmd_run(struct ast *ast, struct hash_map *h)
+{
     assert(ast && ast->type == AST_SIMPLE_CMD);
     struct ast_simp_cmd *cmd = (struct ast_simp_cmd *)ast;
     int result = RUN_LIST(cmd->prefix, cmd->nbr_prefix, h);

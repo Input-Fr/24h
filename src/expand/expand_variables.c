@@ -371,7 +371,7 @@ static char *expand_ifs(char *prev, char *next, struct hash_map *h)
 {
     size_t len = strlen(prev) + strlen(next) + 10;
     char *result = calloc(1, len + 1);
-    struct ast * save = NULL;
+    struct ast *save = NULL;
     char *ifs = hash_map_get(h, "IFS", &save);
     (void)save;
     snprintf(result, len + 1, "%s%s%s", prev, ifs, next);
@@ -447,8 +447,9 @@ void expand_variables(struct hash_map *h, char *res)
         }
         else // variable classique : $name, ${name},"$name"...
         {
-            struct ast * save = NULL;
-            char *val = hash_map_get(h, key, &save); // get the value of the variable
+            struct ast *save = NULL;
+            char *val =
+                hash_map_get(h, key, &save); // get the value of the variable
             (void)save;
             size_t len = strlen(prev) + strlen(val) + strlen(next) + 1;
             snprintf(res, len + 4, "%s^^%s^^%s", prev, val, next); // concat

@@ -85,7 +85,6 @@ int for_run(struct ast *ast, struct hash_map *h)
     return res;
 }
 
-
 static char is_character(char w)
 {
     if ((w <= 'z' && w >= 'a') || (w <= 'Z' && w >= 'A'))
@@ -111,13 +110,13 @@ static char is_good(char w)
 
 static char is_good_name(char *name)
 {
-    if (!is_character(name[0]))
+    if (is_number(name[0]))
     {
-        return 1;
+        return 0;
     }
-    size_t len = strlen(name) + 1;
+    size_t len = strlen(name);
     size_t i = 1;
-    while (i < len && is_good(name[i]))
+    while (i <= len && is_good(name[i]))
     {
         i += 1;
     }
@@ -129,7 +128,7 @@ static short egal(char *word, const char *second)
     return !strcmp(word, second);
 }
 
-static short is_special_builtin(char * words)
+static short is_special_builtin(char *words)
 {
     int test1 = egal(words, "echo") || egal(words, "true");
     int test2 = egal(words, "false") || egal(words, "exit");
@@ -137,17 +136,26 @@ static short is_special_builtin(char * words)
     return egal(words, "export") || test1 || test2 || test3;
 }
 
+static char *copy(char *word)
+{
+    char *copy = calloc(strlen(word) + 1, 1);
+    strcpy(copy, word);
+    return copy;
+}
 
 int function_run(struct ast *ast, struct hash_map *h)
 {
     assert(ast && ast->type == AST_FUNCTION);
     struct ast_function *func = (struct ast_function *)ast;
-    if (is_special_builtin(func->fname) && is_good_name(func->fname))
+    if (!is_special_builtin(func->fname) && is_good_name(func->fname))
     {
-        hash_map_remove(h,func->fname);
-        hash_map_insert(h, func->fname,(void *)ast, FUNCTION);
-        return 0; 
+        char *copy2 = copy(func->fname);
+        hash_map_remove(h, copy2);
+        hash_map_insert(h, copy2, (void *)ast, FUNCTION);
+        return 0;
     }
+    func->isHash = 1;
+    // free_function_hashmap(ast);
     return 1;
 }
 

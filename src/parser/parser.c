@@ -238,11 +238,50 @@ command = simple_command
           | funcdec { redirection };
 */
 
-static struct ast *parse_func(enum parser_status *status, struct lexer *lexer);
+static struct ast *parse_func(enum parser_status *status, struct lexer *lexer,
+                              char *word);
 
+static struct ast *parse_simple_command2(enum parser_status *status,
+                                         struct lexer *lexer, char *word);
 static struct ast *parse_command(enum parser_status *status,
                                  struct lexer *lexer)
 {
+    struct token tok = lexer_peek(lexer);
+    if (tok.type == TOKEN_WORD)
+    {
+        char *save = tok.data->str;
+        lexer_pop(lexer);
+        tok = lexer_peek(lexer);
+        if (tok.type == TOKEN_LPAR)
+        {
+            // it can be a function
+            // launch parser
+            struct ast *ast_func = parse_func(status, lexer, save);
+            if (*status == PARSER_OK)
+            {
+                struct ast *ast_redir = parse_redirection(status, lexer);
+                while (*status == PARSER_OK)
+                {
+                    function_push(ast_func, ast_redir);
+                    ast_redir = parse_redirection(status, lexer);
+                }
+                *status = PARSER_OK;
+                return ast_func;
+            }
+        }
+        else
+        {
+            // it can be a word
+            // launch parser
+            struct ast *ast_simplec =
+                parse_simple_command2(status, lexer, save);
+            if (*status == PARSER_OK)
+            {
+                return ast_simplec;
+            }
+        }
+        return NULL;
+    }
     struct ast *ast_simplec = parse_simple_command(status, lexer);
     if (*status == PARSER_OK)
     {
@@ -262,30 +301,17 @@ static struct ast *parse_command(enum parser_status *status,
         *status = PARSER_OK;
         return ast_shellcmd;
     }
-    *status = PARSER_OK;
-    struct ast *ast_func = parse_func(status, lexer);
-    if (*status == PARSER_OK)
-    {
-        struct ast *ast_redir = parse_redirection(status, lexer);
-        while (*status == PARSER_OK)
-        {
-            function_push(ast_func, ast_redir);
-            ast_redir = parse_redirection(status, lexer);
-        }
-        *status = PARSER_OK;
-        return ast_func;
-    }
     return NULL;
 }
 
 // funcdec = WORD '(' ')' {'\n'} shell_command ;
-static struct ast *parse_func(enum parser_status *status, struct lexer *lexer)
+static struct ast *parse_func(enum parser_status *status, struct lexer *lexer,
+                              char *word)
 {
     struct token tok = lexer_peek(lexer);
-    if (tok.type == TOKEN_WORD)
+    if (word)
     {
-        char *str = tok.data->str;
-        tok = lexer_peek(lexer);
+        char *str = word;
         if (tok.type == TOKEN_LPAR)
         {
             lexer_pop(lexer);
@@ -341,6 +367,54 @@ shell_command = '{' compound_list '}'
                 | rule_for ;
 
 */
+static struct ast *lpar(enum parser_status *status, struct ast *ast_compound,
+                        struct lexer *lexer)
+{
+    if (*status == PARSER_OK)
+    {
+        struct token tok = lexer_pop(lexer);
+        if (tok.type == TOKEN_RPAR)
+        {
+            return ast_subshell_init(ast_compound);
+        }
+        else
+        {
+            (*ast_compound->ftable->free)(ast_compound);
+            *status = PARSER_UNEXPECTED_TOKEN;
+            return NULL;
+        }
+    }
+    else
+    {
+        return NULL;
+    }
+    return NULL;
+}
+
+static struct ast *lbr(enum parser_status *status, struct ast *ast_compound,
+                       struct lexer *lexer)
+{
+    if (*status == PARSER_OK)
+    {
+        struct token tok = lexer_pop(lexer);
+        if (tok.type == TOKEN_RBRACE)
+        {
+            return ast_compound;
+        }
+        else
+        {
+            (*ast_compound->ftable->free)(ast_compound);
+            *status = PARSER_UNEXPECTED_TOKEN;
+            return NULL;
+        }
+    }
+    else
+    {
+        return NULL;
+    }
+    return NULL;
+}
+
 static struct ast *parse_shell_command(enum parser_status *status,
                                        struct lexer *lexer)
 {
@@ -349,47 +423,13 @@ static struct ast *parse_shell_command(enum parser_status *status,
     {
         lexer_pop(lexer);
         struct ast *ast_compound = parse_compound_list(status, lexer);
-        if (*status == PARSER_OK)
-        {
-            tok = lexer_pop(lexer);
-            if (tok.type == TOKEN_RBRACE)
-            {
-                return ast_compound;
-            }
-            else
-            {
-                (*ast_compound->ftable->free)(ast_compound);
-                *status = PARSER_UNEXPECTED_TOKEN;
-                return NULL;
-            }
-        }
-        else
-        {
-            return NULL;
-        }
+        return lbr(status, ast_compound, lexer);
     }
     if (tok.type == TOKEN_LPAR)
     {
         lexer_pop(lexer);
         struct ast *ast_compound = parse_compound_list(status, lexer);
-        if (*status == PARSER_OK)
-        {
-            tok = lexer_pop(lexer);
-            if (tok.type == TOKEN_RPAR)
-            {
-                return ast_subshell_init(ast_compound);
-            }
-            else
-            {
-                (*ast_compound->ftable->free)(ast_compound);
-                *status = PARSER_UNEXPECTED_TOKEN;
-                return NULL;
-            }
-        }
-        else
-        {
-            return NULL;
-        }
+        return lpar(status, ast_compound, lexer);
     }
     struct ast *ast_rule = parse_rule_if(status, lexer);
     if (*status != PARSER_OK)
@@ -915,6 +955,25 @@ static struct ast *parse_simple_command(enum parser_status *status,
     return smpcmd; // return the AST
 }
 
+static struct ast *parse_simple_command2(enum parser_status *status,
+                                         struct lexer *lexer, char *word)
+{
+    struct ast *smpcmd = ast_simple_cmd_init(NULL);
+    if (word) // second case
+    {
+        ((struct ast_simp_cmd *)smpcmd)->word = word;
+        // add word to ast
+        struct ast *ast_elt = parse_element(status, lexer);
+        while (*status == PARSER_OK)
+        {
+            // add elt to ast
+            simple_cmd_push(smpcmd, ast_elt);
+            ast_elt = parse_element(status, lexer);
+        }
+        *status = PARSER_OK;
+    }
+    return smpcmd; // return the AST
+}
 /*
 element = WORD
         | redirection ;

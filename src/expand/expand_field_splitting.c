@@ -71,8 +71,8 @@ static int ispresent(char c, char *deli)
 
 size_t len_ifs(char *str, struct hash_map *h)
 {
-    struct ast * save = NULL;
-    char *deli = hash_map_get(h, "IFS",&save);
+    struct ast *save = NULL;
+    char *deli = hash_map_get(h, "IFS", &save);
     (void)save;
     size_t cpt = 0;
     for (size_t i = 0; str[i] != '\0'; i += 1)
@@ -102,7 +102,7 @@ void field_splitting(char *str, char *check, char **res, struct hash_map *h)
 {
     if (test_double_quote(check))
     {
-        struct ast * save = NULL;
+        struct ast *save = NULL;
         char *deli = hash_map_get(h, "IFS", &save);
         (void)save;
         size_t nb = split(str, res, deli);

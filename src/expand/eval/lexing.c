@@ -83,8 +83,8 @@ void expand_ariii(char *string, size_t *i, struct hash_map *h, struct fifo *f)
     }
     else
     {
-        struct ast * save = NULL;
-        val = hash_map_get(h, str,&save);
+        struct ast *save = NULL;
+        val = hash_map_get(h, str, &save);
         (void)save;
     }
     if (strlen(val) != 0)
@@ -103,12 +103,6 @@ int tri2(char *string, size_t len, struct fifo *f, struct hash_map *h)
 {
     for (size_t i = 0; i < len; i += 1)
     {
-        // if (error(string[i]))
-        //{
-        //     free(string);
-        //     return 1;
-        // }
-
         if (isalpha(string[i]) || string[i] == '_' || string[i] == '$'
             || string[i] == '"')
         {
@@ -143,11 +137,6 @@ int tri2(char *string, size_t len, struct fifo *f, struct hash_map *h)
             fifo_push(f, tok);
         }
     }
-    // if (f->size == 0)
-    //{
-    //     return 0;
-    // }
-    // return -1;
     return 0;
 }
 

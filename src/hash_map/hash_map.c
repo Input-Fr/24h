@@ -1,15 +1,16 @@
 #include "hash_map.h"
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
+
 #include "../ast/ast.h"
 
 bool hash_map_insert(struct hash_map *hash_map, char *key, void *value,
-        enum val_type type)
+                     enum val_type type)
 {
     if (hash_map == NULL || hash_map->size == 0)
     {
@@ -68,14 +69,14 @@ bool hash_map_insert(struct hash_map *hash_map, char *key, void *value,
     return true;
 }
 
-static char * get_function_name(struct ast *ast)
+static char *get_function_name(struct ast *ast)
 {
     assert(ast && ast->type == AST_FUNCTION);
     struct ast_function *fct = (struct ast_function *)ast;
     return fct->fname;
 }
 
-char *hash_map_get(struct hash_map *hash_map, char *key,struct ast **ast)
+char *hash_map_get(struct hash_map *hash_map, char *key, struct ast **ast)
 {
     size_t k = hash(key);
     if (hash_map == NULL || hash_map->size == 0)
@@ -166,7 +167,7 @@ bool hash_map_remove(struct hash_map *hash_map, char *key)
             if (p->type == VARIABLE)
                 free(p->value.variable_value);
             if (p->type == FUNCTION)
-                free(p->value.function_value);
+                free_function_hashmap(p->value.function_value);
 
             free(p);
             return true;

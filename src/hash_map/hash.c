@@ -51,7 +51,7 @@ void hash_map_free(struct hash_map *hash_map)
                 }
                 if (p->type == FUNCTION)
                 {
-                    free(p->value.function_value);
+                    free_function_hashmap(p->value.function_value);
                 }
                 free(p);
                 p = tmp;
@@ -64,7 +64,7 @@ void hash_map_free(struct hash_map *hash_map)
             //}
             if (p->type == FUNCTION)
             {
-                free(p->value.function_value);
+                free_function_hashmap(p->value.function_value);
             }
             // if (strcmp(p->key, "IFS") != 0)
             free(p->key);

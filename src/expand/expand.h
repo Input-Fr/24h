@@ -1,5 +1,5 @@
-#ifndef expand_H
-#define expand_H
+#ifndef EXPAND_H
+#define EXPAND_H
 
 #include "hash_map/hash_map.h"
 
@@ -35,4 +35,4 @@ size_t len_ifs(char *str, struct hash_map *h);
 
 char *expand(struct hash_map *h, char *str);
 
-#endif /* !expand_H */
+#endif /* !EXPAND_H */
