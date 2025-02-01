@@ -132,6 +132,7 @@ static struct token quote(struct lexer *lexer)
     return token_reco(lexer);
 }
 
+static void set_doublep(char c, int *doublep);
 static struct token var(struct lexer *lexer)
 {
     //--5
@@ -163,10 +164,7 @@ static struct token var(struct lexer *lexer)
         int context = 0;
         c = lexer_file(lexer->file);
         mbt_str_pushc(lexer->current_tok.data, c);
-        if (c == '(')
-        {
-            doublep = 1;
-        }
+        set_doublep(c, &doublep);
         while (c != EOF && context != -1)
         {
             c = lexer_file(lexer->file);
@@ -197,7 +195,14 @@ static struct token var(struct lexer *lexer)
     }
     return token_reco(lexer);
 }
+static void set_doublep(char c, int *doublep)
+{
+    if (c == '(')
+    {
+        *doublep = 1;
+    }
 
+}
 static struct token begin_ope(struct lexer *lexer)
 {
     // --6

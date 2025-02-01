@@ -183,20 +183,28 @@ static char *delimite_substi(char *prev, char *next, char *word)
         j += 1;
         word += 1;
     }
-
+    int contexte = 0;
     prev[j] = '\0';
     word += 2;
     char *new = calloc(1, strlen(word) + 1);
     new = strcpy(new, word);
     size_t i = 0;
 
-    while (*word != '\0' && *word != ')')
+    while (*word != '\0' && contexte != -1)
     {
+        if (*word == '(')
+        {
+            contexte++;
+        }
+        if (*word == ')')
+        {
+            contexte--;
+        }
         word += 1;
         i += 1;
     }
 
-    new[i] = '\0';
+    new[i-1] = '\0';
     if (*word == '\0')
         next = "";
     else
