@@ -13,10 +13,23 @@ void variable_free(struct ast *ast)
 void free_function(struct ast *ast)
 {
     assert(ast && ast->type == AST_FUNCTION);
-    struct ast_function *fct = (struct ast_function *)ast;
-    FREE(fct->shell_command);
-    free(fct->fname);
-    free(ast);
+    struct ast_function *ast_f = (struct ast_function *)ast;
+    if (ast_f->isHash)
+    {
+        free_function_hashmap(ast);
+    }
+}
+
+void free_function_hashmap(struct ast *ast)
+{
+    if (ast)
+    {
+        assert(ast->type == AST_FUNCTION);
+        struct ast_function *fct = (struct ast_function *)ast;
+        FREE(fct->shell_command);
+        free(fct->fname);
+        free(ast);
+    }
 }
 
 void subshell_free(struct ast *ast)

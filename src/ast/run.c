@@ -360,7 +360,8 @@ static int export_builtin(char *args[], size_t nb_args, struct hash_map *h)
             }
             else
             {
-                setenv(word, hash_map_get(h, word), 1);
+                struct ast *test = NULL;
+                setenv(word, hash_map_get(h, word, &test), 1);
             }
         }
     }
@@ -816,6 +817,38 @@ static int is_type_or_ulimit(char *word)
     return i < 18;
 }
 
+static short is_created_function(char *words, struct hash_map *h)
+{
+    struct ast *save = NULL;
+    hash_map_get(h, words, &save);
+    return save != NULL;
+}
+
+static int get_nbrelt(char **words)
+{
+    int i = 0;
+    while (words[i])
+    {
+        i += 1;
+    }
+    return i;
+}
+
+static int handle_created_function(char **words, struct hash_map *h)
+{
+    struct ast *save = NULL;
+    hash_map_get(h, words[0], &save);
+    assert(save && save->type == AST_FUNCTION);
+    int save_nbrags = h->nb_args;
+    char **save_args = h->all_args;
+    h->nb_args = get_nbrelt(words);
+    h->all_args = words;
+    int res = function_run_hashmap(save, h);
+    h->all_args = save_args;
+    h->nb_args = save_nbrags;
+    return res;
+}
+
 static int cmd_run(char **words, struct hash_map *h)
 {
     if (!words)
@@ -829,6 +862,10 @@ static int cmd_run(char **words, struct hash_map *h)
     else if (is_unspecified_behaviour(words[0])) // second rule
     {
         return 1;
+    }
+    else if (is_created_function(words[0], h))
+    {
+        return handle_created_function(words, h);
     }
     else if (is_type_or_ulimit(words[0]))
     {

@@ -9,7 +9,7 @@ struct ast *ast_function_init(char *fname, struct ast *shell_command)
 {
     static struct ast_ftable ftable = {
         .run = &function_run,
-        .free = &variable_free,
+        .free = &free_function,
     };
     struct ast_function *function = calloc(1, sizeof(struct ast_function));
     if (!function)

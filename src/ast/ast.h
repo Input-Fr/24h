@@ -188,6 +188,7 @@ struct ast_function
     char *fname;
     struct ast *shell_command;
     size_t nbr_redirection;
+    int isHash;
     struct ast **redirection;
 };
 
@@ -294,7 +295,7 @@ void for_push_Word(struct ast *ast, char *add);
 
 // function
 int function_run(struct ast *ast, struct hash_map *h);
-void function_free(struct ast *ast);
+void free_function(struct ast *ast);
 void function_push(struct ast *ast, struct ast *add);
 
 // function to expeand all the list of a char
