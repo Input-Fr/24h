@@ -204,7 +204,7 @@ static char *delimite_substi(char *prev, char *next, char *word)
         i += 1;
     }
 
-    new[i-1] = '\0';
+    new[i - 1] = '\0';
     if (*word == '\0')
         next = "";
     else

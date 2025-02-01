@@ -176,7 +176,8 @@ int subshell_run(struct ast *ast, struct hash_map *h)
     if (pid == 0) // child
     {
         struct hash_map *h2 = hash_map_init(7);
-        struct ast_list *subshellLst = (struct ast_list *)subshell->compound_list;
+        struct ast_list *subshellLst =
+            (struct ast_list *)subshell->compound_list;
         int res = handle_list_ast(subshellLst->cmd, &subshellLst->nbr_cmd, h2);
         hash_map_free(h2);
         (void)h;

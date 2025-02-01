@@ -201,7 +201,6 @@ static void set_doublep(char c, int *doublep)
     {
         *doublep = 1;
     }
-
 }
 static struct token begin_ope(struct lexer *lexer)
 {
