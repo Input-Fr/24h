@@ -5,9 +5,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
+#include "../ast/ast.h"
 
 bool hash_map_insert(struct hash_map *hash_map, char *key, void *value,
-                     enum val_type type)
+        enum val_type type)
 {
     if (hash_map == NULL || hash_map->size == 0)
     {
@@ -30,7 +32,6 @@ bool hash_map_insert(struct hash_map *hash_map, char *key, void *value,
     {
         list->value.function_value = value;
     }
-
     size_t k = hash(key) % hash_map->size;
     if (hash_map->data[k] == NULL)
     {
@@ -67,7 +68,14 @@ bool hash_map_insert(struct hash_map *hash_map, char *key, void *value,
     return true;
 }
 
-void *hash_map_get(struct hash_map *hash_map, char *key)
+static char * get_function_name(struct ast *ast)
+{
+    assert(ast && ast->type == AST_FUNCTION);
+    struct ast_function *fct = (struct ast_function *)ast;
+    return fct->fname;
+}
+
+char *hash_map_get(struct hash_map *hash_map, char *key,struct ast **ast)
 {
     size_t k = hash(key);
     if (hash_map == NULL || hash_map->size == 0)
@@ -93,9 +101,14 @@ void *hash_map_get(struct hash_map *hash_map, char *key)
         if (p != NULL)
         {
             if (p->type == VARIABLE)
+            {
                 return p->value.variable_value;
+            }
             if (p->type == FUNCTION)
-                return p->value.function_value;
+            {
+                *ast = p->value.function_value;
+                return get_function_name(*ast);
+            }
         }
     }
     return "";
@@ -128,10 +141,10 @@ bool hash_map_remove(struct hash_map *hash_map, char *key)
             }
 
             // if (p->type == VARIABLE && strcmp(p->key, "IFS") != 0)
-            free(p->value.variable_value);
+            if (p->type == VARIABLE)
+                free(p->value.variable_value);
             if (p->type == FUNCTION)
-                free(p->value.function_value);
-
+                free_function_hashmap(p->value.function_value);
             // if (strcmp(p->key, "IFS") != 0)
             free(p->key);
 

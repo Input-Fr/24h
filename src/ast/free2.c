@@ -19,6 +19,18 @@ void free_function(struct ast *ast)
     free(ast);
 }
 
+void free_function_hashmap(struct ast * ast)
+{
+    if (ast)
+    {
+        assert(ast->type == AST_FUNCTION);
+        struct ast_function *fct = (struct ast_function *)ast;
+        FREE(fct->shell_command);
+        free(fct->fname);
+        free(ast);
+    }
+}
+
 void subshell_free(struct ast *ast)
 {
     assert(ast && ast->type == AST_SUBSHELL);

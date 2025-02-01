@@ -83,7 +83,9 @@ void expand_ariii(char *string, size_t *i, struct hash_map *h, struct fifo *f)
     }
     else
     {
-        val = hash_map_get(h, str);
+        struct ast * save = NULL;
+        val = hash_map_get(h, str,&save);
+        (void)save;
     }
     if (strlen(val) != 0)
         tok->value = my_atoi(val);
