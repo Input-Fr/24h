@@ -10,6 +10,9 @@
 - Works with standard UNIX utilities (`cd`, `ls`, `cat`, etc.)
 - Fully compatible with POSIX guidelines
 
+## Execution flow overview
+![](https://github.com/Input-Fr/42sh/blob/main/ExecutionFlow42sh.png?raw=true)
+
 ## Prerequisites
 Ensure you have the following installed:
 - `gcc` (GNU Compiler Collection)
