@@ -56,9 +56,5 @@ $> cd /path/to/directory
 $> pwd
 ```
 
-## License
-This is a school project so it is completely open-source.
-
----
 
 
