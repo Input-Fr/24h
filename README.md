@@ -1,7 +1,7 @@
-# 42sh - The Handmade POSIX Shell in C
+# 24h - The Handmade POSIX Shell in C
 
 ## Overview
-**42sh** is a custom-built POSIX shell written in C. The goal of this project is to create a shell from scratch that follow the POSIX standard specified by the SCL.
+**24h** is a custom-built POSIX shell written in C. The goal of this project is to create a shell from scratch that follow the POSIX standard specified by the SCL.
 
 ## Features
 - Supports everyday built-in commands
@@ -20,16 +20,16 @@ Ensure you have the following installed:
 
 ## Installation
 ```sh
-$> git clone https://github.com/yourusername/42sh.git
-$> cd 42sh
+$> git clone https://github.com/yourusername/24h.git
+$> cd 24h
 $> autoreconf -if
 $> ./configure
 $> make install
-$> 42sh
+$> 24h
 ```
 
 ## Usage
-Use **42sh** just like any other shell:
+Use **24h** just like any other shell:
 
 ### Running Commands
 ```sh
